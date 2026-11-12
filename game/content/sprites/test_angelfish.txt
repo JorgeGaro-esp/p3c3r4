@@ -1,0 +1,11 @@
+# test_angelfish · adulto
+[frame]
+  /\
+><  °>
+  \/
+[colors]
+  ff
+tt  eb
+  ff
+[anchor]
+eye=4,1

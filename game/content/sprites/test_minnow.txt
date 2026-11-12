@@ -1,0 +1,7 @@
+# test_minnow · adulto
+[frame]
+><>
+[colors]
+tbe
+[anchor]
+eye=2,0

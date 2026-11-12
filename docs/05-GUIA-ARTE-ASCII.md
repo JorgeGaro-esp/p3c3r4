@@ -11,7 +11,7 @@
 ## 2. Fuente
 
 - Monoespaciada, con licencia libre que permita incluirla en el juego (por ejemplo, SIL OFL), incluida en `assets/fonts/` junto a su licencia.
-- Candidatas para evaluar en la Fase 1 (P08): JetBrains Mono, Cascadia Mono, DejaVu Sans Mono, IBM Plex Mono.
+- Elegida en la Fase 1 (P08, T17): DejaVu Sans Mono 2.37 (licencia libre tipo Bitstream Vera), en `assets/fonts/`. Es la única candidata evaluada que cubre todos los caracteres de la sección 3.
 - Debe cubrir todos los caracteres de la sección 3. Un test recorre los sprites y falla si algún carácter no existe en la fuente.
 - Sin ligaduras.
 
@@ -82,7 +82,15 @@ eye=4,1
 - `[colors]`: misma forma; cada letra es una entrada de la paleta de la especie (`b` cuerpo, `t` cola, `e` ojo, `f` aleta, `d` detalle).
 - `[anchor]`: puntos con nombre.
 
-El formato definitivo se cierra en la Fase 1 y se documenta aquí.
+Reglas definitivas (Fase 1):
+
+- La cabecera `# id · etapa` es opcional; si falta, el id es el nombre del archivo.
+- Cada `[frame]` es un fotograma. Las líneas más cortas se rellenan con espacios hasta el ancho del fotograma más ancho; el alto se rellena igual.
+- `[colors]` es opcional y va justo después de su `[frame]`, con el mismo número de líneas. Un espacio significa "sin color propio" (color de cuerpo por defecto). Un fotograma sin `[colors]` hereda el del anterior.
+- `[anchor]`: una línea `nombre=x,y` por punto, con coordenadas desde la esquina superior izquierda, dentro del sprite.
+- Todos los sprites se dibujan **mirando a la derecha**. El juego genera la versión mirando a la izquierda invirtiendo cada línea y cambiando las parejas `( )`, `< >`, `/ \`, `[ ]`, `{ }`, `┌ ┐`, `└ ┘`, `├ ┤`, `◄ ►`, `« »`. Los anclajes y colores se reflejan solos.
+- El carácter `¤` marca una celda opaca (tapa lo que haya detrás en negro).
+- Un archivo con cualquier error (carácter no permitido, anclaje fuera, líneas de color que no cuadran) se rechaza con un mensaje y no se dibuja.
 
 ## 5. Color
 

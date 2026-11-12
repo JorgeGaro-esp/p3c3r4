@@ -58,6 +58,12 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T14 | Sin red, sin telemetría, sin cuentas | D02; privacidad |
 | T15 | Ventana sin transparencia | D03 pide solo franja; simplifica y evita problemas de clics |
 | T16 | Fuente monoespaciada con licencia libre incluida en el juego | Aspecto idéntico en cualquier equipo |
+| T17 | Fuente: DejaVu Sans Mono (resuelve P08) | Única candidata que cubre marcos, bloques y formas; elegida por Jorge el 2026-11-12 |
+| T18 | Un solo `AsciiCanvas` dibuja todo con `draw_string`; los elementos son `AsciiDrawable` ordenados por capa | Menos nodos, control total de la rejilla (T06) |
+| T19 | Los peces de prueba son recursos `SwimmerDef` en `content/species/`; son el germen de `SpeciesDef` (Fase 3) | Añadir un pez no toca código de dibujo |
+| T20 | El texto del indicador de depuración (F3) no pasa por `strings.csv` | Herramienta de desarrollo, no se muestra al jugador |
+| T21 | Los nodos se enlazan con `NodePath` y `get_node` en `_ready`, no con `@export` de tipo nodo | Con `@export` de tipo nodo el valor llegaba nulo en ejecución |
+| T22 | Para exportar (Fase 16) hará falta incluir `content/sprites/*.txt` en el filtro de exportación | Godot no empaqueta .txt por defecto |
 
 ## C. Pendientes (no bloquean el inicio)
 
@@ -70,7 +76,7 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | P05 | Qué conserva exactamente el prestigio | Fase 13 |
 | P06 | Estilo concreto de la música y origen de los sonidos | Fase 14 |
 | P07 | Título definitivo | Antes de cualquier publicación |
-| P08 | Fuente definitiva | Fase 1 |
+| P08 | Fuente definitiva | Resuelta en Fase 1: T17 |
 | P09 | ¿Arranque automático con Windows como opción? | Fase 2 |
 | P10 | Franja en varios monitores: en cuál se coloca | Fase 2 |
 

@@ -1,10 +1,10 @@
 extends Control
-## Escena principal de la Fase 0: solo muestra el título del juego.
+## Escena principal. En la Fase 1 muestra la pecera ASCII viva.
 
-const GAME_TITLE: String = "P3C3R4"
-
-@onready var _title: Label = $Title
+## Límite de fotogramas por segundo (T07).
+const TARGET_FPS: int = 30
 
 
 func _ready() -> void:
-	_title.text = GAME_TITLE
+	Engine.max_fps = TARGET_FPS
+	RenderingServer.set_default_clear_color(Color.BLACK)
