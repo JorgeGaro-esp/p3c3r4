@@ -1,0 +1,34 @@
+# Godot 4
+.godot/
+*.translation
+export_presets.cfg.bak
+*.tmp
+
+# Exportaciones y compilados
+build/
+dist/
+*.exe
+*.pck
+*.zip
+
+# Resultados de tests e informes
+reports/
+*.junit.xml
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Python (gdtoolkit)
+__pycache__/
+.venv/
+
+# Nunca subir partidas ni secretos
+*.save
+save*.json
+!game/tests/fixtures/**
+.env

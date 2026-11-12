@@ -1,0 +1,51 @@
+# CI: estilo + tests. No usa acciones de terceros (regla de 02-ARQUITECTURA §10):
+# el repositorio se clona con git y Godot se descarga y verifica a mano.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: "4.6.3-stable"
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Clonar repositorio
+        run: |
+          git clone --depth 1 --branch "${GITHUB_REF_NAME}" \
+            "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" repo \
+            || git clone "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" repo
+          cd repo && git checkout "${GITHUB_SHA}"
+
+      - name: Estilo (gdformat y gdlint)
+        working-directory: repo/game
+        run: |
+          python3 -m venv /tmp/venv
+          /tmp/venv/bin/pip install "gdtoolkit==4.*"
+          /tmp/venv/bin/gdformat --check src tests
+          /tmp/venv/bin/gdlint src tests
+
+      - name: Descargar y verificar Godot
+        run: |
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}"
+          file="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          curl -sSLO "${base}/${file}"
+          curl -sSLO "${base}/SHA512-SUMS.txt"
+          grep " ${file}\$" SHA512-SUMS.txt | sha512sum -c -
+          unzip -q "${file}"
+          sudo mv "Godot_v${GODOT_VERSION}_linux.x86_64" /usr/local/bin/godot
+          sudo chmod +x /usr/local/bin/godot
+
+      - name: Importar proyecto
+        working-directory: repo/game
+        run: godot --headless --import || true
+
+      - name: Tests (GUT)
+        working-directory: repo/game
+        run: godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit

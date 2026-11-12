@@ -1,0 +1,21 @@
+# Finales de línea uniformes
+* text=auto eol=lf
+
+# Texto
+*.gd text
+*.tscn text
+*.tres text
+*.godot text
+*.cfg text
+*.md text
+*.csv text
+*.gdshader text
+
+# Binarios
+*.png binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
