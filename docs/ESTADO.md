@@ -3,14 +3,14 @@
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
 **Última actualización:** 2026-11-12
-**Fase actual:** Fase 0 · Entorno y esqueleto (en curso: archivos creados, faltan instalaciones y comprobación en Godot).
-**Versión:** sin versión (objetivo de la Fase 0: `0.1.0`).
+**Fase actual:** Fase 0 · Entorno y esqueleto: terminada salvo el CI (ver abajo). Siguiente: **Fase 1 · Motor de render ASCII y pecera viva**.
+**Versión:** `0.1.0` (pendiente de etiquetar en Git).
 
 ## Progreso por fases
 
 | Fase | Nombre | Estado |
 |---|---|---|
-| 0 | Entorno y esqueleto | En curso |
+| 0 | Entorno y esqueleto | Hecha (falta activar el CI) |
 | 1 | Motor de render ASCII y pecera viva | Pendiente |
 | 2 | Ventana en franja y prototipo de interfaz | Pendiente |
 | 3 | Núcleo de simulación y economía | Pendiente |
@@ -33,10 +33,12 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 
 - 2026-11-12: cuestionario de decisiones respondido y plan de desarrollo redactado. Carpeta creada en el escritorio.
 - 2026-11-12 (sesión 2): Fase 0, tareas 0.3, 0.4, 0.5, 0.7 (gdlintrc), 0.8 (borrador) y 0.9 escritas: `game/project.godot`, estructura de carpetas, escena principal, test de humo, `CHANGELOG.md`, `LICENSE-THIRD-PARTY.md`. gdformat y gdlint pasan sobre `src` y `tests`. Sin ejecutar en Godot todavía.
+- 2026-11-12 (sesión 2, cierre): Godot 4.6 importa el proyecto; GUT 9.6.1 instalado y activado; F5 muestra "P3C3R4" con 0 errores y 0 avisos; GUT: "All tests passed" (test_smoke.gd). Commit inicial subido a GitHub (JorgeGaro-esp/p3c3r4).
 
 ## Siguiente paso concreto
 
-Jorge: 0.1 instalar Godot 4.6.x, Git y la extensión de VS Code (`08-ENTORNO.md`); 0.2 `git init` y repositorio privado en GitHub; 0.6 instalar GUT 9.6.1 desde AssetLib en `game/addons/gut/`; mover `ci.yml.propuesto` a `.github/workflows/ci.yml`. Después, abrir `game/project.godot`, pulsar F5 y ejecutar los tests; Claude cierra la fase con la versión 0.1.0.
+Jorge: en la terminal, `git add .`, `git commit -m "feat: GUT instalado, fase 0 completa"`, `git tag v0.1.0`, `git push --follow-tags`. Después mover el CI: `mkdir .github\workflows`, `git mv ci.yml.propuesto .github\workflows\ci.yml`, commit y push, y comprobar que el CI sale en verde en GitHub (el CI no se ha podido probar todavía).
+Claude: empezar la Fase 1, tarea 1.1 (fuente monoespaciada y cobertura de caracteres).
 
 ## Bloqueos y dudas abiertas
 
@@ -44,7 +46,7 @@ Ninguno técnico; la Fase 0 depende de las instalaciones de Jorge. Las decisione
 
 ## Notas de la última sesión
 
-- El proyecto se escribió sin poder ejecutar Godot (no hay consola en el equipo de Jorge desde la sesión). Si F5 o los tests dan error, copiar el mensaje.
-- GUT no se pudo descargar desde la sesión (GitHub bloqueado): se instala desde AssetLib.
-- El CI no usa acciones de terceros (regla de 02 §10): clona con git y descarga Godot 4.6.3 verificando SHA512. Versión de Godot del CI sin confirmar contra la descarga real.
+- El proyecto se escribió sin poder ejecutar Godot (no hay consola en el equipo de Jorge desde la sesión). Ya verificado en la sesión 2.
+- GUT se instaló desde AssetLib dentro de Godot, controlando la pantalla.
+- El CI no usa acciones de terceros (regla de 02 §10): clona con git y descarga Godot 4.6-stable verificando SHA512. El CI aún no se ha ejecutado.
 - `.github/` es una ubicación protegida: no se pudo escribir desde aquí.

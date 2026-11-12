@@ -103,10 +103,10 @@ Rellenar en la Fase 0:
 
 | Herramienta | Versión | Fecha |
 |---|---|---|
-| Godot | | |
+| Godot | 4.6.stable.official.89cea1439 (4.6, estándar, no .NET) | 2026-11-12 |
 | Plantillas de exportación | | |
-| Git | | |
+| Git | instalado por Jorge (anotar `git --version`) | 2026-11-12 |
 | Python | | |
 | gdtoolkit | | |
-| GUT | | |
+| GUT | 9.6.1 (para Godot 4.6), instalado desde AssetLib | 2026-11-12 |
 | Extensión godot-tools | | |
