@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.8.0] - 2026-11-13 · Fase 7
+
+### Añadido
+- Etapas de vida: alevín, juvenil y adulto (`LifeStage`). Solo los adultos producen conchas y crían; las crías crecen con el tiempo (cada especie tiene `growth_seconds`) y cambian de sprite al madurar.
+- Cría: dos adultos de la misma especie con felicidad media de 60 o más ponen un huevo cada `breed_seconds` si hay hueco (el huevo ocupa capacidad). Más parejas ponen más deprisa (hasta 4).
+- Huevos en el fondo de la pecera; se mueven poco antes de eclosionar (`hatch_seconds`).
+- Variantes de color (`VariantDef`, `content/variants/`): Normal 93 %, Albina 4 %, Melánica 2 %, Dorada 0,9 % y Prismática 0,1 %, con venta ×1, ×3, ×5, ×15 y ×50. La prismática cambia de color con el tiempo.
+- Venta desde la ficha del pez, con confirmación («¿Seguro?»). El valor depende de la especie, la variante y la etapa. «Sobrantes» vende todos los peces normales de la especie salvo los dos más maduros.
+- Aviso al conseguir por primera vez una variante rara de una especie, y registro de combinaciones descubiertas (`GameState.discovered`).
+- Ajustes: «Vender todos los peces» (con tres pulsaciones de confirmación) para vaciar la pecera; descarta también los huevos.
+- Guardado formato 3 con migración desde el 2 (peces antiguos: adultos y de variante normal).
+
 ## [0.7.0] - 2026-11-13 · Fase 6
 
 ### Corregido

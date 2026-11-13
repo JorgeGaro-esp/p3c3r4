@@ -40,6 +40,15 @@ const RARITY_SYMBOLS: String = "·+*#@"
 ## Roles de color (`b`, `t`, `e`, `f`, `d`) y su color, en listas paralelas.
 @export var palette_roles: PackedStringArray = PackedStringArray()
 @export var palette_colors: PackedColorArray = PackedColorArray()
+## Segundos que tarda un alevín en ser adulto.
+@export var growth_seconds: float = 120.0
+## Segundos que tarda una pareja en poner un huevo.
+@export var breed_seconds: float = 180.0
+## Segundos que tarda un huevo en eclosionar.
+@export var hatch_seconds: float = 30.0
+## Sprites de alevín y juvenil. Vacíos, se usan los genéricos de `content/sprites/`.
+@export_file("*.txt") var fry_sprite_path: String = ""
+@export_file("*.txt") var juvenile_sprite_path: String = ""
 ## Estilo de nado: 0 DART, 1 GLIDE, 2 DRIFT, 3 CRAWL (ver `SwimMotion.Style`).
 @export_range(0, 3) var style: int = 1
 ## Velocidad de crucero, en celdas por segundo.

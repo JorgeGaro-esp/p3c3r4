@@ -5,7 +5,8 @@ extends RefCounted
 ## Recibe el contenido y el generador aleatorio desde fuera (principio 3), de
 ## modo que con la misma semilla y los mismos pasos el resultado sea idéntico.
 ## Sistemas, por orden: cuidados (hambre, limpieza, felicidad y perlas) y producción
-## pasiva. Crecimiento, cría, eventos y logros se añadirán aquí en sus fases.
+## pasiva, más el ciclo de vida (crecimiento, puesta y eclosión, ver [Lifecycle]).
+## Eventos y logros se añadirán aquí en sus fases.
 
 ## Cambio mínimo de felicidad que se tiene en cuenta (evita recalcular a cada paso).
 const HAPPINESS_EPSILON: float = 0.5
@@ -31,6 +32,8 @@ static func total_production(state: GameState, content: ContentDB) -> float:
 	var total: float = 0.0
 	for tank: Tank in state.tanks:
 		for fish: Fish in tank.fish:
+			if not fish.is_adult():
+				continue
 			var species: SpeciesDef = content.get_species(fish.species_id)
 			if species != null:
 				total += Economy.fish_rate(species.base_production, fish.happiness)
@@ -53,6 +56,7 @@ static func _care(
 				fish.happiness = mood
 				state.mark_production_dirty()
 		_pearl_tick(state, tank_index, dt, content, rng)
+		Lifecycle.step(state, tank_index, dt, content, rng)
 
 
 static func _pearl_tick(
@@ -63,7 +67,13 @@ static func _pearl_tick(
 	if tank.pearl_timer > 0.0:
 		return
 	tank.pearl_timer = rng.randf_range(Care.PEARL_MIN_SECONDS, Care.PEARL_MAX_SECONDS)
-	var fish: Fish = tank.fish[rng.randi_range(0, tank.fish.size() - 1)]
+	var adults: Array[Fish] = []
+	for candidate: Fish in tank.fish:
+		if candidate.is_adult():
+			adults.append(candidate)
+	if adults.is_empty():
+		return
+	var fish: Fish = adults[rng.randi_range(0, adults.size() - 1)]
 	var species: SpeciesDef = content.get_species(fish.species_id)
 	if species == null or state.pending_pearls.size() >= GameState.MAX_PENDING_PEARLS:
 		return

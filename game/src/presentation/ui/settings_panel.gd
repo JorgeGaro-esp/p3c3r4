@@ -8,15 +8,21 @@ extends UiPanel
 signal close_requested
 signal message(text: String)
 
+## Pasos de la confirmación de «Vender todos los peces».
+enum SellStep { IDLE, ASKED, SURE }
+
 const LABEL_X: int = 3
 const LABEL_WIDTH: int = 32
 const VALUE_WIDTH: int = 28
 const ARROW_WIDTH: int = 3
 const FIRST_ROW: int = 2
 const CLOSE_BUTTON_WIDTH: int = 16
+const SELL_ALL_WIDTH: int = 32
 
 var _frame: AsciiFrame = AsciiFrame.new()
 var _close: AsciiButton = null
+var _sell_all: AsciiButton = null
+var _sell_step: SellStep = SellStep.IDLE
 var _rows: Array[Row] = []
 var _strip: Row = null
 var _screen: Row = null
@@ -39,6 +45,17 @@ func _init(root: UiRoot) -> void:
 	_mode = _make_stepper("SETTINGS_PANEL_MODE", _on_mode_toggled, _on_mode_toggled)
 	_close = _make_button(_text("UI_CLOSE_PANEL"))
 	_close.activated.connect(func() -> void: close_requested.emit())
+	_sell_all = _make_button("")
+	_sell_all.activated.connect(_on_sell_all_pressed)
+	EventBus.fish_removed.connect(func(_tank_index: int, _fish: Fish) -> void: _update_sell_all())
+	EventBus.fish_added.connect(func(_tank_index: int, _fish: Fish) -> void: _update_sell_all())
+
+
+## Al cerrar el panel se cancela una venta a medias.
+func set_active(value: bool) -> void:
+	super(value)
+	if not value:
+		_sell_step = SellStep.IDLE
 
 
 func layout(area: Rect2i) -> void:
@@ -57,6 +74,12 @@ func layout(area: Rect2i) -> void:
 	_close.rect = Rect2i(
 		area.position.x + LABEL_X, area.position.y + area.size.y - 2, CLOSE_BUTTON_WIDTH, 1
 	)
+	_sell_all.rect = Rect2i(
+		area.position.x + LABEL_X + CLOSE_BUTTON_WIDTH + 2,
+		area.position.y + area.size.y - 2,
+		SELL_ALL_WIDTH,
+		1
+	)
 	refresh()
 
 
@@ -73,6 +96,40 @@ func refresh() -> void:
 	_autostart.toggle.label = _toggle_text(data.launch_with_windows)
 	var is_grow: bool = data.panel_mode == SettingsData.PanelMode.GROW_UP
 	_mode.value.text = _text("SETTINGS_PANEL_GROW" if is_grow else "SETTINGS_PANEL_REPLACE")
+	_update_sell_all()
+
+
+## Texto y estado del botón de vender todo según el paso de la confirmación.
+func _update_sell_all() -> void:
+	var tank: Tank = Game.state.tanks[0]
+	var count: int = tank.fish.size()
+	_sell_all.is_enabled = count > 0 or not tank.eggs.is_empty()
+	if not _sell_all.is_enabled:
+		_sell_step = SellStep.IDLE
+	match _sell_step:
+		SellStep.ASKED:
+			var total: float = 0.0
+			for fish: Fish in tank.fish:
+				total += Selling.value_of(fish, Game.content)
+			var shown: String = NumberFormat.compact(total, TranslationServer.get_locale())
+			_sell_all.label = _text("SETTINGS_SELL_ALL_ASK") % [count, shown]
+		SellStep.SURE:
+			_sell_all.label = _text("SETTINGS_SELL_ALL_SURE")
+		_:
+			_sell_all.label = _text("SETTINGS_SELL_ALL")
+
+
+## Vender todo exige tres pulsaciones: pedir, confirmar y, por último, vender.
+func _on_sell_all_pressed() -> void:
+	match _sell_step:
+		SellStep.IDLE:
+			_sell_step = SellStep.ASKED
+		SellStep.ASKED:
+			_sell_step = SellStep.SURE
+		_:
+			_sell_step = SellStep.IDLE
+			Game.sell_all_fish()
+	_update_sell_all()
 
 
 func _screen_text(index: int) -> String:

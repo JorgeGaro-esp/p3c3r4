@@ -1,0 +1,11 @@
+# pond_snail · juvenil
+[frame]
+(@@)°
+[colors]
+dddde
+[frame]
+(@@)o
+[colors]
+dddde
+[anchor]
+eye=4,0

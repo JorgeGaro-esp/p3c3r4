@@ -64,3 +64,42 @@ func test_cost_and_production_grow_with_rarity() -> void:
 func test_the_starting_game_can_afford_a_second_guppy() -> void:
 	var guppy: SpeciesDef = _content.get_species("pond_guppy")
 	assert_gte(GameService.START_SHELLS, guppy.base_cost)
+
+
+func test_every_stage_sprite_loads_and_stays_in_the_charset() -> void:
+	var paths: Array[String] = [TankView.GENERIC_FRY, TankView.GENERIC_JUVENILE]
+	for species_id: String in _content.species_ids():
+		var def: SpeciesDef = _content.get_species(species_id)
+		for extra: String in [def.fry_sprite_path, def.juvenile_sprite_path]:
+			if not extra.is_empty():
+				paths.append(extra)
+	for path: String in paths:
+		var sprite: AsciiSprite = SpriteLoader.load_file(path)
+		assert_true(sprite.is_valid(), "%s: %s" % [path, sprite.errors])
+		for frame: PackedStringArray in sprite.frames:
+			for line: String in frame:
+				assert_eq(AsciiCharset.first_disallowed(line), "", path)
+
+
+func test_growth_breeding_and_hatching_times_grow_with_rarity() -> void:
+	var ids: Array[SpeciesDef] = []
+	for species_id: String in _content.species_ids():
+		ids.append(_content.get_species(species_id))
+	ids.sort_custom(func(a: SpeciesDef, b: SpeciesDef) -> bool: return a.base_cost < b.base_cost)
+	var previous: SpeciesDef = null
+	for def: SpeciesDef in ids:
+		assert_gt(def.breed_seconds, def.hatch_seconds, def.id)
+		if previous != null:
+			assert_gt(def.growth_seconds, previous.growth_seconds, def.id)
+			assert_gt(def.breed_seconds, previous.breed_seconds, def.id)
+		previous = def
+
+
+func test_every_stage_and_variant_has_text_in_both_languages() -> void:
+	var keys: Dictionary = _csv_keys()
+	for stage: LifeStage.Stage in LifeStage.Stage.values():
+		assert_true(keys.has(LifeStage.name_key(stage)), LifeStage.name_key(stage))
+	var variants: ContentDB = ContentDB.new()
+	assert_true(variants.load_variants_dir(), str(variants.errors))
+	for id: String in variants.variant_ids():
+		assert_true(keys.has(variants.get_variant(id).name_key), id)

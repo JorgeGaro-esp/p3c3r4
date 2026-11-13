@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="VariantDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/variant_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "prismatic"
+name_key = "VARIANT_PRISMATIC"
+weight = 0.1
+sale_multiplier = 50.0
+look = 4

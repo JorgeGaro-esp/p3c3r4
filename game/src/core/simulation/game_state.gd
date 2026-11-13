@@ -23,6 +23,11 @@ var production_dirty: bool = true
 var pending_pearls: Array[PearlSpawn] = []
 ## Especies que ya se pueden comprar. Una vez desbloqueada, no se vuelve a bloquear.
 var unlocked: Dictionary[String, bool] = {}
+## Combinaciones de especie y variante que el jugador ya ha tenido (clave
+## `especie|variante`). Es la base del Pecedex.
+var discovered: Dictionary[String, bool] = {}
+## Huevos que han eclosionado y `Game` aún no ha publicado.
+var pending_hatched: Array[HatchEvent] = []
 
 
 ## Avisa de que compra, venta o cambio de felicidad alteran la producción.
@@ -40,6 +45,31 @@ func count_of(species_id: String) -> int:
 
 func is_unlocked(species_id: String) -> bool:
 	return unlocked.has(species_id)
+
+
+## Clave de una combinación de especie y variante en [member discovered].
+static func discovery_key(species_id: String, variant_id: String) -> String:
+	return "%s|%s" % [species_id, variant_id]
+
+
+func is_discovered(species_id: String, variant_id: String) -> bool:
+	return discovered.has(discovery_key(species_id, variant_id))
+
+
+## Anota la combinación. Devuelve verdadero si era nueva.
+func discover(species_id: String, variant_id: String) -> bool:
+	var key: String = discovery_key(species_id, variant_id)
+	if discovered.has(key):
+		return false
+	discovered[key] = true
+	return true
+
+
+## Entrega y vacía la cola de eclosiones.
+func take_hatched() -> Array[HatchEvent]:
+	var taken: Array[HatchEvent] = pending_hatched
+	pending_hatched = []
+	return taken
 
 
 ## Entrega y vacía la cola de perlas nuevas.
@@ -69,6 +99,7 @@ func to_dict() -> Dictionary:
 		"rng_seed": str(rng_seed),
 		"rng_state": str(rng_state),
 		"unlocked": unlocked.keys(),
+		"discovered": discovered.keys(),
 	}
 
 
@@ -105,6 +136,7 @@ static func from_dict(
 	state.rng_seed = SaveFields.read_big_int(data, "rng_seed", 0, warnings)
 	state.rng_state = SaveFields.read_big_int(data, "rng_state", 0, warnings)
 	_read_unlocked(state, data, content, warnings)
+	_read_discovered(state, data, content, warnings)
 	return state
 
 
@@ -125,3 +157,24 @@ static func _read_unlocked(
 		var species_id: String = item
 		if content.has_species(species_id):
 			state.unlocked[species_id] = true
+
+
+## Lee las combinaciones descubiertas; ignora las de especies o variantes que no existen.
+static func _read_discovered(
+	state: GameState, data: Dictionary, content: ContentDB, warnings: PackedStringArray
+) -> void:
+	if not data.has("discovered"):
+		return
+	var raw: Variant = SaveFields.read_array(data, "discovered", warnings)
+	if raw == null:
+		return
+	var items: Array = raw
+	for item: Variant in items:
+		if typeof(item) != TYPE_STRING:
+			continue
+		var key: String = item
+		var parts: PackedStringArray = key.split("|")
+		if parts.size() != 2:
+			continue
+		if content.has_species(parts[0]) and content.has_variant(parts[1]):
+			state.discovered[key] = true

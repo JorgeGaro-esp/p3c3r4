@@ -47,6 +47,8 @@ func _ready() -> void:
 	EventBus.shells_changed.connect(_on_shells_changed)
 	EventBus.species_unlocked.connect(_on_species_unlocked)
 	EventBus.pearl_collected.connect(_on_pearl_collected)
+	EventBus.fish_sold.connect(_on_fish_sold)
+	EventBus.variant_discovered.connect(_on_variant_discovered)
 	EventBus.production_changed.connect(_on_production_changed)
 	_on_shells_changed(Game.state.wallet.shells)
 	_on_production_changed(Game.state.production_rate)
@@ -124,6 +126,19 @@ func _on_pearl_collected(value: float) -> void:
 	_sidebar.show_toast(
 		tr("TOAST_PEARL") % NumberFormat.compact(value, TranslationServer.get_locale())
 	)
+
+
+func _on_fish_sold(value: float) -> void:
+	_sidebar.show_toast(
+		tr("TOAST_SOLD") % NumberFormat.compact(value, TranslationServer.get_locale())
+	)
+
+
+func _on_variant_discovered(species_id: String, variant_id: String) -> void:
+	var species: SpeciesDef = Game.content.get_species(species_id)
+	var variant: VariantDef = Game.content.get_variant(variant_id)
+	if species != null and variant != null:
+		_sidebar.show_toast(tr("TOAST_VARIANT_NEW") % [tr(variant.name_key), tr(species.name_key)])
 
 
 func _on_species_unlocked(species_id: String) -> void:

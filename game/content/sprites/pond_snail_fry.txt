@@ -1,0 +1,11 @@
+# pond_snail · alevin
+[frame]
+@°
+[colors]
+de
+[frame]
+@o
+[colors]
+de
+[anchor]
+eye=1,0

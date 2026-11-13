@@ -23,9 +23,12 @@ static func equipment_cost(base_cost: float, level: int) -> float:
 	return ceilf(base_cost * pow(EQUIPMENT_COST_GROWTH, float(maxi(level, 0))) - ROUNDING_TOLERANCE)
 
 
-## Valor de venta de un adulto.
-static func sale_value(base_cost: float, variant_multiplier: float = 1.0) -> float:
-	return floorf(SELL_FACTOR * base_cost * variant_multiplier)
+## Valor de venta de un pez: la mitad del coste base, por el multiplicador de su
+## variante y por la fracción que corresponde a su etapa de vida. Nunca menos de 1.
+static func sale_value(
+	base_cost: float, variant_multiplier: float = 1.0, stage_factor: float = 1.0
+) -> float:
+	return maxf(1.0, floorf(SELL_FACTOR * base_cost * variant_multiplier * stage_factor))
 
 
 ## Multiplicador de producción según la felicidad (0 a 100): de ×0,25 a ×1,25.

@@ -74,3 +74,20 @@ TOAST_SAVE_RECOVERED,Partida recuperada de una copia,Save recovered from a backu
 TOAST_SAVE_CORRUPT,Partida dañada: empiezas una nueva,Save damaged: starting a new game
 TOAST_SAVE_NEWER,Partida de una versión más nueva,Save is from a newer version
 TOAST_SAVE_FAILED,No se pudo guardar la partida,Could not save the game
+STAGE_FRY,Alevín,Fry
+STAGE_JUVENILE,Juvenil,Juvenile
+STAGE_ADULT,Adulto,Adult
+VARIANT_NORMAL,Normal,Normal
+VARIANT_ALBINO,Albina,Albino
+VARIANT_MELANISTIC,Melánica,Melanistic
+VARIANT_GOLDEN,Dorada,Golden
+VARIANT_PRISMATIC,Prismática,Prismatic
+FISH_STAGE_VARIANT,%s · %s ×%d,%s · %s ×%d
+FISH_SELL,Vender +%s,Sell +%s
+FISH_SELL_SURPLUS,Sobrantes %d +%s,Extras %d +%s
+FISH_SELL_CONFIRM,¿Seguro?,Sure?
+TOAST_SOLD,Vendido: +%s ¢,Sold: +%s ¢
+TOAST_VARIANT_NEW,¡Variante nueva! %s (%s),New variant! %s (%s)
+SETTINGS_SELL_ALL,Vender todos los peces,Sell all fish
+SETTINGS_SELL_ALL_ASK,¿Vender %d peces? +%s ¢,Sell %d fish? +%s ¢
+SETTINGS_SELL_ALL_SURE,¿Seguro? Última pulsación,Sure? Last press

@@ -22,6 +22,9 @@ const LAYER_FRONT: int = 20
 const SEEK_RADIUS: float = 30.0
 ## A qué distancia de la boca se come un copo.
 const EAT_DISTANCE: float = 1.8
+## Sprites de alevín y juvenil de las especies que no traen los suyos.
+const GENERIC_FRY: String = "res://content/sprites/stage_fry.txt"
+const GENERIC_JUVENILE: String = "res://content/sprites/stage_juvenile.txt"
 
 
 ## Lo necesario para dibujar una especie: se prepara una vez y se reutiliza.
@@ -29,12 +32,31 @@ class Look:
 	extends RefCounted
 	var def: SpeciesDef
 	var sprite: AsciiSprite
+	var fry_sprite: AsciiSprite
+	var juvenile_sprite: AsciiSprite
 	var palette: AsciiPalette
 
-	func _init(new_def: SpeciesDef, new_sprite: AsciiSprite) -> void:
+	func _init(
+		new_def: SpeciesDef,
+		new_sprite: AsciiSprite,
+		new_fry: AsciiSprite,
+		new_juvenile: AsciiSprite
+	) -> void:
 		def = new_def
 		sprite = new_sprite
+		fry_sprite = new_fry
+		juvenile_sprite = new_juvenile
 		palette = new_def.build_palette()
+
+	## Sprite de la etapa [param stage].
+	func sprite_for(stage: LifeStage.Stage) -> AsciiSprite:
+		match stage:
+			LifeStage.Stage.FRY:
+				return fry_sprite
+			LifeStage.Stage.JUVENILE:
+				return juvenile_sprite
+			_:
+				return sprite
 
 
 @export var canvas_path: NodePath
@@ -54,6 +76,7 @@ var _bubbles: BubbleField = BubbleField.new()
 var _food: FoodField = FoodField.new()
 var _spots: GlassSpots = GlassSpots.new()
 var _pearls: PearlField = PearlField.new()
+var _eggs: EggField = EggField.new()
 var _next_bubble_in: float = 1.0
 
 
@@ -68,7 +91,10 @@ func _ready() -> void:
 	_food.layer = LAYER_FISH + 2
 	_pearls.layer = LAYER_FISH + 3
 	_spots.layer = LAYER_FRONT + 1
-	for drawable: AsciiDrawable in [_sand, _weeds, _bubbles, _surface, _food, _pearls, _spots]:
+	_eggs.layer = LAYER_BACK + 2
+	for drawable: AsciiDrawable in [
+		_sand, _weeds, _eggs, _bubbles, _surface, _food, _pearls, _spots
+	]:
 		canvas.add_drawable(drawable)
 	_load_looks()
 	canvas.grid_changed.connect(_on_grid_changed)
@@ -193,6 +219,11 @@ func fish_count() -> int:
 	return _fish.size()
 
 
+## Número de huevos que se dibujan.
+func egg_count() -> int:
+	return _eggs.count()
+
+
 ## Número de burbujas vivas.
 func bubble_count() -> int:
 	return _bubbles.count()
@@ -202,37 +233,92 @@ func bubble_count() -> int:
 func _load_looks() -> void:
 	for species_id: String in Game.content.species_ids():
 		var def: SpeciesDef = Game.content.get_species(species_id)
-		var sprite: AsciiSprite = SpriteLoader.load_file(def.sprite_path)
-		if not sprite.is_valid():
-			push_error("TankView: invalid sprite %s: %s" % [def.sprite_path, sprite.errors])
+		var sprite: AsciiSprite = _load_sprite(def.sprite_path)
+		var fry: AsciiSprite = _load_sprite(_path_or(def.fry_sprite_path, GENERIC_FRY))
+		var juvenile: AsciiSprite = _load_sprite(
+			_path_or(def.juvenile_sprite_path, GENERIC_JUVENILE)
+		)
+		if sprite == null or fry == null or juvenile == null:
 			continue
-		_looks[species_id] = Look.new(def, sprite)
+		_looks[species_id] = Look.new(def, sprite, fry, juvenile)
+
+
+func _path_or(path: String, fallback: String) -> String:
+	return fallback if path.is_empty() else path
+
+
+## Carga un sprite; devuelve null (y avisa) si no es válido.
+func _load_sprite(path: String) -> AsciiSprite:
+	var sprite: AsciiSprite = SpriteLoader.load_file(path)
+	if not sprite.is_valid():
+		push_error("TankView: invalid sprite %s: %s" % [path, sprite.errors])
+		return null
+	return sprite
 
 
 func _add_view(fish: Fish) -> void:
 	if not _looks.has(fish.species_id):
 		return
+	var view: FishView = _make_view(fish)
+	view.motion.scatter()
+	_register_view(fish, view)
+
+
+## Crea la vista de [param fish] con el sprite de su etapa y los colores de su variante.
+func _make_view(fish: Fish) -> FishView:
 	var look: Look = _looks[fish.species_id]
 	var def: SpeciesDef = look.def
 	var motion: SwimMotion = SwimMotion.new(
 		_rng, def.style as SwimMotion.Style, def.speed, def.amplitude, def.frequency
 	)
-	var view: FishView = FishView.new(look.sprite, look.palette, motion, def.frame_duration)
+	var variant_look: VariantDef.Look = VariantDef.Look.NONE
+	var variant: VariantDef = Game.content.get_variant(fish.variant_id)
+	if variant != null:
+		variant_look = variant.look
+	var view: FishView = FishView.new(
+		look.sprite_for(fish.stage()), look.palette, motion, def.frame_duration, variant_look
+	)
 	view.layer = LAYER_FISH
+	view.stage = fish.stage()
+	view.variant_id = fish.variant_id
 	motion.set_bounds(_bounds_for(view))
-	motion.scatter()
 	view.set_mood(fish.happiness)
+	return view
+
+
+func _register_view(fish: Fish, view: FishView) -> void:
 	_views[fish] = view
 	_owners[view] = fish
 	_fish.append(view)
 	canvas.add_drawable(view)
 
 
+## Cambia la vista de [param fish] por una nueva con el sprite de su etapa actual,
+## en el mismo sitio y con el mismo rumbo.
+func _restage(old_view: FishView, fish: Fish) -> void:
+	var view: FishView = _make_view(fish)
+	var old: SwimMotion = old_view.motion
+	view.motion.position = old.position
+	view.motion.velocity = old.velocity
+	view.motion.facing = old.facing
+	view.motion.phase = old.phase
+	view.motion.set_bounds(_bounds_for(view))
+	_views.erase(fish)
+	_owners.erase(old_view)
+	_fish.erase(old_view)
+	canvas.remove_drawable(old_view)
+	_register_view(fish, view)
+
+
 ## Estado de ánimo, manchas y búsqueda de comida de cada pez.
 func _update_care() -> void:
 	_spots.set_count(Care.spots_for(Game.state.tanks[0].cleanliness))
-	for view: FishView in _fish:
+	_eggs.set_eggs(Game.state.tanks[0].eggs, _current_area().size.x)
+	for view: FishView in _fish.duplicate():
 		var fish: Fish = _owners[view]
+		if view.stage != fish.stage():
+			_restage(view, fish)
+			continue
 		view.set_mood(fish.happiness)
 		if _food.count() > 0 and fish.hunger < Care.HUNGRY_BELOW:
 			_hunt(view, fish)
@@ -305,6 +391,7 @@ func _on_grid_changed() -> void:
 	_bubbles.surface_row = float(area.position.y + SURFACE_ROWS)
 	_food.floor_row = float(sand_top)
 	_pearls.floor_row = float(sand_top - 1)
+	_eggs.floor_row = float(sand_top)
 	_spots.configure(
 		Rect2i(
 			area.position.x,

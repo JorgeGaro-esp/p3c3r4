@@ -24,7 +24,7 @@ Hacer trampas editando la partida no se considera una amenaza: es un juego de un
 
 ```json
 {
-  "format_version": 1,
+  "format_version": 3,
   "game_version": "0.5.0",
   "saved_at_unix": 1794500000,
   "checksum": "sha256 del campo data serializado de forma canónica",
@@ -35,14 +35,14 @@ Hacer trampas editando la partida no se considera una amenaza: es un juego de un
         "biome_id": "pond",
         "cleanliness": 82.5,
         "fish": [
-          { "species_id": "pond_guppy", "variant_id": "normal", "stage": 3, "hunger": 40.0 }
+          { "species_id": "pond_guppy", "variant_id": "normal", "maturity": 1.0, "happiness": 100.0, "hunger": 40.0 }
         ],
-        "eggs": [],
+        "eggs": [ { "species_id": "pond_guppy", "variant_id": "albino", "remaining": 12.5, "position_x": 0.3 } ],
         "equipment": { "filter": 2 },
         "decorations": [ { "def_id": "rock_small", "x": 12, "y": 0, "layer": 0 } ]
       }
     ],
-    "pokedex": { "pond_guppy": ["normal"] },
+    "discovered": ["pond_guppy|normal"],
     "achievements": {},
     "prestige": { "count": 0, "upgrades": {} },
     "stats": {},

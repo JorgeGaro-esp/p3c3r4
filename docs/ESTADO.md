@@ -3,8 +3,8 @@
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
 **Última actualización:** 2026-11-13
-**Fase actual:** Fase 6 · Cuidados: código y 276 tests hechos. Pendiente de Jorge: probar la Fase 5 y la 6, elegir P02 y borrar los `test_*` (ver abajo). Siguiente: **Fase 7 · Cría, variantes y venta**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
-**Versión:** `0.7.0` (pendiente de etiquetar en Git). Etiquetas existentes: `v0.1.0`, `v0.2.0`. Falta commitear y etiquetar `v0.3.0`.
+**Fase actual:** Fase 7 · Cría, variantes y venta: código y 337 tests hechos. Pendiente de Jorge: probarla en la ventana real (ver abajo). Siguiente: **Fase 8 · Equipamiento**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
+**Versión:** `0.8.0` (pendiente de commit y etiqueta `v0.8.0`). Etiquetas hasta `v0.7.0`.
 
 ## Progreso por fases
 
@@ -17,7 +17,7 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 | 4 | Guardado | Hecha; guardar y recargar conchas probado por Jorge |
 | 5 | Tienda, especies y rarezas | Hecha en código; pendiente de prueba manual de Jorge |
 | 6 | Cuidados: hambre, limpieza y felicidad | Hecha en código; pendiente de prueba manual de Jorge |
-| 7 | Cría, variantes de color y venta | Pendiente |
+| 7 | Cría, variantes de color y venta | Hecha en código; pendiente de prueba manual de Jorge |
 | 8 | Equipamiento mejorable | Pendiente |
 | 9 | Decoración colocable | Pendiente |
 | 10 | Biomas y varias peceras | Pendiente |
@@ -30,6 +30,8 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 | 17 | (Futuro) Versión web y publicación | Sin planificar en detalle |
 
 ## Hecho hasta ahora
+
+- 2026-11-13 (sesión 5): arreglo de las manchas del cristal (T56) y limpieza visible en el panel (T57). Fase 7: etapas de vida, huevos y eclosión, 5 variantes con paletas (prismática animada), venta desde la ficha con confirmación y venta de sobrantes, aviso de variante nueva y registro de combinaciones descubiertas (base del Pecedex). Guardado formato 3. 337 tests.
 
 - 2026-11-12: cuestionario de decisiones respondido y plan de desarrollo redactado. Carpeta creada en el escritorio.
 - 2026-11-12 (sesión 2): Fase 0, tareas 0.3, 0.4, 0.5, 0.7 (gdlintrc), 0.8 (borrador) y 0.9 escritas: `game/project.godot`, estructura de carpetas, escena principal, test de humo, `CHANGELOG.md`, `LICENSE-THIRD-PARTY.md`. gdformat y gdlint pasan sobre `src` y `tests`. Sin ejecutar en Godot todavía.

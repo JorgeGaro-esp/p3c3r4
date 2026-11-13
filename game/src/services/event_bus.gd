@@ -21,3 +21,7 @@ signal species_unlocked(species_id: String)
 signal purchase_made
 ## Hay algo que contarle al jugador; [param key] es una clave de traducción.
 signal notice_requested(key: String)
+## El jugador vendió un pez por [param value] conchas.
+signal fish_sold(value: float)
+## Salió por primera vez una variante de una especie (no se emite para la normal).
+signal variant_discovered(species_id: String, variant_id: String)

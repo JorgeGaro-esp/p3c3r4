@@ -1,6 +1,6 @@
 class_name Tank
 extends RefCounted
-## Una pecera: sus peces y su capacidad.
+## Una pecera: sus peces, sus huevos y su capacidad. Los huevos ocupan hueco.
 
 const DEFAULT_CAPACITY: int = 40
 ## Límites al leer una partida (06-SEGURIDAD §3.4).
@@ -9,14 +9,22 @@ const MAX_CAPACITY: int = 200
 var biome_id: String = "pond"
 var capacity: int = DEFAULT_CAPACITY
 var fish: Array[Fish] = []
+var eggs: Array[Egg] = []
 ## Limpieza del agua de 0 (sucia) a 100 (impecable).
 var cleanliness: float = Care.MAX_CLEANLINESS
 ## Segundos que faltan para la próxima perla (no se guarda).
 var pearl_timer: float = Care.PEARL_MAX_SECONDS
+## Segundos acumulados hacia la próxima puesta de cada especie (no se guarda).
+var breed_timers: Dictionary[String, float] = {}
+
+
+## Huecos usados: peces más huevos.
+func occupied() -> int:
+	return fish.size() + eggs.size()
 
 
 func is_full() -> bool:
-	return fish.size() >= capacity
+	return occupied() >= capacity
 
 
 ## Añade [param new_fish] si hay sitio. Devuelve falso si la pecera está llena.
@@ -49,8 +57,15 @@ func to_dict() -> Dictionary:
 	var fish_data: Array = []
 	for item: Fish in fish:
 		fish_data.append(item.to_dict())
+	var egg_data: Array = []
+	for egg: Egg in eggs:
+		egg_data.append(egg.to_dict())
 	return {
-		"biome_id": biome_id, "capacity": capacity, "cleanliness": cleanliness, "fish": fish_data
+		"biome_id": biome_id,
+		"capacity": capacity,
+		"cleanliness": cleanliness,
+		"fish": fish_data,
+		"eggs": egg_data,
 	}
 
 
@@ -70,14 +85,37 @@ static func from_dict(source: Variant, content: ContentDB, warnings: PackedStrin
 		data, "cleanliness", Care.MAX_CLEANLINESS, 0.0, Care.MAX_CLEANLINESS, warnings
 	)
 	var raw_fish: Variant = SaveFields.read_array(data, "fish", warnings)
-	if raw_fish == null:
-		return tank
-	var list: Array = raw_fish
-	for entry: Variant in list:
+	if raw_fish != null:
+		var fish_list: Array = raw_fish
+		_read_fish(tank, fish_list, content, warnings)
+	if data.has("eggs"):
+		var raw_eggs: Variant = SaveFields.read_array(data, "eggs", warnings)
+		if raw_eggs != null:
+			var egg_list: Array = raw_eggs
+			_read_eggs(tank, egg_list, content, warnings)
+	return tank
+
+
+static func _read_fish(
+	tank: Tank, raw: Array, content: ContentDB, warnings: PackedStringArray
+) -> void:
+	for entry: Variant in raw:
 		var fish_item: Fish = Fish.from_dict(entry, content, warnings)
 		if fish_item == null:
 			continue
 		if not tank.add_fish(fish_item):
 			warnings.append("pez descartado: la pecera está llena")
 			break
-	return tank
+
+
+static func _read_eggs(
+	tank: Tank, raw: Array, content: ContentDB, warnings: PackedStringArray
+) -> void:
+	for entry: Variant in raw:
+		var egg: Egg = Egg.from_dict(entry, content, warnings)
+		if egg == null:
+			continue
+		if tank.is_full():
+			warnings.append("huevo descartado: la pecera está llena")
+			break
+		tank.eggs.append(egg)

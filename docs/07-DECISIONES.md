@@ -121,6 +121,17 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T55 | Orden del clic en el agua: limpiar mancha, recoger perla, abrir ficha de pez y, si no, echar comida | La mancha está «delante» del cristal; la comida es la acción por defecto |
 | T56 | Una mancha por cada 10 puntos de suciedad completos (`floor`, no `ceil`) | Con `ceil`, cualquier suciedad mínima mostraba una mancha que reaparecía al instante tras limpiarla (bug visto en pruebas manuales) |
 | T57 | La limpieza se muestra como texto con color en la fila 9 del panel lateral, solo con 11+ filas | Con 10 filas (mínimo) no hay hueco; las manchas siguen avisando |
+| T58 | La etapa sale de la **madurez** (0 a 1): alevín <0,3, juvenil <1, adulto 1; el tiempo de crecimiento es un dato por especie | Cambiar tiempos o umbrales no toca el resto del código |
+| T59 | El huevo no es un pez: es un `Egg` aparte que ocupa un hueco de capacidad y eclosiona en un pez de madurez 0 | La capacidad se respeta siempre y la variante se sortea al poner |
+| T60 | Cría por especie: felicidad media de adultos >= 60, al menos 2 adultos, hueco libre; cada pareja (hasta 4) acelera la puesta | Cumple el criterio de la Fase 7 sin pares explícitos |
+| T61 | Peces comprados y partidas antiguas: adultos de variante normal; solo la cría sortea variante | Comprar no da variantes raras; la cría es el camino |
+| T62 | Valor de venta = 0,5 × coste base × variante × etapa (alevín 0,2; juvenil 0,5), mínimo 1 | Criar y vender solo rinde un poco: queda para el balance de la Fase 16 |
+| T63 | Venta con doble pulsación («¿Seguro?»). «Sobrantes» solo para variante normal y conserva los 2 peces más maduros | Evita vender por error variantes raras o la pareja de cría |
+| T64 | Sprites de alevín y juvenil genéricos con la paleta de cada especie; una especie puede traer los suyos (`fry_sprite_path`, `juvenile_sprite_path`; el caracol los trae) | Coste de arte bajo ahora; la pasada de estilo puede afinarlos |
+| T65 | Variantes = transformación de color de la paleta (`VariantPalette`), no paletas escritas a mano | Una variante nueva no necesita arte; la prismática se anima con el tiempo |
+| T66 | `GameState.discovered` guarda las combinaciones especie+variante vistas | Base del Pecedex (Fase 11) y del aviso de variante nueva |
+| T67 | Guardado formato 3: peces con `maturity` y `variant_id`, peceras con `eggs`, estado con `discovered` | Migración 2→3 rellena los valores por defecto |
+| T68 | Vaciar la pecera = botón «Vender todos los peces» en Ajustes, con tres pulsaciones (pedir, confirmar, vender); paga el valor de venta y descarta los huevos | Jorge quería una forma de vaciar la pecera persistente; vender evita perder conchas |
 
 ## Cómo añadir decisiones
 

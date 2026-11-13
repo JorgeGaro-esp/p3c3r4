@@ -8,10 +8,17 @@ extends AsciiDrawable
 
 ## Cada cuántos puntos de felicidad cambia el aspecto del pez.
 const MOOD_STEP: float = 5.0
+## Cada cuántos segundos se recalculan los colores de una variante animada.
+const ANIMATED_STEP: float = 0.1
+## Desfase de tono entre columnas contiguas de una variante prismática.
+const PRISM_SPREAD: float = 0.08
 
 var motion: SwimMotion
 var width: int = 0
 var height: int = 0
+## Etapa y variante con las que se dibujó; `TankView` lo usa para detectar cambios.
+var stage: LifeStage.Stage = LifeStage.Stage.ADULT
+var variant_id: String = VariantDef.NORMAL_ID
 
 var _cells: Array[FishCells] = []
 var _frame_count: int = 1
@@ -19,15 +26,23 @@ var _frame_duration: float = 0.4
 var _clock: float = 0.0
 var _frame_index: int = 0
 var _mood_level: int = -1
+var _look: VariantDef.Look = VariantDef.Look.NONE
+var _animated_clock: float = 0.0
+var _last_animated: float = 0.0
 var _desaturation: float = 0.0
 var _right: AsciiSprite
 var _left: AsciiSprite
 
 
 func _init(
-	sprite: AsciiSprite, palette: AsciiPalette, swim: SwimMotion, new_frame_duration: float
+	sprite: AsciiSprite,
+	palette: AsciiPalette,
+	swim: SwimMotion,
+	new_frame_duration: float,
+	variant_look: VariantDef.Look = VariantDef.Look.NONE
 ) -> void:
 	motion = swim
+	_look = variant_look
 	width = sprite.width
 	height = sprite.height
 	_right = sprite
@@ -36,12 +51,19 @@ func _init(
 	_frame_duration = maxf(new_frame_duration, 0.05)
 	_cells.append_array(_build_cells(_right, palette))
 	_cells.append_array(_build_cells(_left, palette))
+	if _look != VariantDef.Look.NONE:
+		_retint(0.0)
 
 
 func update(delta: float, _canvas: AsciiCanvas) -> void:
 	motion.step(delta)
 	_clock += delta
 	_frame_index = int(_clock / _frame_duration) % _frame_count
+	if VariantPalette.is_animated(_look):
+		_animated_clock += delta
+		if _animated_clock - _last_animated >= ANIMATED_STEP:
+			_last_animated = _animated_clock
+			_retint(_animated_clock)
 
 
 func draw(canvas: AsciiCanvas) -> void:
@@ -91,6 +113,18 @@ func anchor_cell(anchor_name: String) -> Vector2:
 	return motion.position + point
 
 
+## Recalcula los colores de la variante en el instante [param time] y vuelve a
+## aplicar la desaturación del ánimo actual.
+func _retint(time: float) -> void:
+	for cells: FishCells in _cells:
+		for index: int in range(cells.source_colors.size()):
+			var phase: float = float(cells.columns[index]) * PRISM_SPREAD
+			cells.base_colors[index] = VariantPalette.tint(
+				cells.source_colors[index], _look, time, phase
+			)
+		cells.apply_desaturation(_desaturation)
+
+
 func _build_cells(sprite: AsciiSprite, palette: AsciiPalette) -> Array[FishCells]:
 	var result: Array[FishCells] = []
 	for frame_index: int in range(sprite.frame_count()):
@@ -109,6 +143,7 @@ func _build_cells(sprite: AsciiSprite, palette: AsciiPalette) -> Array[FishCells
 				cells.rows.append(row)
 				cells.chars.append(character)
 				var color: Color = palette.color_for(role)
+				cells.source_colors.append(color)
 				cells.base_colors.append(color)
 				cells.colors.append(color)
 		result.append(cells)
@@ -120,6 +155,7 @@ class FishCells:
 	var columns: PackedInt32Array = PackedInt32Array()
 	var rows: PackedInt32Array = PackedInt32Array()
 	var chars: PackedStringArray = PackedStringArray()
+	var source_colors: PackedColorArray = PackedColorArray()
 	var base_colors: PackedColorArray = PackedColorArray()
 	var colors: PackedColorArray = PackedColorArray()
 

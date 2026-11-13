@@ -1,0 +1,11 @@
+# generico · juvenil
+[frame]
+><(°>
+[colors]
+ttbeb
+[frame]
+><(o>
+[colors]
+ttbeb
+[anchor]
+eye=3,0

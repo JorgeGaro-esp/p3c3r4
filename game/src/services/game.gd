@@ -21,7 +21,9 @@ var _last_rate: float = -1.0
 
 
 func _ready() -> void:
-	if not content.load_species_dir():
+	var variants_ok: bool = content.load_variants_dir()
+	var species_ok: bool = content.load_species_dir()
+	if not variants_ok or not species_ok:
 		for message: String in content.errors:
 			push_error("ContentDB: %s" % message)
 	start_new_game(DEFAULT_SEED)
@@ -32,6 +34,9 @@ func _process(delta: float) -> void:
 		Simulation.step(state, FixedStepper.STEP_SECONDS, content, rng)
 	for spawn: PearlSpawn in state.take_pearls():
 		EventBus.pearl_spawned.emit(spawn.tank_index, spawn.fish, spawn.value)
+	for hatching: HatchEvent in state.take_hatched():
+		EventBus.fish_added.emit(hatching.tank_index, hatching.fish)
+		_register_discovery(hatching.fish, true)
 	_publish_changes()
 
 
@@ -82,6 +87,57 @@ func buy_fish(species_id: String) -> BuyResult:
 	_add_fish(0, species_id)
 	EventBus.purchase_made.emit()
 	return BuyResult.OK
+
+
+## Vende [param fish] de la pecera 0. Devuelve las conchas ganadas, o -1 si el pez
+## no está en ella.
+func sell_fish(fish: Fish) -> float:
+	var tank: Tank = state.tanks[0]
+	if not tank.fish.has(fish):
+		return -1.0
+	var value: float = Selling.value_of(fish, content)
+	tank.remove_fish(fish)
+	state.wallet.add(value)
+	state.mark_production_dirty()
+	EventBus.fish_removed.emit(0, fish)
+	EventBus.fish_sold.emit(value)
+	EventBus.purchase_made.emit()
+	return value
+
+
+## Vende los sobrantes de [param species_id] y [param variant_id] (ver
+## [method Selling.surplus]). Devuelve las conchas ganadas en total.
+func sell_surplus(species_id: String, variant_id: String) -> float:
+	var total: float = 0.0
+	for fish: Fish in Selling.surplus(state.tanks[0], species_id, variant_id):
+		var value: float = Selling.value_of(fish, content)
+		state.tanks[0].remove_fish(fish)
+		state.wallet.add(value)
+		EventBus.fish_removed.emit(0, fish)
+		total += value
+	if total > 0.0:
+		state.mark_production_dirty()
+		EventBus.fish_sold.emit(total)
+		EventBus.purchase_made.emit()
+	return total
+
+
+## Vende todos los peces de la pecera [param tank_index] y descarta sus huevos.
+## Devuelve las conchas ganadas.
+func sell_all_fish(tank_index: int = 0) -> float:
+	var tank: Tank = state.tanks[tank_index]
+	var total: float = 0.0
+	for fish: Fish in tank.fish.duplicate():
+		total += Selling.value_of(fish, content)
+		tank.remove_fish(fish)
+		EventBus.fish_removed.emit(tank_index, fish)
+	tank.eggs.clear()
+	tank.breed_timers.clear()
+	state.wallet.add(total)
+	state.mark_production_dirty()
+	EventBus.fish_sold.emit(total)
+	EventBus.purchase_made.emit()
+	return total
 
 
 ## Da de comer un copo a [param fish]. Devuelve falso si ya estaba lleno.
@@ -146,6 +202,9 @@ func _replace_state(fresh: GameState) -> void:
 	_last_shells = -1.0
 	_last_rate = -1.0
 	_refresh_unlocks(false)
+	for tank: Tank in state.tanks:
+		for fish: Fish in tank.fish:
+			_register_discovery(fish, false)
 	_publish_changes()
 
 
@@ -153,7 +212,16 @@ func _add_fish(tank_index: int, species_id: String) -> void:
 	var fish: Fish = Fish.new(species_id)
 	if state.tanks[tank_index].add_fish(fish):
 		state.mark_production_dirty()
+		_register_discovery(fish, false)
 		EventBus.fish_added.emit(tank_index, fish)
+
+
+## Anota la combinación de especie y variante de [param fish]. Con [param announce]
+## avisa de las variantes nuevas que no son la normal.
+func _register_discovery(fish: Fish, announce: bool) -> void:
+	var is_new: bool = state.discover(fish.species_id, fish.variant_id)
+	if is_new and announce and fish.variant_id != VariantDef.NORMAL_ID:
+		EventBus.variant_discovered.emit(fish.species_id, fish.variant_id)
 
 
 ## Desbloquea las especies cuya condición ya se cumple. Con [param announce] avisa
