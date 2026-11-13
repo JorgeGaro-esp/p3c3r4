@@ -1,0 +1,19 @@
+# abyss_jellyfish · adulto
+[frame]
+ .---.
+(__°__)
+ |:|:|
+[colors]
+ bbbbb
+bbbebbb
+ ddddd
+[frame]
+ .---.
+(__°__)
+ :|:|:
+[colors]
+ bbbbb
+bbbebbb
+ ddddd
+[anchor]
+eye=3,1

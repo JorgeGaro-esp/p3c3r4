@@ -1,0 +1,17 @@
+# deco_hydro_vent · decoración
+[frame]
+  ) (
+.^^.
+/####\
+[colors]
+  b b
+abba
+aaaaaa
+[frame]
+ (  )
+.^^.
+/####\
+[colors]
+ b  b
+abba
+aaaaaa

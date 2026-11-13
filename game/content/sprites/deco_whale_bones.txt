@@ -1,0 +1,17 @@
+# deco_whale_bones · decoración
+[frame]
+  ,---,
+ /|||||\
+/_|=_=|_\
+[colors]
+  aaaaa
+ aaaaaaa
+aaaaaaaaa
+[frame]
+  ,---,
+ /|||||\
+/_|=_=|_\
+[colors]
+  aaaaa
+ aaaaaaa
+aaaaaaaaa

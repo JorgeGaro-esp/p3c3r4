@@ -1,0 +1,19 @@
+# mangrove_crab · adulto
+[frame]
+ V  V
+<(°°)>
+ /\/\
+[colors]
+ d  d
+dbeebd
+ ffff
+[frame]
+V    V
+<(°°)>
+ \/\/
+[colors]
+d    d
+dbeebd
+ ffff
+[anchor]
+eye=2,1

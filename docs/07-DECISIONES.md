@@ -157,6 +157,10 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T91 | Decoración con `biome_id` opcional: vacío vale para todos; la tienda filtra por el bioma activo. Las etiquetas de desbloqueo cuentan en todas las peceras | Equipo y decoración específicos de bioma (10.5) sin duplicar los objetos universales |
 | T92 | Guardado formato 6: `active_tank`; migración 5→6 la pone a 0 | Seguridad al cargar: se limita al rango de peceras |
 | T93 | Entrega en dos partes: 10A (sistema + Arrecife) y 10B (Manglar y Abismo, 16 especies) | Decisión de Jorge: revisar el sistema antes de multiplicar el contenido |
+| T94 | Cadena de biomas: Estanque → Arrecife (6 000) → Manglar (90 000) → Abismo (700 000), cada uno exige el anterior | Progresión clara; el coste sigue la curva de la economía (cada bioma ~10-15× el anterior) |
+| T95 | Las especies de cada bioma repiten la estructura (2 comunes, 2 poco comunes, 2 raras, 1 épica, 1 legendaria) y la economía del bioma nuevo empieza por encima del final del anterior | Los tests de contenido lo exigen; el balance fino queda para la Fase 16 |
+| T96 | Etiquetas propias por bioma (raíz, fango, brillo, fumarola, huesos, señuelo): las especies de más rareza piden decoración de su bioma | Da sentido a decorar y a la tienda de decoración |
+| T97 | El Abismo no tiene relleno de fondo (`backdrop_char` vacío): la oscuridad es la identidad visual y las partículas luminosas hacen de «nieve marina» | Contraste máximo con los otros biomas |
 
 ## Cómo añadir decisiones
 

@@ -151,7 +151,7 @@ func test_the_biome_tab_unlocks_the_reef_with_shells() -> void:
 	var shop: ShopPanel = _controller._shop
 	shop.select_biome("reef")
 	await wait_frames(2)
-	assert_eq(shop.biome_ids(), PackedStringArray(["pond", "reef"]))
+	assert_eq(shop.biome_ids(), PackedStringArray(["pond", "reef", "mangrove", "abyss"]))
 	shop.buy_selected()
 	await wait_frames(2)
 	assert_eq(Game.state.tanks.size(), 2)

@@ -1,0 +1,17 @@
+# deco_barnacle_rock · decoración
+[frame]
+ ,^,
+.o:o.
+'---'
+[colors]
+ aaa
+abbba
+aaaaa
+[frame]
+ ,^,
+.:o:.
+'---'
+[colors]
+ aaa
+abbba
+aaaaa

@@ -1,0 +1,19 @@
+# mangrove_snapper · adulto
+[frame]
+  .--.
+><(///°)>
+  '--'
+[colors]
+  ffff
+ttbdddebb
+  ffff
+[frame]
+  .--.
+<>(\\\°)>
+  '--'
+[colors]
+  ffff
+ttbdddebb
+  ffff
+[anchor]
+eye=6,1

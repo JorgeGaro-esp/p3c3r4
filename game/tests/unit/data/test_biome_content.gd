@@ -2,7 +2,7 @@ extends GutTest
 ## Comprueba el contenido real de cada bioma: 8 especies, sus textos y su arte.
 
 const CSV_PATH: String = "res://assets/i18n/strings.csv"
-const BIOMES: PackedStringArray = ["pond", "reef"]
+const BIOMES: PackedStringArray = ["pond", "reef", "mangrove", "abyss"]
 
 var _content: ContentDB = ContentDB.new()
 

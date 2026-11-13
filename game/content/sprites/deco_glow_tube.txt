@@ -1,0 +1,21 @@
+# deco_glow_tube · decoración
+[frame]
+ *
+(|)
+(|)
+/_\
+[colors]
+ b
+aaa
+aaa
+aaa
+[frame]
+ +
+(|)
+(|)
+/_\
+[colors]
+ b
+aaa
+aaa
+aaa

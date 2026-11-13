@@ -1,0 +1,19 @@
+# abyss_anglerfish · adulto
+[frame]
+    ,o
+><(VVV°)>
+  '--'
+[colors]
+    fd
+ttbdddebb
+  ffff
+[frame]
+    ,*
+<>(VVV°)>
+  '--'
+[colors]
+    fd
+ttbdddebb
+  ffff
+[anchor]
+eye=6,1

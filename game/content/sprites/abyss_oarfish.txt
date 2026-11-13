@@ -1,0 +1,19 @@
+# abyss_oarfish · adulto
+[frame]
+  ^^^^^^^^^
+~~<=======°>
+  ~~~~~~~~~
+[colors]
+  fffffffff
+ttbbbbbbbbeb
+  fffffffff
+[frame]
+  ^^^^^^^^^
+-~<=======°>
+  ---------
+[colors]
+  fffffffff
+ttbbbbbbbbeb
+  fffffffff
+[anchor]
+eye=10,1

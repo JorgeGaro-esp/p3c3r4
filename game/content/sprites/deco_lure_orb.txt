@@ -1,0 +1,17 @@
+# deco_lure_orb · decoración
+[frame]
+ ,
+(O)
+ '
+[colors]
+ a
+aba
+ a
+[frame]
+ ,
+(o)
+ '
+[colors]
+ a
+aba
+ a

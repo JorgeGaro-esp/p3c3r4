@@ -1,0 +1,13 @@
+# deco_mud_mound · decoración
+[frame]
+  _,,_
+.'~~~~'.
+[colors]
+  aaaa
+aabbbbaa
+[frame]
+  _,,_
+.'~~~~'.
+[colors]
+  aaaa
+aabbbbaa

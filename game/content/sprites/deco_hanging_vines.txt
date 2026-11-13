@@ -1,0 +1,25 @@
+# deco_hanging_vines · decoración
+[frame]
+ |
+ }|
+{|
+ |{
+ |
+[colors]
+ a
+ ba
+ba
+ ab
+ a
+[frame]
+ |
+ {|
+}|
+ |}
+ |
+[colors]
+ a
+ ba
+ba
+ ab
+ a

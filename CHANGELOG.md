@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.12.0] - 2026-11-13 · Fase 10B
+
+### Añadido
+- **Manglar** (90 000 ¢, pide el Arrecife): agua turbia, arena de barro, raíces, motas de polen. 8 especies (pez arquero, cangrejo violinista, gamba, siluro, pargo, saltarín del fango, barracuda y pez sierra) y 4 decoraciones propias (raíz de mangle, montículo de fango, lianas colgantes, roca de percebes).
+- **Abismo** (700 000 ¢, pide el Manglar): sin fondo decorado, plantas luminosas y nieve marina brillante. 8 especies (pez linterna, medusa, pez hacha, calamar vampiro, pez víbora, rape abisal, pez remo y calamar gigante) y 4 decoraciones propias (tubo luminoso, fumarola, huesos de ballena, orbe señuelo).
+- Nuevas etiquetas de desbloqueo: raíz, fango, brillo, fumarola, huesos y señuelo. Cada bioma tiene sus 5 rarezas, sus desbloqueos y su economía creciente.
+- Tests: cadena de desbloqueo (Abismo ← Manglar ← Arrecife) y compra de especies solo en su bioma.
+
+### Cambiado
+- `test_biome_content` y la pestaña «Biomas» cubren ya los cuatro biomas. Fase 10 completa.
+
 ## [0.11.0] - 2026-11-13 · Fase 10A
 
 ### Añadido

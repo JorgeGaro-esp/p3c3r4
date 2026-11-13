@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="DecorationDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/decoration_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "lure_orb"
+name_key = "DECOR_LURE_ORB"
+description_key = "DECOR_LURE_ORB_DESC"
+layer = 1
+anchor = 1
+bonus = 2
+amount = 0.1
+tag = "lure"
+biome_id = "abyss"
+base_cost = 1200000.0
+sprite_path = "res://content/sprites/deco_lure_orb.txt"
+cells_wide = 3
+cells_high = 3
+palette_roles = PackedStringArray("a","b")
+palette_colors = PackedColorArray(0.5, 0.6, 0.7, 1, 1, 1, 0.6, 1)
+frame_duration = 0.5

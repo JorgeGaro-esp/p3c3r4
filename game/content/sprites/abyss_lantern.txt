@@ -1,0 +1,19 @@
+# abyss_lantern · adulto
+[frame]
+  .--.
+><(ooo°)>
+  '--'
+[colors]
+  ffff
+ttbdddebb
+  ffff
+[frame]
+  .--.
+<>(:::°)>
+  '--'
+[colors]
+  ffff
+ttbdddebb
+  ffff
+[anchor]
+eye=6,1

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="BiomeDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/biome_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "mangrove"
+name_key = "BIOME_MANGROVE"
+description_key = "BIOME_MANGROVE_DESC"
+order = 2
+unlock_cost = 90000.0
+requires_biome_id = "reef"
+surface_pattern = "~.,~"
+surface_color = Color(0.55, 0.65, 0.35, 1)
+sand_grains = ",.;:'.,"
+sand_color = Color(0.45, 0.35, 0.25, 1)
+weed_chars = "/|"
+weed_light = Color(0.55, 0.4, 0.25, 1)
+weed_dark = Color(0.35, 0.28, 0.18, 1)
+weed_gap_scale = 0.8
+bubble_color = Color(0.7, 0.8, 0.55, 1)
+backdrop_char = ":"
+backdrop_color = Color(0.25, 0.3, 0.15, 1)
+backdrop_density = 0.05
+particle_chars = ",·"
+particle_color = Color(0.6, 0.55, 0.35, 1)
+particle_count = 18
+particle_fall = 0.3

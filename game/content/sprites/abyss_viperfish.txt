@@ -1,0 +1,19 @@
+# abyss_viperfish · adulto
+[frame]
+  .^^.
+><(oo°)E
+  '--'
+[colors]
+  ffff
+ttbddebd
+  ffff
+[frame]
+  .^^.
+<>(oo°)E
+  '--'
+[colors]
+  ffff
+ttbddebd
+  ffff
+[anchor]
+eye=5,1

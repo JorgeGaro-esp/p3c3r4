@@ -1,0 +1,19 @@
+# mangrove_catfish · adulto
+[frame]
+  _,-._
+><(~~~°)>=
+  '---'
+[colors]
+  fffff
+ttbbbbebbd
+  fffff
+[frame]
+  _,-._
+<>(---°)>=
+  '---'
+[colors]
+  fffff
+ttbbbbebbd
+  fffff
+[anchor]
+eye=6,1

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "mangrove_sawfish"
+name_key = "SPECIES_MANGROVE_SAWFISH"
+description_key = "SPECIES_MANGROVE_SAWFISH_DESC"
+biome_id = "mangrove"
+rarity = 4
+base_cost = 1800000.0
+base_production = 6400.0
+unlock_kind = 1
+unlock_amount = 20000000.0
+unlock_species_id = ""
+unlock_tag = ""
+sprite_path = "res://content/sprites/mangrove_sawfish.txt"
+palette_roles = PackedStringArray("b","t","d","f","e")
+palette_colors = PackedColorArray(0.55, 0.6, 0.62, 1, 0.4, 0.45, 0.5, 1, 0.9, 0.9, 0.85, 1, 0.7, 0.75, 0.78, 1, 1, 1, 1, 1)
+growth_seconds = 800.0
+breed_seconds = 1100.0
+hatch_seconds = 120.0
+style = 1
+speed = 4.5
+amplitude = 0.25
+frequency = 0.8
+frame_duration = 0.5

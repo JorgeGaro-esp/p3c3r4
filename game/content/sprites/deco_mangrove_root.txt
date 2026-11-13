@@ -1,0 +1,25 @@
+# deco_mangrove_root · decoración
+[frame]
+\ | /
+ \|/
+ /|\
+/ | \
+  |
+[colors]
+a b a
+ aba
+ aba
+a b a
+  b
+[frame]
+\ | /
+ \|/
+ /|\
+/ | \
+  |
+[colors]
+a b a
+ aba
+ aba
+a b a
+  b

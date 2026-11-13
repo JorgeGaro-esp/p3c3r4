@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "mangrove_shrimp"
+name_key = "SPECIES_MANGROVE_SHRIMP"
+description_key = "SPECIES_MANGROVE_SHRIMP_DESC"
+biome_id = "mangrove"
+rarity = 1
+base_cost = 48000.0
+base_production = 190.0
+unlock_kind = 3
+unlock_amount = 3.0
+unlock_species_id = "mangrove_crab"
+unlock_tag = ""
+sprite_path = "res://content/sprites/mangrove_shrimp.txt"
+palette_roles = PackedStringArray("b","t","f","e")
+palette_colors = PackedColorArray(0.95, 0.6, 0.5, 1, 0.8, 0.4, 0.35, 1, 0.9, 0.5, 0.4, 1, 0.05, 0.05, 0.05, 1)
+growth_seconds = 380.0
+breed_seconds = 540.0
+hatch_seconds = 80.0
+style = 2
+speed = 3.0
+amplitude = 0.25
+frequency = 1.0
+frame_duration = 0.5

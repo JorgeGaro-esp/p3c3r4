@@ -162,3 +162,26 @@ func test_adopting_a_state_restores_its_active_tank() -> void:
 	Game.adopt_state(loaded)
 	assert_eq(Game.state.active().biome_id, "reef")
 	assert_signal_emitted_with_parameters(EventBus, "active_tank_changed", [1])
+
+
+func test_biomes_must_be_opened_in_order() -> void:
+	Game.state.wallet.add(1.0e9)
+	assert_eq(Game.biomes.unlock("mangrove"), BiomeDirector.Result.REQUIRES)
+	assert_eq(Game.biomes.unlock("abyss"), BiomeDirector.Result.REQUIRES)
+	assert_eq(Game.state.tanks.size(), 1)
+	assert_eq(Game.biomes.unlock("reef"), BiomeDirector.Result.OK)
+	assert_eq(Game.biomes.unlock("abyss"), BiomeDirector.Result.REQUIRES)
+	assert_eq(Game.biomes.unlock("mangrove"), BiomeDirector.Result.OK)
+	assert_eq(Game.biomes.unlock("abyss"), BiomeDirector.Result.OK)
+	assert_eq(Game.state.tanks.size(), 4)
+	assert_eq(Game.state.active().biome_id, "abyss")
+
+
+func test_each_new_biome_sells_only_its_own_species() -> void:
+	Game.state.wallet.add(1.0e9)
+	for id: String in ["reef", "mangrove", "abyss"]:
+		Game.biomes.unlock(id)
+	assert_eq(Game.buy_fish("mangrove_archer"), Game.BuyResult.WRONG_BIOME)
+	assert_eq(Game.buy_fish("abyss_lantern"), Game.BuyResult.OK)
+	Game.biomes.set_active(2)
+	assert_eq(Game.buy_fish("mangrove_archer"), Game.BuyResult.OK)

@@ -214,3 +214,61 @@ DECOR_STAGHORN,Coral cuerno de ciervo,Staghorn coral
 DECOR_STAGHORN_DESC,Ramas de coral que atraen variantes raras.,Coral branches that attract rare variants.
 TAG_CORAL,un coral cerebro,a brain coral
 TAG_ANEMONE,una anémona,an anemone
+BIOME_MANGROVE,Manglar,Mangrove
+BIOME_MANGROVE_DESC,Raíces enredadas y agua turbia. Criaturas que viven entre el barro.,Tangled roots and murky water. Creatures that live in the mud.
+BIOME_ABYSS,Abismo,Abyss
+BIOME_ABYSS_DESC,Oscuridad total salpicada de luz propia. Los peces más raros del océano.,Total darkness dotted with their own light. The ocean's rarest fish.
+SPECIES_MANGROVE_ARCHER,Pez arquero,Archerfish
+SPECIES_MANGROVE_ARCHER_DESC,Escupe chorros de agua para derribar insectos.,Spits jets of water to knock down insects.
+SPECIES_MANGROVE_CRAB,Cangrejo violinista,Fiddler crab
+SPECIES_MANGROVE_CRAB_DESC,Agita su pinza enorme entre las raíces.,Waves its huge claw among the roots.
+SPECIES_MANGROVE_SHRIMP,Gamba de manglar,Mangrove shrimp
+SPECIES_MANGROVE_SHRIMP_DESC,"Pequeña y esquiva, se esconde en el fango.","Small and elusive, it hides in the silt."
+SPECIES_MANGROVE_CATFISH,Siluro,Catfish
+SPECIES_MANGROVE_CATFISH_DESC,Sus bigotes rastrean el fondo embarrado.,Its whiskers feel along the muddy bottom.
+SPECIES_MANGROVE_SNAPPER,Pargo de manglar,Mangrove snapper
+SPECIES_MANGROVE_SNAPPER_DESC,Nace entre las raíces y se hace grande aquí.,"Born among the roots, it grows big here."
+SPECIES_MANGROVE_MUDSKIPPER,Saltarín del fango,Mudskipper
+SPECIES_MANGROVE_MUDSKIPPER_DESC,Sale del agua y se arrastra sobre el barro.,Leaves the water and crawls over the mud.
+SPECIES_MANGROVE_BARRACUDA,Barracuda,Barracuda
+SPECIES_MANGROVE_BARRACUDA_DESC,Rápida y dentuda. Patrulla el borde del manglar.,Fast and toothy. Patrols the mangrove edge.
+SPECIES_MANGROVE_SAWFISH,Pez sierra,Sawfish
+SPECIES_MANGROVE_SAWFISH_DESC,Su rostro aserrado es leyenda del manglar.,Its toothed snout is a mangrove legend.
+SPECIES_ABYSS_LANTERN,Pez linterna,Lanternfish
+SPECIES_ABYSS_LANTERN_DESC,Miles de puntitos de luz en el flanco.,Thousands of tiny lights along its flank.
+SPECIES_ABYSS_JELLYFISH,Medusa abisal,Deep jellyfish
+SPECIES_ABYSS_JELLYFISH_DESC,"Flota sin rumbo, translúcida y morada.","Drifts aimlessly, translucent and purple."
+SPECIES_ABYSS_HATCHET,Pez hacha,Hatchetfish
+SPECIES_ABYSS_HATCHET_DESC,Plateado y plano como la hoja de un hacha.,Silvery and flat as an axe blade.
+SPECIES_ABYSS_SQUID,Calamar vampiro,Vampire squid
+SPECIES_ABYSS_SQUID_DESC,Se envuelve en su manto como en una capa.,Wraps itself in its mantle like a cloak.
+SPECIES_ABYSS_VIPERFISH,Pez víbora,Viperfish
+SPECIES_ABYSS_VIPERFISH_DESC,Colmillos tan largos que no le caben en la boca.,Fangs so long they do not fit in its mouth.
+SPECIES_ABYSS_ANGLERFISH,Rape abisal,Anglerfish
+SPECIES_ABYSS_ANGLERFISH_DESC,Un farol en la frente atrae a sus presas.,A lantern on its brow lures its prey.
+SPECIES_ABYSS_OARFISH,Pez remo,Oarfish
+SPECIES_ABYSS_OARFISH_DESC,Largo como una serpiente de mar de leyenda.,Long as a legendary sea serpent.
+SPECIES_ABYSS_GIANT_SQUID,Calamar gigante,Giant squid
+SPECIES_ABYSS_GIANT_SQUID_DESC,Ojos como platos. Casi nadie lo ha visto vivo.,Eyes like plates. Almost nobody has seen one alive.
+DECOR_MANGROVE_ROOT,Raíz de mangle,Mangrove root
+DECOR_MANGROVE_ROOT_DESC,Raíces zancudas que sostienen todo el manglar.,Stilt roots that hold up the whole mangrove.
+DECOR_MUD_MOUND,Montículo de fango,Mud mound
+DECOR_MUD_MOUND_DESC,Un abrigo blando para los habitantes del fondo.,A soft shelter for bottom dwellers.
+DECOR_HANGING_VINES,Lianas colgantes,Hanging vines
+DECOR_HANGING_VINES_DESC,Caen desde la superficie y atraen insectos.,They dangle from the surface and attract insects.
+DECOR_BARNACLE_ROCK,Roca de percebes,Barnacle rock
+DECOR_BARNACLE_ROCK_DESC,Cubierta de crustáceos. A veces trae sorpresas.,Covered in crustaceans. Sometimes brings surprises.
+DECOR_GLOW_TUBE,Tubo luminoso,Glow tube
+DECOR_GLOW_TUBE_DESC,Gusanos de tubo que brillan en la oscuridad.,Tube worms that glow in the dark.
+DECOR_HYDRO_VENT,Fumarola,Hydrothermal vent
+DECOR_HYDRO_VENT_DESC,Agua caliente y minerales: la energía del abismo.,Hot water and minerals: the abyss's energy.
+DECOR_WHALE_BONES,Huesos de ballena,Whale bones
+DECOR_WHALE_BONES_DESC,Un banquete lento que alimenta el fondo durante décadas.,A slow feast that feeds the seabed for decades.
+DECOR_LURE_ORB,Orbe señuelo,Lure orb
+DECOR_LURE_ORB_DESC,Una luz hipnótica que atrae a los peces raros.,A hypnotic light that draws rare fish.
+TAG_ROOT,una raíz de mangle,a mangrove root
+TAG_MUD,un montículo de fango,a mud mound
+TAG_GLOW,un tubo luminoso,a glow tube
+TAG_VENT,una fumarola,a hydrothermal vent
+TAG_BONES,unos huesos de ballena,whale bones
+TAG_LURE,un orbe señuelo,a lure orb

@@ -1,0 +1,19 @@
+# mangrove_sawfish · adulto
+[frame]
+   _,--,_
+><(====°)>=+=+=+
+   '-..-'
+[colors]
+   ffffff
+ttbbbbbebbdddddd
+   ffffff
+[frame]
+   .-''-.
+<>(====°)>+=+=+=
+   _,..,_
+[colors]
+   ffffff
+ttbbbbbebbdddddd
+   ffffff
+[anchor]
+eye=7,1
