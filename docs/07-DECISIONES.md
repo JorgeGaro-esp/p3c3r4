@@ -76,6 +76,12 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T29 | Minimizada, la ventana pone en pausa dibujo y simulación (`PROCESS_MODE_DISABLED`) | Bajo consumo (T07) |
 | T30 | Símbolos de rareza accesibles sin depender del color: `· + * # @` | Doc 05 y accesibilidad (Fase 15) |
 | T31 | Orden de foco por grupos (`focus_group`): un panel abierto recibe el foco con Tab antes que la barra lateral | Teclado natural al abrir tienda o ajustes |
+| T32 | `SpeciesDef` (en `data/`) sustituye a `SwimmerDef`: reúne aspecto y economía de una especie | Una sola definición por especie (T19); `SwimmerDef` se elimina |
+| T33 | Los costes se redondean hacia arriba con una tolerancia de 1e-9 | Evita que 50×1,6² = 128,00000000000003 cueste 129 |
+| T34 | `FixedStepper`: pasos de 0,1 s, máximo 5 por fotograma, el exceso se descarta; tolerancia de 1e-9 | Sin espiral tras una pausa (D11) y sin pasos perdidos por coma flotante |
+| T35 | `Game` y `EventBus` son autoloads; `Game` emite `shells_changed` y `production_changed` una vez por fotograma, no por paso | Evita inundar la interfaz de señales |
+| T36 | La partida nueva da 20 conchas y 3 peces de prueba (guppy, pececillo, pez ángel); las especies `test_*` se sustituirán en la Fase 5 | Valores provisionales hasta el balance (Fase 16) |
+| T37 | `Simulation.step` recibe el generador aleatorio pero todavía no lo usa | Reservado para cuidados, cría y eventos; el test de determinismo se vuelve estricto cuando entren |
 
 ## C. Pendientes (no bloquean el inicio)
 

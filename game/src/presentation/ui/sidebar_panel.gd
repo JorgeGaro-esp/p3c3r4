@@ -1,7 +1,7 @@
 class_name SidebarPanel
 extends UiPanel
 ## Barra lateral derecha: accesos a los paneles, avisos y botones de ventana
-## (minimizar y cerrar). Las conchas y la producción llegarán en la Fase 3.
+## (minimizar y cerrar), más el contador de conchas y la producción por segundo.
 
 signal shop_pressed
 signal dex_pressed
@@ -14,6 +14,8 @@ const WINDOW_BUTTON_WIDTH: int = 3
 
 var _frame: AsciiFrame = AsciiFrame.new()
 var _toast: AsciiToast = AsciiToast.new()
+var _shells: AsciiLabel = null
+var _rate: AsciiLabel = null
 var _shop: AsciiButton = null
 var _dex: AsciiButton = null
 var _settings: AsciiButton = null
@@ -26,6 +28,8 @@ func _init(root: UiRoot) -> void:
 	focus_group = 1
 	_frame.title = _text("GAME_TITLE")
 	_add(_frame, UiRoot.LAYER_PANEL)
+	_shells = _make_label("", AsciiColors.AMBER)
+	_rate = _make_label("", AsciiColors.TEXT_DIM)
 	_add(_toast)
 	_shop = _make_button(_text("UI_SHOP"), _text("UI_SHOP_KEY"))
 	_dex = _make_button(_text("UI_DEX"), _text("UI_DEX_KEY"))
@@ -44,6 +48,16 @@ func show_toast(message: String) -> void:
 	_toast.show_message(message)
 
 
+## Escribe el contador de conchas (ya abreviado, por ejemplo `12,4K`).
+func set_shells(text: String) -> void:
+	_shells.text = _text("UI_SHELLS") % text
+
+
+## Escribe la producción por segundo (ya abreviada, por ejemplo `+1,2/s`).
+func set_rate(text: String) -> void:
+	_rate.text = text
+
+
 func layout(area: Rect2i) -> void:
 	_frame.rect = area
 	var left: int = area.position.x + 1
@@ -53,7 +67,9 @@ func layout(area: Rect2i) -> void:
 	_minimize.rect = Rect2i(
 		area.end.x - 2 - 2 * WINDOW_BUTTON_WIDTH, top + 1, WINDOW_BUTTON_WIDTH, 1
 	)
-	_toast.rect = Rect2i(left, top + 2, inner, TOAST_ROWS)
-	_shop.rect = Rect2i(left, top + 5, inner, 1)
-	_dex.rect = Rect2i(left, top + 6, inner, 1)
-	_settings.rect = Rect2i(left, top + 7, inner, 1)
+	_shells.rect = Rect2i(left, top + 2, inner, 1)
+	_rate.rect = Rect2i(left, top + 3, inner, 1)
+	_toast.rect = Rect2i(left, top + 4, inner, TOAST_ROWS)
+	_shop.rect = Rect2i(left, top + 6, inner, 1)
+	_dex.rect = Rect2i(left, top + 7, inner, 1)
+	_settings.rect = Rect2i(left, top + 8, inner, 1)

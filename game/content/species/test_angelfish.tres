@@ -1,10 +1,14 @@
-[gd_resource type="Resource" script_class="SwimmerDef" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://src/presentation/tank/swimmer_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
 
 [resource]
 script = ExtResource("1_def")
 id = "test_angelfish"
+name_key = "SPECIES_TEST_ANGELFISH"
+rarity = 1
+base_cost = 40.0
+base_production = 0.6
 sprite_path = "res://content/sprites/test_angelfish.txt"
 palette_roles = PackedStringArray("b", "t", "e", "f")
 palette_colors = PackedColorArray(1, 0.85, 0.3, 1, 0.85, 0.7, 0.2, 1, 1, 1, 1, 1, 0.9, 0.9, 0.95, 1)

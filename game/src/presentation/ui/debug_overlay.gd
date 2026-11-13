@@ -51,9 +51,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		visible = not visible
 	elif key_event.keycode == KEY_F4:
 		if key_event.shift_pressed:
-			tank.remove_fish(FISH_STEP)
+			Game.debug_remove_fish(FISH_STEP)
 		else:
-			tank.add_fish(FISH_STEP)
+			Game.debug_add_fish(FISH_STEP)
 
 
 func _build_text() -> String:

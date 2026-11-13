@@ -40,6 +40,10 @@ func _ready() -> void:
 	Settings.changed.connect(_on_settings_changed)
 	Platform.display_changed.connect(_apply_window)
 	Platform.minimized_changed.connect(_on_minimized_changed)
+	EventBus.shells_changed.connect(_on_shells_changed)
+	EventBus.production_changed.connect(_on_production_changed)
+	_on_shells_changed(Game.state.wallet.shells)
+	_on_production_changed(Game.state.production_rate)
 	_on_settings_changed()
 
 
@@ -90,6 +94,14 @@ func _build_panels() -> void:
 	_settings_panel.close_requested.connect(close_panel)
 	_shop.message.connect(_sidebar.show_toast)
 	_settings_panel.message.connect(_sidebar.show_toast)
+
+
+func _on_shells_changed(shells: float) -> void:
+	_sidebar.set_shells(NumberFormat.compact(shells, TranslationServer.get_locale()))
+
+
+func _on_production_changed(rate: float) -> void:
+	_sidebar.set_rate("+" + NumberFormat.per_second(rate, TranslationServer.get_locale()))
 
 
 func _on_settings_changed() -> void:
@@ -146,3 +158,4 @@ func _on_minimized_changed(is_minimized: bool) -> void:
 		mode = Node.PROCESS_MODE_DISABLED
 	_canvas.process_mode = mode
 	_tank.process_mode = mode
+	Game.set_paused(is_minimized)

@@ -49,3 +49,7 @@ SETTINGS_AUTOSTART_FAILED,No se pudo cambiar el inicio con Windows,Could not cha
 SETTINGS_PANEL_MODE,Paneles (prototipo),Panels (prototype)
 SETTINGS_PANEL_REPLACE,A: sustituyen la pecera,A: replace the tank
 SETTINGS_PANEL_GROW,B: crece hacia arriba,B: grows upward
+UI_SHELLS,Conchas %s,Shells %s
+SPECIES_TEST_GUPPY,Guppy de prueba,Test guppy
+SPECIES_TEST_MINNOW,Pececillo de prueba,Test minnow
+SPECIES_TEST_ANGELFISH,Pez ángel de prueba,Test angelfish

@@ -3,8 +3,8 @@
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
 **Última actualización:** 2026-11-13
-**Fase actual:** Fase 2 · Ventana en franja y prototipo de interfaz: código y tests hechos; falta que Jorge la pruebe a mano (escalas 125/150 %, segundo monitor) y elija P02. Siguiente: **Fase 3 · Núcleo de simulación y economía**.
-**Versión:** `0.3.0` (pendiente de etiquetar en Git). Etiquetas existentes: `v0.1.0`, `v0.2.0`.
+**Fase actual:** Fase 3 · Núcleo de simulación y economía: código y tests hechos. Pendientes de Jorge: probar la Fase 2 en ventana real y elegir P02. Siguiente: **Fase 4 · Guardado**.
+**Versión:** `0.4.0` (pendiente de etiquetar en Git). Etiquetas existentes: `v0.1.0`, `v0.2.0`. Falta commitear y etiquetar `v0.3.0`.
 
 ## Progreso por fases
 
@@ -13,7 +13,7 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 | 0 | Entorno y esqueleto | Hecha |
 | 1 | Motor de render ASCII y pecera viva | Hecha |
 | 2 | Ventana en franja y prototipo de interfaz | Hecha en código; pendiente de prueba manual de Jorge y de P02 |
-| 3 | Núcleo de simulación y economía | Pendiente |
+| 3 | Núcleo de simulación y economía | Hecha en código; pendiente de prueba manual de Jorge |
 | 4 | Guardado | Pendiente |
 | 5 | Tienda, especies y rarezas | Pendiente |
 | 6 | Cuidados: hambre, limpieza y felicidad | Pendiente |
@@ -38,10 +38,11 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 
 - 2026-11-13 (sesión 4): Fase 2 escrita y probada en un Godot 4.6 de Linux (headless): 138 tests, 32151 aserciones, gdformat y gdlint limpios. Incluye la matemática de la franja a 100/125/150 % y varios monitores (tests unitarios), ajustes, widgets, paneles y tests de integración con clics y teclado sobre la escena completa.
 
-## Siguiente paso concreto
+- 2026-11-13 (sesión 4, prueba en el equipo): proyecto abierto en Godot 4.6; F5 sin errores ni avisos propios; pecera y barra lateral visibles; Ajustes se abre y se cierra pulsando de nuevo el botón. GUT en el editor: 137 de 138 pasan; falla `test_clicking_the_open_panel_button_again_closes_it` solo dentro del editor (con ventana real) aunque a mano funciona y en headless pasa. Pendiente de investigar. No se pudo probar la franja sin incrustar (el editor la ejecuta incrustada: "Embedded window can't be moved/resized"); falta que Jorge la ejecute como ventana real.
 
-Jorge: abrir el proyecto en Godot (se generarán los `.uid` nuevos), F5, y comprobar: franja sobre la barra de tareas sin cubrirla, sin robar el foco, `[_]`/`[X]`, barra lateral (Tienda, Ajustes), cambios en Ajustes. Probar 125/150 % de escala y un segundo monitor si es posible. Elegir P02 (paneles que sustituyen la pecera, o ventana que crece hacia arriba). Luego `git add .`, commit y `git tag v0.3.0`.
-Claude: Fase 3 (núcleo de simulación y economía) tras la validación de Jorge. Sustituir la tienda de prueba (datos fijos) en la Fase 5.
+
+Jorge: borrar `game/src/presentation/tank/swimmer_def.gd` y su `.uid` (ya no se usan; no los borró Claude). Después abrir el proyecto en Godot (se generarán los `.uid` nuevos), F5, y comprobar: franja sobre la barra de tareas sin cubrirla, sin robar el foco, `[_]`/`[X]`, barra lateral (Tienda, Ajustes), cambios en Ajustes. Probar 125/150 % de escala y un segundo monitor si es posible. Elegir P02 (paneles que sustituyen la pecera, o ventana que crece hacia arriba). Luego `git add .`, commit y `git tag v0.3.0`.
+Claude: Fase 4 (guardado). La tienda de prueba sigue con datos fijos hasta la Fase 5; `Game.buy_fish` ya está lista para usarse.
 
 ## Bloqueos y dudas abiertas
 

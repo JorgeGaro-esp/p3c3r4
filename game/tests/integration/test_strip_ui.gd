@@ -10,6 +10,7 @@ var _main: Node = null
 var _canvas: AsciiCanvas = null
 var _ui: UiRoot = null
 var _controller: StripController = null
+var _tank: TankView = null
 var _previous_locale: String = ""
 var _previous_mode: SettingsData.PanelMode = SettingsData.PanelMode.REPLACE
 var _previous_size: Vector2i = Vector2i.ZERO
@@ -29,10 +30,13 @@ func before_each() -> void:
 	_canvas = _main.get_node("AsciiCanvas") as AsciiCanvas
 	_ui = _main.get_node("UiRoot") as UiRoot
 	_controller = _main.get_node("StripController") as StripController
+	_tank = _main.get_node("TankView") as TankView
+	Game.start_new_game(Game.DEFAULT_SEED)
 	await wait_frames(3)
 
 
 func after_each() -> void:
+	Game.start_new_game(Game.DEFAULT_SEED)
 	_main.queue_free()
 	await wait_frames(1)
 	Settings.data.panel_mode = _previous_mode
@@ -171,3 +175,43 @@ func test_clicks_on_the_open_panel_do_not_reach_what_is_underneath() -> void:
 	await _click_cell(Vector2i(2, 5))
 	assert_eq(_ui.all_widgets().size(), handled_before)
 	assert_eq(_controller.open_kind(), StripController.Kind.SHOP)
+
+
+func _find_label_starting_with(prefix: String) -> AsciiLabel:
+	for widget: AsciiWidget in _ui.all_widgets():
+		var label: AsciiLabel = widget as AsciiLabel
+		if label != null and label.text.begins_with(prefix):
+			return label
+	return null
+
+
+func test_fish_in_the_tank_match_the_model() -> void:
+	assert_eq(_tank.fish_count(), Game.state.fish_total())
+	Game.state.wallet.add(100.0)
+	Game.buy_fish("test_angelfish")
+	await wait_frames(2)
+	assert_eq(_tank.fish_count(), Game.state.fish_total())
+	Game.debug_remove_fish(2)
+	await wait_frames(2)
+	assert_eq(_tank.fish_count(), Game.state.fish_total())
+
+
+func test_sidebar_shows_shells_and_production_and_they_rise() -> void:
+	var shells: AsciiLabel = _find_label_starting_with("Conchas")
+	assert_not_null(shells)
+	assert_eq(shells.text, "Conchas 20")
+	var rate: AsciiLabel = _find_label_starting_with("+")
+	assert_not_null(rate)
+	assert_true(rate.text.ends_with("/s"), rate.text)
+	var before: float = Game.state.wallet.shells
+	await wait_seconds(1.2)
+	assert_gt(Game.state.wallet.shells, before, "las conchas suben con el tiempo")
+	assert_ne(shells.text, "Conchas 20", "el contador se actualiza")
+
+
+func test_minimizing_pauses_the_simulation() -> void:
+	var before: float = Game.state.sim_time
+	Game.set_paused(true)
+	await wait_seconds(0.5)
+	assert_eq(Game.state.sim_time, before)
+	Game.set_paused(false)

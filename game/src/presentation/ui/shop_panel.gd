@@ -84,7 +84,7 @@ func layout(area: Rect2i) -> void:
 	var top: int = area.position.y
 	var inner: int = area.size.x - 2
 	var height: int = area.size.y
-	var list_width: int = clampi(inner * 2 / 5, MIN_LIST_WIDTH, MAX_LIST_WIDTH)
+	var list_width: int = clampi(floori(float(inner) * 0.4), MIN_LIST_WIDTH, MAX_LIST_WIDTH)
 	_tabs.rect = Rect2i(left, top + 1, inner, 1)
 	_list.set_rect(Rect2i(left, top + 2, list_width, maxi(height - 4, 1)))
 	var detail_x: int = left + list_width + DETAIL_GAP

@@ -35,7 +35,7 @@ static func pad_left(text: String, width: int) -> String:
 static func center(text: String, width: int) -> String:
 	var fitted: String = fit(text, width)
 	var total: int = maxi(width, 0) - fitted.length()
-	var left: int = total / 2
+	var left: int = floori(float(total) / 2.0)
 	return "".lpad(left) + fitted + "".lpad(total - left)
 
 

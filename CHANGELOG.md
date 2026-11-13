@@ -2,6 +2,22 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.4.0] - 2026-11-13 · Fase 3
+
+### Añadido
+- Modelo de juego en `core/`: `GameState`, `Tank`, `Fish`, `Wallet`, `Simulation` y `FixedStepper` (10 pasos por segundo).
+- Economía: costes ×1,15 por pez y ×1,6 por nivel de equipo, valor de venta, multiplicador por felicidad (×0,25 a ×1,25) y producción pasiva.
+- `SpeciesDef` y `ContentDB` con validación de identificadores, rangos, sprites y paletas.
+- Formato de números grandes según idioma (`12,4K`, `3,1M`, `1.25B`).
+- Autoloads `Game` y `EventBus`; la pecera dibuja los peces del modelo.
+- Contador de conchas y producción por segundo en la barra lateral.
+- 196 tests (economía, simulación, determinismo, contenido, integración).
+
+### Cambiado
+- `SwimmerDef` se sustituye por `SpeciesDef`.
+- F4 y Mayús+F4 añaden y quitan peces del modelo.
+- La simulación se pausa al minimizar.
+
 ## [0.3.0] - 2026-11-13 · Fase 2
 
 ### Añadido

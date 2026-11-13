@@ -27,7 +27,7 @@ func test_species_reference_existing_sprites_and_cover_colors() -> void:
 	for file_name: String in DirAccess.get_files_at(SPECIES_DIR):
 		if not file_name.ends_with(".tres"):
 			continue
-		var def: SwimmerDef = load(SPECIES_DIR.path_join(file_name)) as SwimmerDef
+		var def: SpeciesDef = load(SPECIES_DIR.path_join(file_name)) as SpeciesDef
 		assert_not_null(def, file_name)
 		var sprite: AsciiSprite = SpriteLoader.load_file(def.sprite_path)
 		assert_true(sprite.is_valid(), file_name)

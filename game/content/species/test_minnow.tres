@@ -1,10 +1,14 @@
-[gd_resource type="Resource" script_class="SwimmerDef" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://src/presentation/tank/swimmer_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
 
 [resource]
 script = ExtResource("1_def")
 id = "test_minnow"
+name_key = "SPECIES_TEST_MINNOW"
+rarity = 0
+base_cost = 5.0
+base_production = 0.1
 sprite_path = "res://content/sprites/test_minnow.txt"
 palette_roles = PackedStringArray("b", "t", "e")
 palette_colors = PackedColorArray(0.55, 0.8, 1, 1, 0.35, 0.55, 0.85, 1, 1, 1, 1, 1)
