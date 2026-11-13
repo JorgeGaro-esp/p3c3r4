@@ -17,11 +17,22 @@ const DETAIL_GAP: int = 2
 const CLOSE_BUTTON_WIDTH: int = 16
 const BUY_BUTTON_WIDTH: int = 12
 const DECORATE_BUTTON_WIDTH: int = 14
+## Posición de la pestaña de la Enciclopedia.
+const DEX_TAB: int = 4
+## Posición de las pestañas de Logros y de Estadísticas.
+const ACHIEVEMENTS_TAB: int = 5
+const STATS_TAB: int = 6
+## Ancho del retrato del pez en la Enciclopedia y ancho mínimo del detalle para verlo.
+const PORTRAIT_WIDTH: int = 20
+const MIN_DETAIL_FOR_PORTRAIT: int = 44
 
 var _ids: PackedStringArray = PackedStringArray()
 var _equipment_ids: PackedStringArray = PackedStringArray()
 var _decor_ids: PackedStringArray = PackedStringArray()
 var _biome_ids: PackedStringArray = PackedStringArray()
+var _dex_ids: PackedStringArray = PackedStringArray()
+var _achievement_ids: PackedStringArray = PackedStringArray()
+var _stat_rows: Array[PackedStringArray] = []
 var _tab: int = 0
 var _frame: AsciiFrame = AsciiFrame.new()
 var _tabs: AsciiTabs = AsciiTabs.new()
@@ -32,6 +43,8 @@ var _rarity: AsciiLabel = null
 var _description: AsciiLabel = null
 var _owned: AsciiLabel = null
 var _progress: AsciiProgress = AsciiProgress.new()
+var _portrait: AsciiPortrait = AsciiPortrait.new()
+var _area: Rect2i = Rect2i()
 var _buy: AsciiButton = null
 var _close: AsciiButton = null
 var _decorate: AsciiButton = null
@@ -50,6 +63,7 @@ func _init(root: UiRoot) -> void:
 	_description.wraps = true
 	_owned = _make_label("")
 	_add(_progress)
+	_add(_portrait)
 	_buy = _make_button("")
 	_close = _make_button("")
 	_decorate = _make_button("", "D")
@@ -66,11 +80,13 @@ func _init(root: UiRoot) -> void:
 	EventBus.active_tank_changed.connect(_on_state_changed)
 	EventBus.tank_unlocked.connect(_on_state_changed)
 	EventBus.equipment_changed.connect(_on_equipment_changed)
+	EventBus.achievement_unlocked.connect(_on_state_changed)
 	_tabs.tab_changed.connect(_on_tab_changed)
 	refresh()
 
 
 func layout(area: Rect2i) -> void:
+	_area = area
 	_frame.rect = area
 	var left: int = area.position.x + 1
 	var top: int = area.position.y
@@ -80,8 +96,9 @@ func layout(area: Rect2i) -> void:
 	_tabs.rect = Rect2i(left, top + 1, inner, 1)
 	_list.set_rect(Rect2i(left, top + 2, list_width, maxi(height - 4, 1)))
 	var detail_x: int = left + list_width + DETAIL_GAP
-	var detail_width: int = maxi(inner - list_width - DETAIL_GAP, 1)
+	var full_width: int = maxi(inner - list_width - DETAIL_GAP, 1)
 	var owned_row: int = top + height - 4
+	var detail_width: int = full_width
 	_name.rect = Rect2i(detail_x, top + 2, detail_width, 1)
 	_price.rect = Rect2i(detail_x, top + 3, detail_width, 1)
 	_rarity.rect = Rect2i(detail_x, top + 4, detail_width, 1)
@@ -92,7 +109,31 @@ func layout(area: Rect2i) -> void:
 	_close.rect = Rect2i(detail_x + BUY_BUTTON_WIDTH + 1, top + height - 2, CLOSE_BUTTON_WIDTH, 1)
 	var decorate_x: int = detail_x + BUY_BUTTON_WIDTH + CLOSE_BUTTON_WIDTH + 2
 	_decorate.rect = Rect2i(decorate_x, top + height - 2, DECORATE_BUTTON_WIDTH, 1)
+	if _tab >= DEX_TAB:
+		_layout_dex(detail_x, top, owned_row, full_width)
+	else:
+		_portrait.is_shown = false
 	_show_detail(_list.selected_index())
+
+
+## Reparte el detalle de la Enciclopedia: textos a la izquierda, retrato a la derecha,
+## las variantes en una fila entera y los totales junto a la barra.
+func _layout_dex(detail_x: int, top: int, owned_row: int, full_width: int) -> void:
+	var has_portrait: bool = _tab == DEX_TAB and full_width >= MIN_DETAIL_FOR_PORTRAIT
+	var text_width: int = full_width - PORTRAIT_WIDTH - 1 if has_portrait else full_width
+	_portrait.rect = Rect2i(
+		detail_x + text_width + 1, top + 2, PORTRAIT_WIDTH, maxi(owned_row - top - 2, 1)
+	)
+	_portrait.is_shown = is_active and has_portrait
+	_name.rect = Rect2i(detail_x, top + 2, text_width, 1)
+	_rarity.rect = Rect2i(detail_x, top + 3, text_width, 1)
+	_description.rect = Rect2i(detail_x, top + 4, text_width, maxi(owned_row - top - 4, 1))
+	_owned.rect = Rect2i(detail_x, owned_row, full_width, 1)
+	var bar_width: int = mini(full_width, 24)
+	_progress.rect = Rect2i(detail_x, owned_row + 1, bar_width, 1)
+	_price.rect = Rect2i(
+		detail_x + bar_width + 2, owned_row + 1, maxi(full_width - bar_width - 2, 1), 1
+	)
 
 
 ## Vuelve a escribir todos los textos (cambio de idioma) y la lista.
@@ -104,7 +145,10 @@ func refresh() -> void:
 				_text("SHOP_TAB_FISH"),
 				_text("SHOP_TAB_EQUIPMENT"),
 				_text("SHOP_TAB_DECOR"),
-				_text("SHOP_TAB_BIOMES")
+				_text("SHOP_TAB_BIOMES"),
+				_text("SHOP_TAB_DEX"),
+				_text("SHOP_TAB_ACHIEVEMENTS"),
+				_text("SHOP_TAB_STATS")
 			]
 		)
 	)
@@ -124,6 +168,7 @@ func species_ids() -> PackedStringArray:
 func set_active(value: bool) -> void:
 	super(value)
 	_decorate.is_shown = value and _tab == 2
+	_portrait.is_shown = value and _tab == DEX_TAB
 
 
 ## Ids de la decoración a la venta, en el orden de la lista.
@@ -159,7 +204,46 @@ func equipment_ids() -> PackedStringArray:
 	return _equipment_ids
 
 
-## Cambia a la pestaña [param index] (0 peces, 1 equipo, 2 decoración, 3 biomas).
+## Ids de los logros de la lista, en orden.
+func achievement_ids() -> PackedStringArray:
+	return _achievement_ids
+
+
+## Selecciona el logro [param achievement_id] (para los tests).
+func select_achievement(achievement_id: String) -> void:
+	select_tab(ACHIEVEMENTS_TAB)
+	var index: int = _achievement_ids.find(achievement_id)
+	if index >= 0:
+		_list.model.select(index)
+		_show_detail(index)
+
+
+## Ids de las especies de la Enciclopedia, de la más barata a la más cara.
+func dex_ids() -> PackedStringArray:
+	return _dex_ids
+
+
+## El retrato de la Enciclopedia (para los tests).
+func portrait() -> AsciiPortrait:
+	return _portrait
+
+
+## Pestaña abierta ahora (0 peces ... 4 Enciclopedia).
+func current_tab() -> int:
+	return _tab
+
+
+## Selecciona la especie [param species_id] en la Enciclopedia (para los tests).
+func select_dex_species(species_id: String) -> void:
+	select_tab(DEX_TAB)
+	var index: int = _dex_ids.find(species_id)
+	if index >= 0:
+		_list.model.select(index)
+		_show_detail(index)
+
+
+## Cambia a la pestaña [param index] (0 peces, 1 equipo, 2 decoración, 3 biomas,
+## 4 Enciclopedia, 5 Logros, 6 Estadísticas).
 func select_tab(index: int) -> void:
 	_tabs.select(index)
 
@@ -204,6 +288,8 @@ func _on_decoration_changed(_tank_index: int) -> void:
 func _on_tab_changed(index: int) -> void:
 	_tab = index
 	_decorate.is_shown = is_active and _tab == 2
+	if _area.size != Vector2i.ZERO:
+		layout(_area)
 	_fill_list()
 
 
@@ -228,6 +314,15 @@ func _collect_ids() -> PackedStringArray:
 
 
 func _fill_list() -> void:
+	if _tab == ACHIEVEMENTS_TAB:
+		_fill_achievement_list()
+		return
+	if _tab == STATS_TAB:
+		_fill_stats_list()
+		return
+	if _tab == DEX_TAB:
+		_fill_dex_list()
+		return
 	if _tab == 3:
 		_fill_biome_list()
 		return
@@ -304,6 +399,145 @@ func _decoration_for_active_biome() -> PackedStringArray:
 		if def.biome_id.is_empty() or def.biome_id == biome_id:
 			ids.append(decoration_id)
 	return ids
+
+
+func _fill_dex_list() -> void:
+	_dex_ids = Encyclopedia.species_of(Game.content)
+	var previous: int = _list.selected_index()
+	var names: PackedStringArray = PackedStringArray()
+	var extras: PackedStringArray = PackedStringArray()
+	var total_variants: int = Game.content.variant_ids().size()
+	for species_id: String in _dex_ids:
+		var def: SpeciesDef = Game.content.get_species(species_id)
+		var found: int = Encyclopedia.variants_found(Game.state, Game.content, species_id)
+		var shown_name: String = _text(def.name_key) if found > 0 else _text("DEX_UNKNOWN")
+		names.append("%s %s" % [def.rarity_symbol(), shown_name])
+		extras.append("%d/%d" % [found, total_variants])
+	_list.set_items(names, extras)
+	if previous >= 0:
+		_list.model.select(previous)
+	_show_detail(_list.selected_index())
+
+
+func _show_dex_detail(index: int) -> void:
+	_buy.is_enabled = false
+	var species_total: Vector2i = Encyclopedia.species_progress(Game.state, Game.content)
+	_price.text = _text("DEX_TOTALS") % [species_total.x, species_total.y]
+	if index < 0 or index >= _dex_ids.size():
+		_name.text = ""
+		_rarity.text = ""
+		_description.text = ""
+		_owned.text = ""
+		_progress.value = 0.0
+		_portrait.clear()
+		return
+	var def: SpeciesDef = Game.content.get_species(_dex_ids[index])
+	var found: int = Encyclopedia.variants_found(Game.state, Game.content, def.id)
+	var biome: BiomeDef = Game.content.biomes.get_biome(def.biome_id)
+	var rarity_name: String = _text(RarityStyle.name_key(def.rarity))
+	_rarity.text = "%s %s · %s" % [def.rarity_symbol(), rarity_name, _text(biome.name_key)]
+	_rarity.color = RarityStyle.color(def.rarity)
+	if found > 0:
+		_name.text = _text(def.name_key)
+		_description.text = _text(def.description_key)
+		_owned.text = _variant_line(def)
+	else:
+		_name.text = _text("DEX_UNKNOWN")
+		_description.text = _text("DEX_UNKNOWN_HINT")
+		_owned.text = ""
+	var total_variants: int = Game.content.variant_ids().size()
+	_progress.value = float(found) / float(maxi(total_variants, 1))
+	_show_portrait(def)
+
+
+## Pone el retrato de [param def]: cada variante que se ha tenido o, si no hay
+## ninguna, su silueta.
+func _show_portrait(def: SpeciesDef) -> void:
+	var looks: Array[VariantDef.Look] = []
+	var names: PackedStringArray = PackedStringArray()
+	for variant_id: String in Game.content.variant_ids():
+		if Game.state.is_discovered(def.id, variant_id):
+			var variant: VariantDef = Game.content.get_variant(variant_id)
+			looks.append(variant.look)
+			names.append(_text(variant.name_key))
+	_portrait.show_species(def, looks, names)
+
+
+## Una línea con cada variante: marcada si ya se ha tenido.
+func _variant_line(def: SpeciesDef) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for variant_id: String in Game.content.variant_ids():
+		var variant: VariantDef = Game.content.get_variant(variant_id)
+		var mark: String = "x" if Game.state.is_discovered(def.id, variant_id) else " "
+		parts.append("[%s]%s" % [mark, _text(variant.name_key)])
+	return " ".join(parts)
+
+
+func _fill_achievement_list() -> void:
+	_achievement_ids = Game.content.achievements.ids()
+	var previous: int = _list.selected_index()
+	var names: PackedStringArray = PackedStringArray()
+	var extras: PackedStringArray = PackedStringArray()
+	var locale: String = TranslationServer.get_locale()
+	for achievement_id: String in _achievement_ids:
+		var def: AchievementDef = Game.content.achievements.get_achievement(achievement_id)
+		var done: bool = Game.state.achievements.has(achievement_id)
+		names.append("[%s] %s" % ["x" if done else " ", _text(def.name_key)])
+		extras.append(NumberFormat.percent(def.reward_percent, locale))
+	_list.set_items(names, extras)
+	if previous >= 0:
+		_list.model.select(previous)
+	_show_detail(_list.selected_index())
+
+
+func _show_achievement_detail(index: int) -> void:
+	_buy.is_enabled = false
+	var locale: String = TranslationServer.get_locale()
+	_price.text = AchievementText.summary(Game.state, Game.content, locale)
+	if index < 0 or index >= _achievement_ids.size():
+		_name.text = ""
+		_rarity.text = ""
+		_description.text = ""
+		_owned.text = ""
+		_progress.value = 0.0
+		return
+	var def: AchievementDef = Game.content.achievements.get_achievement(_achievement_ids[index])
+	var done: bool = Game.state.achievements.has(def.id)
+	var state_key: String = "ACH_STATE_DONE" if done else "ACH_STATE_PENDING"
+	_name.text = _text(def.name_key)
+	_rarity.text = "%s · %s" % [_text(state_key), AchievementText.reward_text(def, locale)]
+	_rarity.color = AsciiColors.SEAWEED_LIGHT if done else AsciiColors.TEXT
+	_description.text = AchievementText.description(def, Game.content, locale)
+	_owned.text = AchievementText.progress_text(def, Game.state, Game.content, locale)
+	_progress.value = 1.0 if done else Achievements.progress_ratio(def, Game.state, Game.content)
+
+
+func _fill_stats_list() -> void:
+	_stat_rows = AchievementText.stat_rows(Game.state, Game.content, TranslationServer.get_locale())
+	var previous: int = _list.selected_index()
+	var names: PackedStringArray = PackedStringArray()
+	var extras: PackedStringArray = PackedStringArray()
+	for row: PackedStringArray in _stat_rows:
+		names.append(row[0])
+		extras.append(row[1])
+	_list.set_items(names, extras)
+	if previous >= 0:
+		_list.model.select(previous)
+	_show_detail(_list.selected_index())
+
+
+func _show_stats_detail(index: int) -> void:
+	_buy.is_enabled = false
+	_rarity.text = ""
+	_owned.text = ""
+	_progress.value = 0.0
+	_price.text = AchievementText.summary(Game.state, Game.content, TranslationServer.get_locale())
+	if index < 0 or index >= _stat_rows.size():
+		_name.text = ""
+		_description.text = ""
+		return
+	_name.text = _stat_rows[index][0]
+	_description.text = _stat_rows[index][1]
 
 
 func _fill_biome_list() -> void:
@@ -442,15 +676,24 @@ func _buy_equipment() -> void:
 
 
 func _show_detail(index: int) -> void:
-	if _tab == 3:
-		_show_biome_detail(index)
-		return
-	if _tab == 2:
-		_show_decoration_detail(index)
-		return
-	if _tab == 1:
-		_show_equipment_detail(index)
-		return
+	match _tab:
+		ACHIEVEMENTS_TAB:
+			_show_achievement_detail(index)
+		STATS_TAB:
+			_show_stats_detail(index)
+		DEX_TAB:
+			_show_dex_detail(index)
+		3:
+			_show_biome_detail(index)
+		2:
+			_show_decoration_detail(index)
+		1:
+			_show_equipment_detail(index)
+		_:
+			_show_fish_detail(index)
+
+
+func _show_fish_detail(index: int) -> void:
 	if index < 0 or index >= _ids.size():
 		_clear_detail()
 		return
@@ -509,6 +752,8 @@ func _unlock_hint(def: SpeciesDef) -> String:
 
 
 func _buy_selected() -> void:
+	if _tab >= DEX_TAB:
+		return
 	if _tab == 3:
 		_buy_biome()
 		return

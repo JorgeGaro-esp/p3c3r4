@@ -3,8 +3,8 @@
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
 **Última actualización:** 2026-11-13
-**Fase actual:** Fase 10 completa (10B: Manglar y Abismo): código y 455 tests hechos (Fases 7–10 sin commit aún). Pendiente de Jorge: probar Fases 5–10 en la ventana real. Siguiente: **Fase 11 · Pecedex y logros**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
-**Versión:** `0.12.0` (pendiente de commit; `0.8.0` a `0.11.0` tampoco tienen etiqueta aún). Etiquetas hasta `v0.7.0`.
+**Fase actual:** Fase 11B · Logros y recompensas: código y 516 tests hechos (Fases 7–11B sin commit aún). Pendiente de Jorge: probar Fases 5–11B en la ventana real. Siguiente: **Fase 12 · Día/noche y eventos aleatorios** (la lámpara atenúa la noche; el calefactor actúa en todos los peces). Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
+**Versión:** `0.14.0` (pendiente de commit; `0.8.0` a `0.13.0` tampoco tienen etiqueta aún). Etiquetas hasta `v0.7.0`.
 
 ## Progreso por fases
 
@@ -21,7 +21,7 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 | 8 | Equipamiento mejorable | Hecha en código; pendiente de prueba manual de Jorge |
 | 9 | Decoración colocable | Hecha en código; pendiente de prueba manual de Jorge |
 | 10 | Biomas y varias peceras | hecha (Estanque, Arrecife, Manglar, Abismo) |
-| 11 | Pecedex y logros | Pendiente |
+| 11 | Enciclopedia y logros | hecha (11A estadísticas y Enciclopedia; 11B 60 logros con bonus de producción) |
 | 12 | Día/noche y eventos aleatorios | Pendiente |
 | 13 | Prestigio y meta final | Pendiente |
 | 14 | Audio | Pendiente |
@@ -33,9 +33,11 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 
 - 2026-11-13 (sesión 8): Fase 10A: `BiomeDef` y `BiomeCatalog`, pecera activa y `BiomeDirector`, pestañas de pecera, pestaña «Biomas» en la tienda, visuales por bioma (superficie, arena, plantas, fondo y partículas), Arrecife con 8 especies y 4 decoraciones, peceras ocultas con la misma simulación (test de igualdad), guardado formato 6. 453 tests.
 - 2026-11-13 (sesión 8): Fase 10B: Manglar y Abismo (16 especies, 8 decoraciones, 2 biomas con aspecto propio), 6 etiquetas nuevas, tests de la cadena de desbloqueo. 455 tests.
+- 2026-11-13 (sesión 9): Fase 11B: 60 logros como datos, bonus de producción con tope (+50 %), guardado formato 8, pestañas «Logros» y «Estadísticas» en la tienda (tecla L), aviso al desbloquear. 516 tests.
+- 2026-11-13 (sesión 8): Fase 11A: `GameStats` guardadas (formato 7), `Encyclopedia` con progreso por bioma, pestaña «Enciclopedia» en la tienda (tecla E, botón lateral, «???» y silueta para lo no descubierto, retrato animado). 484 tests.
 - 2026-11-13 (sesión 7): Fase 9: 20 objetos de decoración con arte, tienda con pestaña de decoración, modo decorar (`D`), bonificaciones con tope, la lota pide una cueva, guardado formato 5. 405 tests.
 - 2026-11-13 (sesión 6): botón «Vender todos los peces» en Ajustes (T68) y Fase 8: siete equipos con 5 niveles, pestaña «Equipo» en la tienda, dibujo animado en la pecera, imán de perlas, `TankBonuses`, guardado formato 4. Con filtro 5 y comedero 3 una pecera de 40 peces se mantiene sola (test). 368 tests.
-- 2026-11-13 (sesión 5): arreglo de las manchas del cristal (T56) y limpieza visible en el panel (T57). Fase 7: etapas de vida, huevos y eclosión, 5 variantes con paletas (prismática animada), venta desde la ficha con confirmación y venta de sobrantes, aviso de variante nueva y registro de combinaciones descubiertas (base del Pecedex). Guardado formato 3. 337 tests.
+- 2026-11-13 (sesión 5): arreglo de las manchas del cristal (T56) y limpieza visible en el panel (T57). Fase 7: etapas de vida, huevos y eclosión, 5 variantes con paletas (prismática animada), venta desde la ficha con confirmación y venta de sobrantes, aviso de variante nueva y registro de combinaciones descubiertas (base del Enciclopedia). Guardado formato 3. 337 tests.
 
 - 2026-11-12: cuestionario de decisiones respondido y plan de desarrollo redactado. Carpeta creada en el escritorio.
 - 2026-11-12 (sesión 2): Fase 0, tareas 0.3, 0.4, 0.5, 0.7 (gdlintrc), 0.8 (borrador) y 0.9 escritas: `game/project.godot`, estructura de carpetas, escena principal, test de humo, `CHANGELOG.md`, `LICENSE-THIRD-PARTY.md`. gdformat y gdlint pasan sobre `src` y `tests`. Sin ejecutar en Godot todavía.
@@ -53,7 +55,9 @@ Jorge (Fase 6): clic en el agua para echar comida; arrastrar sobre las manchas v
 Jorge (Fase 8): reimportar traducciones (`--headless --import`), ganar conchas, abrir Tienda → pestaña «Equipo» (flechas ←/→), comprar el filtro y el comedero y ver cómo aparecen en la pecera.
 Jorge (Fase 9): reimportar traducciones; Tienda → pestaña «Decoración» (←/→), comprar una cueva, botón [D]ecorar o tecla D, clic para colocar, clic derecho para guardar, rueda para cambiar de objeto; comprobar que la lota aparece en la tienda.
 Jorge (Fase 10A): reimportar traducciones; ganar 6000 ¢ (o F4 para peces de prueba), Tienda → pestaña «Biomas» (flechas ←/→), comprar el Arrecife; aparecen las pestañas «Estanque | Arrecife» sobre el agua (también teclas 1 y 2).
-Claude: Fase 11 (Pecedex y logros).
+Jorge (Fase 11A): reimportar traducciones; pulsar E o el botón «Enciclopedia»: lista de las 32 especies con «???» para las no vistas y variantes marcadas `[x]`.
+Jorge (Fase 11B): reimportar traducciones; pulsar L: lista de 60 logros con `[ ]`/`[x]`; ver el aviso «¡Logro: …!» al conseguir uno (p. ej. comprar el primer pez) y el bonus en «Estadísticas».
+Claude: Fase 12 (día/noche y eventos aleatorios).
 
 ## Bloqueos y dudas abiertas
 

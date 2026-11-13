@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AchievementDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/achievement_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "mangrove_complete"
+name_key = "ACH_MANGROVE_COMPLETE"
+order = 400
+metric = 3
+biome_id = "mangrove"
+target = 8.0
+reward_percent = 1.5

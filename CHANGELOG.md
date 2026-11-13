@@ -2,6 +2,31 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.14.0] - 2026-11-13 · Fase 11B
+
+### Añadido
+- **60 logros** como datos (`content/achievements/*.tres`, `AchievementDef`): compras, ventas, eclosiones, perlas, limpieza, comida, decoración, equipo, conchas ganadas, peces a la vez, especies por bioma, variantes raras, legendarias, biomas abiertos, decoración colocada, tiempo de juego, producción y porcentaje de colección. Cada uno lleva su nombre; la descripción se compone sola con la plantilla de su métrica (es/en).
+- **Recompensa**: cada logro suma entre +0,25 % y +2 % de producción permanente; el total tiene un tope de +50 % (`Achievements.MAX_BONUS_PERCENT`). Se aplica en `Simulation.total_production`.
+- `Achievements` (núcleo): valor, progreso, cumplimiento y bonus de cada logro. `AchievementCatalog` (`content.achievements`) carga y valida (ids únicos, metas > 0, estadísticas y biomas existentes).
+- `Game` comprueba los logros cada 0,5 s y al cargar una partida (en silencio, de forma retroactiva); nueva señal `EventBus.achievement_unlocked` y aviso «¡Logro: …!».
+- Pestañas **Logros** y **Estadísticas** en la tienda (tecla `L` abre Logros): lista con `[x]`/`[ ]` y recompensa, detalle con estado, descripción, progreso y barra, y resumen «Logros: n/60 · +x %». Estadísticas: contadores, conchas ganadas, tiempo, peces, producción, especies, variantes, biomas, logros y bonus.
+- `NumberFormat.percent`, `Encyclopedia.rare_variants_found` y `legendary_found`, `GameState.decorations_placed`, `Simulation.refresh_production`.
+- Guardado formato 8 (`achievements`) con migración 7→8; los ids desconocidos o con valor distinto de `true` se descartan.
+
+## [0.13.0] - 2026-11-13 · Fase 11A
+
+### Añadido
+- Estadísticas de la partida (`GameStats`): peces comprados y vendidos, huevos eclosionados, perlas recogidas, manchas limpiadas, copos dados, decoración y equipo comprados. Se guardan y serán la base de los logros (11B).
+- Colección (`Encyclopedia`): consultas de especies y variantes descubiertas, con progreso por bioma y total, y detección de colección completa.
+- Pestaña «Enciclopedia» en la tienda: todas las especies de todos los biomas, de la más barata a la más cara; las que aún no se han tenido salen como «???» (con su rareza), y las vistas muestran descripción, bioma y las variantes conseguidas. Tecla `P` y botón de la barra lateral.
+- Guardado formato 7 (`stats`) con migración 6→7. Las partidas antiguas empiezan con las estadísticas a cero; el Enciclopedia se rellena solo con los peces que ya tengan.
+
+- Retrato animado del pez en la ficha (`AsciiPortrait`): su sprite quieto en el centro (como una foto que se mueve), con los mismos fotogramas y el mismo movimiento que al nadar en la pecera (un `SwimMotion` real: ondulación, inclinación y giros) en una pecera en miniatura: nada despacio dentro del recuadro y se da la vuelta al llegar al borde; recorre las variantes que se han tenido, con su color y su nombre, y las de colores animados (prismática) brillan. Las especies sin descubrir enseñan su silueta.
+
+### Cambiado
+- El Pecedex se llama **Enciclopedia** (texto, código y documentos): clase `Encyclopedia`, atajo `E`. El botón de la barra lateral abre la pestaña en lugar de avisar de que llegará pronto (se quita `TOAST_DEX_SOON`).
+- Ficha de la Enciclopedia reorganizada para la franja baja: nombre, rareza y bioma, descripción, variantes en una fila y total descubierto junto a la barra.
+
 ## [0.12.0] - 2026-11-13 · Fase 10B
 
 ### Añadido

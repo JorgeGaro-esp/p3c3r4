@@ -54,6 +54,11 @@ func show_toast(message: String) -> void:
 	_toast.show_message(message)
 
 
+## Texto del aviso que se ve ahora (vacío si no hay ninguno).
+func toast_text() -> String:
+	return _toast.text if _toast.is_active() else ""
+
+
 ## Escribe el contador de conchas (ya abreviado, por ejemplo `12,4K`).
 func set_shells(text: String) -> void:
 	_shells.text = _text("UI_SHELLS") % text

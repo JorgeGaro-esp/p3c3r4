@@ -2,7 +2,7 @@ class_name GameState
 extends RefCounted
 ## Estado completo de la partida: la raíz del modelo (02-ARQUITECTURA §3.1).
 ##
-## Más sistemas colgarán de aquí en fases posteriores (Pecedex, logros, prestigio).
+## Más sistemas colgarán de aquí en fases posteriores (Enciclopedia, logros, prestigio).
 
 const MAX_TANKS: int = 16
 const MAX_SIM_TIME: float = 1.0e12
@@ -28,10 +28,14 @@ var pending_pearls: Array[PearlSpawn] = []
 ## Especies que ya se pueden comprar. Una vez desbloqueada, no se vuelve a bloquear.
 var unlocked: Dictionary[String, bool] = {}
 ## Combinaciones de especie y variante que el jugador ya ha tenido (clave
-## `especie|variante`). Es la base del Pecedex.
+## `especie|variante`). Es la base de la Enciclopedia.
 var discovered: Dictionary[String, bool] = {}
 ## Decoración comprada y sin colocar (id → cantidad). Se guarda.
 var decoration_stock: Dictionary[String, int] = {}
+## Contadores de lo hecho en la partida (base de los logros). Se guardan.
+var stats: GameStats = GameStats.new()
+## Logros conseguidos (id → verdadero). Se guardan.
+var achievements: Dictionary[String, bool] = {}
 ## Huevos que han eclosionado y `Game` aún no ha publicado.
 var pending_hatched: Array[HatchEvent] = []
 
@@ -68,6 +72,14 @@ func decoration_owned(decoration_id: String) -> int:
 		for placed: PlacedDecoration in tank.decorations:
 			if placed.def.id == decoration_id:
 				total += 1
+	return total
+
+
+## Cuántos objetos de decoración hay colocados en todas las peceras.
+func decorations_placed() -> int:
+	var total: int = 0
+	for tank: Tank in tanks:
+		total += tank.decorations.size()
 	return total
 
 
@@ -143,6 +155,8 @@ func to_dict() -> Dictionary:
 		"unlocked": unlocked.keys(),
 		"discovered": discovered.keys(),
 		"decoration_stock": decoration_stock.duplicate(),
+		"stats": stats.to_dict(),
+		"achievements": achievements.duplicate(),
 	}
 
 
@@ -188,6 +202,8 @@ static func from_dict(
 	_read_unlocked(state, data, content, warnings)
 	_read_discovered(state, data, content, warnings)
 	_read_stock(state, data, content, warnings)
+	state.stats = GameStats.from_dict(data.get("stats"), warnings)
+	_read_achievements(state, data, content, warnings)
 	return state
 
 
@@ -229,6 +245,24 @@ static func _read_discovered(
 			continue
 		if content.has_species(parts[0]) and content.has_variant(parts[1]):
 			state.discovered[key] = true
+
+
+## Lee los logros conseguidos; ignora los que no existen.
+static func _read_achievements(
+	state: GameState, data: Dictionary, content: ContentDB, warnings: PackedStringArray
+) -> void:
+	if not data.has("achievements"):
+		return
+	var raw: Variant = SaveFields.read_dict(data, "achievements", warnings)
+	if raw == null:
+		return
+	var entries: Dictionary = raw
+	for key: Variant in entries:
+		var flag: Variant = entries[key]
+		if typeof(key) == TYPE_STRING and typeof(flag) == TYPE_BOOL and flag:
+			var achievement_id: String = key
+			if content.achievements.has(achievement_id):
+				state.achievements[achievement_id] = true
 
 
 ## Lee la decoración sin colocar; ignora las que no existen y limita las cantidades.

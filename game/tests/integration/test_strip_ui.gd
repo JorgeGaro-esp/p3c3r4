@@ -163,10 +163,11 @@ func test_settings_buttons_change_settings_and_the_label_follows() -> void:
 	Settings.set_strip_rows(before)
 
 
-func test_dex_button_shows_a_toast_instead_of_a_panel() -> void:
+func test_dex_button_opens_the_dex_tab_of_the_shop() -> void:
 	var dex: AsciiButton = _find_button(TranslationServer.translate("UI_DEX"))
 	await _click_cell(dex.rect.position)
-	assert_eq(_controller.open_kind(), StripController.Kind.NONE)
+	assert_eq(_controller.open_kind(), StripController.Kind.SHOP)
+	assert_eq(_controller._shop.current_tab(), ShopPanel.DEX_TAB)
 
 
 func test_clicks_on_the_open_panel_do_not_reach_what_is_underneath() -> void:

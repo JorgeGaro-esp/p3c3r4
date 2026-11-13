@@ -24,7 +24,7 @@ Hacer trampas editando la partida no se considera una amenaza: es un juego de un
 
 ```json
 {
-  "format_version": 6,
+  "format_version": 8,
   "game_version": "0.5.0",
   "saved_at_unix": 1794500000,
   "checksum": "sha256 del campo data serializado de forma canónica",
@@ -45,9 +45,9 @@ Hacer trampas editando la partida no se considera una amenaza: es un juego de un
     "active_tank": 0,
     "discovered": ["pond_guppy|normal"],
     "decoration_stock": { "cave": 1 },
-    "achievements": {},
+    "achievements": { "first_fish": true },
     "prestige": { "count": 0, "upgrades": {} },
-    "stats": {},
+    "stats": { "fish_bought": 12.0, "pearls_collected": 80.0 },
     "rng_seed": "42",
     "rng_state": "0",
     "sim_time": 3600.0

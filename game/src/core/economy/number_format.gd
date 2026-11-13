@@ -44,6 +44,13 @@ static func per_second(value: float, locale: String = "es") -> String:
 	return compact(value, locale) + "/s"
 
 
+## Porcentaje con signo y hasta dos decimales sin ceros sobrantes: `+1,5 %`.
+static func percent(value: float, locale: String = "es") -> String:
+	var text: String = String.num(snappedf(value, 0.01), 2).trim_suffix("0")
+	text = text.trim_suffix("0").trim_suffix(".")
+	return "+" + _localize(text, locale) + " %"
+
+
 ## Exponente de la potencia de 10 de [param magnitude] (mayor que 0), corregido
 ## contra el error de `log`: 1000 debe dar 3, no 2.
 static func _exponent10(magnitude: float) -> int:

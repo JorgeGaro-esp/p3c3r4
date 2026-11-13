@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="AchievementDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/achievement_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "fish_now_25"
+name_key = "ACH_FISH_NOW_25"
+order = 330
+metric = 2
+target = 25.0
+reward_percent = 1.0

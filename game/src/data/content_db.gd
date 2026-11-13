@@ -14,6 +14,7 @@ const ID_PATTERN: String = "^[a-z][a-z0-9_]*$"
 var errors: PackedStringArray = PackedStringArray()
 ## Biomas (pestañas de pecera); viven aparte para no engordar esta clase.
 var biomes: BiomeCatalog = BiomeCatalog.new()
+var achievements: AchievementCatalog = AchievementCatalog.new()
 
 var _species: Dictionary[String, SpeciesDef] = {}
 var _order: PackedStringArray = PackedStringArray()

@@ -19,12 +19,17 @@ static func step(
 ) -> float:
 	state.sim_time += dt
 	_care(state, dt, content, rng)
-	if state.production_dirty:
-		state.production_rate = total_production(state, content)
-		state.production_dirty = false
+	refresh_production(state, content)
 	var earned: float = state.production_rate * dt
 	state.wallet.add(earned)
 	return earned
+
+
+## Recalcula la producción por segundo si algo la ha cambiado.
+static func refresh_production(state: GameState, content: ContentDB) -> void:
+	if state.production_dirty:
+		state.production_rate = total_production(state, content)
+		state.production_dirty = false
 
 
 ## Conchas por segundo de todas las peceras con el estado actual.
@@ -39,7 +44,7 @@ static func total_production(state: GameState, content: ContentDB) -> float:
 				total += Economy.fish_rate(
 					species.base_production, fish.happiness, tank.bonuses.production_multiplier
 				)
-	return total
+	return total * Achievements.multiplier(state, content)
 
 
 ## Hambre, limpieza, felicidad y perlas de todas las peceras.

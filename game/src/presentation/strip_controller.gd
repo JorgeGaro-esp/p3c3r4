@@ -49,6 +49,7 @@ func _ready() -> void:
 	EventBus.shells_changed.connect(_on_shells_changed)
 	EventBus.species_unlocked.connect(_on_species_unlocked)
 	EventBus.tank_unlocked.connect(_on_tank_unlocked)
+	EventBus.achievement_unlocked.connect(_on_achievement_unlocked)
 	EventBus.tank_unlocked.connect(func(_index: int) -> void: _apply_layout())
 	EventBus.active_tank_changed.connect(func(_index: int) -> void: _apply_layout())
 	EventBus.pearl_collected.connect(_on_pearl_collected)
@@ -75,6 +76,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		Platform.request_quit()
 	elif key.keycode == KEY_D and not key.ctrl_pressed:
 		toggle_decorating()
+	elif key.keycode == KEY_L and not key.ctrl_pressed:
+		open_achievements()
 	elif key.keycode >= KEY_1 and key.keycode <= KEY_8 and not key.ctrl_pressed:
 		Game.biomes.set_active(key.keycode - KEY_1)
 
@@ -86,6 +89,27 @@ func toggle_decorating() -> void:
 		close_card()
 		close_panel()
 	_tank.set_decorating(entering)
+
+
+## Abre la Enciclopedia (pestaña de la tienda), o lo cierra si ya estaba a la vista.
+func open_dex() -> void:
+	open_shop_tab(ShopPanel.DEX_TAB)
+
+
+## Abre los Logros (pestaña de la tienda), o lo cierra si ya estaba a la vista.
+func open_achievements() -> void:
+	open_shop_tab(ShopPanel.ACHIEVEMENTS_TAB)
+
+
+## Abre la tienda en la pestaña [param tab], o la cierra si ya estaba a la vista.
+func open_shop_tab(tab: int) -> void:
+	if _open == Kind.SHOP and _shop.current_tab() == tab:
+		close_panel()
+		return
+	if _tank.is_decorating():
+		_tank.set_decorating(false)
+	open_panel(Kind.SHOP)
+	_shop.select_tab(tab)
 
 
 ## Abre [param kind], o lo cierra si ya estaba abierto.
@@ -169,6 +193,12 @@ func _on_species_unlocked(species_id: String) -> void:
 		_sidebar.show_toast(tr("TOAST_UNLOCKED") % tr(def.name_key))
 
 
+func _on_achievement_unlocked(achievement_id: String) -> void:
+	var def: AchievementDef = Game.content.achievements.get_achievement(achievement_id)
+	if def != null:
+		_sidebar.show_toast(tr("TOAST_ACHIEVEMENT") % tr(def.name_key))
+
+
 func _on_tank_unlocked(tank_index: int) -> void:
 	var biome: BiomeDef = Game.content.biomes.get_biome(Game.state.tanks[tank_index].biome_id)
 	if biome != null:
@@ -185,7 +215,7 @@ func _build_panels() -> void:
 	_sidebar.set_active(true)
 	_sidebar.shop_pressed.connect(toggle_panel.bind(Kind.SHOP))
 	_sidebar.settings_pressed.connect(toggle_panel.bind(Kind.SETTINGS))
-	_sidebar.dex_pressed.connect(func() -> void: _sidebar.show_toast(tr("TOAST_DEX_SOON")))
+	_sidebar.dex_pressed.connect(open_dex)
 	_sidebar.minimize_pressed.connect(Platform.minimize)
 	_sidebar.close_pressed.connect(Platform.request_quit)
 	_shop.close_requested.connect(close_panel)

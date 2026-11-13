@@ -2,8 +2,8 @@ keys,es,en
 GAME_TITLE,P3C3R4,P3C3R4
 UI_SHOP,[T]ienda,[S]hop
 UI_SHOP_KEY,T,S
-UI_DEX,[P]ecedex,[F]ishdex
-UI_DEX_KEY,P,F
+UI_DEX,[E]nciclopedia,[E]ncyclopedia
+UI_DEX_KEY,E,E
 UI_SETTINGS,[A]justes,[O]ptions
 UI_SETTINGS_KEY,A,O
 UI_MINIMIZE,[_],[_]
@@ -12,7 +12,6 @@ UI_CLOSE_PANEL,[Esc] Cerrar,[Esc] Close
 UI_BUY,Comprar,Buy
 UI_YES,Sí,Yes
 UI_NO,No,No
-TOAST_DEX_SOON,El Pecedex llegará pronto,The Fishdex is coming soon
 SHOP_TITLE,Tienda,Shop
 SHOP_TAB_FISH,Peces,Fish
 SHOP_PRICE,Precio: %s ¢,Price: %s ¢
@@ -272,3 +271,112 @@ TAG_GLOW,un tubo luminoso,a glow tube
 TAG_VENT,una fumarola,a hydrothermal vent
 TAG_BONES,unos huesos de ballena,whale bones
 TAG_LURE,un orbe señuelo,a lure orb
+SHOP_TAB_DEX,Enciclopedia,Encyclopedia
+DEX_UNKNOWN,???,???
+DEX_UNKNOWN_HINT,Aún no has tenido este pez. Consíguelo para rellenar su ficha.,You have not had this fish yet. Get one to fill in its entry.
+DEX_TOTALS,Descubiertas: %d/%d,Discovered: %d/%d
+ACH_FIRST_FISH,Primer pez,First fish
+ACH_FISH_BOUGHT_10,Aficionado,Hobbyist
+ACH_FISH_BOUGHT_50,Coleccionista de peces,Fish collector
+ACH_FISH_BOUGHT_200,Gran acuarista,Great aquarist
+ACH_FISH_BOUGHT_500,Mercader del mar,Sea merchant
+ACH_FIRST_SALE,Primera venta,First sale
+ACH_FISH_SOLD_25,Vendedor,Seller
+ACH_FISH_SOLD_150,Comerciante,Trader
+ACH_FIRST_HATCH,Primera eclosión,First hatching
+ACH_EGGS_HATCHED_25,Criador,Breeder
+ACH_EGGS_HATCHED_150,Guardería marina,Sea nursery
+ACH_FIRST_PEARL,Primera perla,First pearl
+ACH_PEARLS_50,Buscador de perlas,Pearl seeker
+ACH_PEARLS_300,Joyero,Jeweler
+ACH_PEARLS_1500,Rey de las perlas,Pearl king
+ACH_FIRST_CLEAN,Manos a la obra,Roll up your sleeves
+ACH_CLEAN_100,Pecera reluciente,Sparkling tank
+ACH_CLEAN_600,Obsesión por la limpieza,Cleaning obsession
+ACH_FIRST_FEED,A comer,Dinner time
+ACH_FEED_300,Buen cuidador,Good keeper
+ACH_FIRST_DECOR,Decorador,Decorator
+ACH_DECOR_BOUGHT_15,Interiorista,Interior designer
+ACH_DECOR_BOUGHT_60,Paisajista,Landscaper
+ACH_FIRST_EQUIPMENT,Primer equipo,First gear
+ACH_EQUIPMENT_10,Técnico,Technician
+ACH_EQUIPMENT_40,Ingeniero,Engineer
+ACH_EARNED_1K,Ahorrador,Saver
+ACH_EARNED_100K,Pequeña fortuna,Small fortune
+ACH_EARNED_10M,Millonario,Millionaire
+ACH_EARNED_1B,Magnate,Tycoon
+ACH_EARNED_100B,Leyenda del mercado,Market legend
+ACH_FISH_NOW_10,Pecera animada,Lively tank
+ACH_FISH_NOW_25,Pecera abarrotada,Crowded tank
+ACH_FISH_NOW_60,Acuario gigante,Giant aquarium
+ACH_SPECIES_5,Curioso,Curious
+ACH_SPECIES_16,Naturalista,Naturalist
+ACH_SPECIES_32,Enciclopedista,Encyclopedist
+ACH_POND_COMPLETE,Experto en estanques,Pond expert
+ACH_REEF_COMPLETE,Experto en arrecifes,Reef expert
+ACH_MANGROVE_COMPLETE,Experto en manglares,Mangrove expert
+ACH_ABYSS_COMPLETE,Explorador de abismos,Abyss explorer
+ACH_VARIANT_1,Ojo clínico,Sharp eye
+ACH_VARIANT_5,Cazador de rarezas,Rarity hunter
+ACH_VARIANT_20,Coleccionista de rarezas,Rarity collector
+ACH_VARIANT_50,Maestro de variantes,Variant master
+ACH_LEGENDARY_1,Criatura de leyenda,Legendary creature
+ACH_LEGENDARY_4,Domador de leyendas,Legend tamer
+ACH_BIOMES_2,Más allá del estanque,Beyond the pond
+ACH_BIOMES_3,Entre raíces,Among the roots
+ACH_BIOMES_4,A las profundidades,Into the depths
+ACH_PLACED_5,Un toque personal,A personal touch
+ACH_PLACED_20,Mundo submarino,Underwater world
+ACH_TIME_1H,Una hora de calma,An hour of calm
+ACH_TIME_10H,Paciencia de pescador,Angler's patience
+ACH_TIME_40H,Vida en el acuario,Life in the aquarium
+ACH_RATE_100,Marea de conchas,Tide of shells
+ACH_RATE_100K,Río de conchas,River of shells
+ACH_RATE_1B,Océano de conchas,Ocean of shells
+ACH_COLLECTION_50,A medio camino,Halfway there
+ACH_COLLECTION_100,Colección perfecta,Perfect collection
+SHOP_TAB_ACHIEVEMENTS,Logros,Achievements
+SHOP_TAB_STATS,Estadísticas,Statistics
+TOAST_ACHIEVEMENT,¡Logro: %s!,Achievement: %s!
+ACH_STATE_DONE,Conseguido,Achieved
+ACH_STATE_PENDING,Pendiente,Pending
+ACH_REWARD,Recompensa: %s producción,Reward: %s production
+ACH_PROGRESS,Progreso: %s / %s,Progress: %s / %s
+ACH_SUMMARY,Logros: %d/%d · %s,Achievements: %d/%d · %s
+ACH_DESC_STAT_FISH_BOUGHT,Compra %s peces,Buy %s fish
+ACH_DESC_STAT_FISH_SOLD,Vende %s peces,Sell %s fish
+ACH_DESC_STAT_EGGS_HATCHED,Haz eclosionar %s huevos,Hatch %s eggs
+ACH_DESC_STAT_PEARLS_COLLECTED,Recoge %s perlas,Collect %s pearls
+ACH_DESC_STAT_SPOTS_CLEANED,Limpia %s manchas,Clean %s spots
+ACH_DESC_STAT_FISH_FED,Da de comer %s veces,Feed fish %s times
+ACH_DESC_STAT_DECORATIONS_BOUGHT,Compra %s decoraciones,Buy %s decorations
+ACH_DESC_STAT_EQUIPMENT_BOUGHT,Compra o mejora equipo %s veces,Buy or upgrade equipment %s times
+ACH_DESC_TOTAL_EARNED,Gana %s conchas en total,Earn %s shells in total
+ACH_DESC_FISH_NOW,Ten %s peces a la vez,Have %s fish at once
+ACH_DESC_SPECIES_FOUND,Descubre %s especies,Discover %s species
+ACH_DESC_SPECIES_FOUND_BIOME,Descubre %s especies de: %s,Discover %s species from: %s
+ACH_DESC_VARIANTS_FOUND,Descubre %s variantes raras,Discover %s rare variants
+ACH_DESC_LEGENDARY_FOUND,Consigue %s especies legendarias,Get %s legendary species
+ACH_DESC_BIOMES_OPENED,Abre %s biomas,Open %s biomes
+ACH_DESC_DECORATIONS_PLACED,Coloca %s decoraciones a la vez,Place %s decorations at once
+ACH_DESC_PLAY_TIME,Juega %s horas,Play for %s hours
+ACH_DESC_PRODUCTION_RATE,Produce %s conchas por segundo,Produce %s shells per second
+ACH_DESC_COLLECTION_PERCENT,Completa el %s %% de las variantes,Complete %s %% of all variants
+STAT_FISH_BOUGHT,Peces comprados,Fish bought
+STAT_FISH_SOLD,Peces vendidos,Fish sold
+STAT_EGGS_HATCHED,Huevos eclosionados,Eggs hatched
+STAT_PEARLS_COLLECTED,Perlas recogidas,Pearls collected
+STAT_SPOTS_CLEANED,Manchas limpiadas,Spots cleaned
+STAT_FISH_FED,Veces que has dado de comer,Times fed
+STAT_DECORATIONS_BOUGHT,Decoraciones compradas,Decorations bought
+STAT_EQUIPMENT_BOUGHT,Mejoras de equipo,Equipment upgrades
+STAT_TOTAL_EARNED,Conchas ganadas,Shells earned
+STAT_PLAY_TIME,Tiempo de juego,Play time
+STAT_FISH_NOW,Peces ahora,Fish now
+STAT_PRODUCTION,Producción,Production
+STAT_SPECIES,Especies descubiertas,Species discovered
+STAT_VARIANTS,Variantes descubiertas,Variants discovered
+STAT_BIOMES,Biomas abiertos,Biomes opened
+STAT_ACHIEVEMENTS,Logros,Achievements
+STAT_BONUS,Bonus de logros,Achievement bonus
+STAT_HOURS,%s h,%s h

@@ -54,3 +54,11 @@ func test_output_only_uses_drawable_characters() -> void:
 	for value: float in [0.0, 3.7, 12400.0, 3.1e6, 1.0e15, 1.0e50, -5.0]:
 		var text: String = NumberFormat.per_second(value)
 		assert_eq(AsciiCharset.first_disallowed(text), "", text)
+
+
+func test_percent_has_sign_and_trims_zeroes() -> void:
+	assert_eq(NumberFormat.percent(1.5), "+1,5 %")
+	assert_eq(NumberFormat.percent(2.0), "+2 %")
+	assert_eq(NumberFormat.percent(0.25, "en"), "+0.25 %")
+	assert_eq(NumberFormat.percent(0.0), "+0 %")
+	assert_eq(NumberFormat.percent(12.0), "+12 %")

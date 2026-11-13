@@ -14,11 +14,11 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | D06 | Economía | Producción pasiva de monedas + cría y venta de peces |
 | D07 | Interacción | Pasivo con tareas ligeras |
 | D08 | Muerte | Los peces no mueren; se entristecen y producen menos |
-| D09 | Colección | Especies con rarezas, Pecedex y logros. Sin genética heredada |
+| D09 | Colección | Especies con rarezas, Enciclopedia y logros. Sin genética heredada |
 | D10 | Pecera y progreso | Decoración colocable, equipamiento mejorable, varias peceras o biomas, prestigio |
 | D11 | Ambiente | Día/noche con hora real y eventos aleatorios. **Sin progreso con el juego cerrado** |
 | D12 | Final | Meta final y después modo infinito |
-| D13 | Meta final | Completar el Pecedex |
+| D13 | Meta final | Completar el Enciclopedia |
 | D14 | Movimiento | Fluido por píxel |
 | D15 | Caracteres | ASCII + Unicode (marcos de caja, bloques, `°`) |
 | D16 | Color | Color por especie sobre fondo negro, con efecto CRT |
@@ -32,7 +32,7 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | D24 | Versiones | Git + GitHub privado |
 | D25 | Versión web | Arquitectura preparada, entrega aplazada |
 | D26 | Papel de Jorge | Entender y poder tocar el código |
-| D27 | Cría | Cría con variantes de color raras que valen más y cuentan en el Pecedex |
+| D27 | Cría | Cría con variantes de color raras que valen más y cuentan en el Enciclopedia |
 | D28 | Pruebas | Tests automáticos + CI en GitHub |
 | D29 | Guardado | Autoguardado con copia de seguridad y versión de formato |
 | D30 | Carpeta | `Proyecto P3C3R4` en el escritorio, creada por Claude |
@@ -88,7 +88,7 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | ID | Pregunta | Cuándo hace falta |
 |---|---|---|
 | P01 | Altura de la franja y si es ajustable por el jugador | Resuelta en Fase 2: D32 |
-| P02 | Cómo se abren tienda y Pecedex dentro de la franja: panel lateral o ventana que crece hacia arriba | Prototipo hecho en Fase 2 con ambos modos (Ajustes → modo de paneles). **Pendiente de que Jorge elija** |
+| P02 | Cómo se abren tienda y Enciclopedia dentro de la franja: panel lateral o ventana que crece hacia arriba | Prototipo hecho en Fase 2 con ambos modos (Ajustes → modo de paneles). **Pendiente de que Jorge elija** |
 | P11 | Pasada de estilo al terminar la Fase 16: acercar las animaciones y la estética al HTML del primer prototipo, más pequeñas mejoras estéticas | Jorge aportará la documentación y el HTML de referencia; no antes de la 1.0 funcional |
 | P03 | Lista definitiva de biomas y especies (el GDD trae una propuesta) | Fase 5 y Fase 10 |
 | P04 | Nombre de la moneda y de la moneda de prestigio | Fase 3 |
@@ -129,7 +129,7 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T63 | Venta con doble pulsación («¿Seguro?»). «Sobrantes» solo para variante normal y conserva los 2 peces más maduros | Evita vender por error variantes raras o la pareja de cría |
 | T64 | Sprites de alevín y juvenil genéricos con la paleta de cada especie; una especie puede traer los suyos (`fry_sprite_path`, `juvenile_sprite_path`; el caracol los trae) | Coste de arte bajo ahora; la pasada de estilo puede afinarlos |
 | T65 | Variantes = transformación de color de la paleta (`VariantPalette`), no paletas escritas a mano | Una variante nueva no necesita arte; la prismática se anima con el tiempo |
-| T66 | `GameState.discovered` guarda las combinaciones especie+variante vistas | Base del Pecedex (Fase 11) y del aviso de variante nueva |
+| T66 | `GameState.discovered` guarda las combinaciones especie+variante vistas | Base del Enciclopedia (Fase 11) y del aviso de variante nueva |
 | T67 | Guardado formato 3: peces con `maturity` y `variant_id`, peceras con `eggs`, estado con `discovered` | Migración 2→3 rellena los valores por defecto |
 | T68 | Vaciar la pecera = botón «Vender todos los peces» en Ajustes, con tres pulsaciones (pedir, confirmar, vender); paga el valor de venta y descarta los huevos | Jorge quería una forma de vaciar la pecera persistente; vender evita perder conchas |
 | T69 | Equipo = `EquipmentDef` (recurso en `content/equipment/`) con efecto, niveles (máx. 5), coste base y fuerza por nivel; el nivel k cuesta base × 1,6^k | Añadir un equipo no toca código salvo un efecto nuevo |
@@ -161,6 +161,20 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T95 | Las especies de cada bioma repiten la estructura (2 comunes, 2 poco comunes, 2 raras, 1 épica, 1 legendaria) y la economía del bioma nuevo empieza por encima del final del anterior | Los tests de contenido lo exigen; el balance fino queda para la Fase 16 |
 | T96 | Etiquetas propias por bioma (raíz, fango, brillo, fumarola, huesos, señuelo): las especies de más rareza piden decoración de su bioma | Da sentido a decorar y a la tienda de decoración |
 | T97 | El Abismo no tiene relleno de fondo (`backdrop_char` vacío): la oscuridad es la identidad visual y las partículas luminosas hacen de «nieve marina» | Contraste máximo con los otros biomas |
+| T98 | Fase 11 en dos entregas: 11A (estadísticas y Enciclopedia) y 11B (logros y recompensas) | Decisión de Jorge: revisar la colección antes de añadir los 40-60 logros |
+| T99 | El Enciclopedia es una pestaña de la tienda (tecla `E` y botón de la barra lateral), no un panel aparte | Decisión de Jorge; reutiliza el panel lateral y su navegación |
+| T100 | Una especie se descubre al tener un pez suyo; cada variante cuenta aparte. El Enciclopedia está completo con todas las variantes de todas las especies | Coherente con D13 y D27 (las variantes raras cuentan) |
+| T101 | Las especies no descubiertas se ven como «???» con su rareza (silueta de texto) en vez de ocultarse | Muestra cuánto queda por descubrir sin revelar el nombre |
+| T102 | `GameStats` solo admite una lista cerrada de contadores y los limita a 1e12; lo desconocido de un archivo se descarta | Cumple 06-SEGURIDAD: nada del archivo se usa como nombre libre |
+| T103 | Guardado formato 7: `stats`. Las partidas antiguas no pueden reconstruir sus estadísticas y empiezan a cero; el Enciclopedia sí es retroactivo (se rellena con los peces presentes al cargar) | Honestidad con los datos que no existen |
+| T104 | Los logros darán un bonus de producción permanente pequeño con tope total | Decisión de Jorge para la 11B |
+| T105 | El Pecedex pasa a llamarse **Enciclopedia** (clase `Encyclopedia`, tecla `E`, también en inglés) para no chocar con una marca ajena | Decisión de Jorge |
+| T106 | Retrato animado en la Enciclopedia: pecera en miniatura. Un `SwimMotion` real (onda, inclinación, giros) con la amplitud ×3 (máx. 0,9 celdas) nada despacio (×0,22 de la velocidad de su especie) dentro del recuadro; muestra por turnos las variantes tenidas y la silueta (`▓`) si no se ha descubierto | Decisión de Jorge: «moverse como en la pecera». Descartado recolocar el pez en cada fotograma: rompía el cuerpo (cola desencajada) y vibraba |
+| T107 | Los logros son datos (`AchievementDef`): una métrica de un conjunto cerrado (contador de `GameStats` u otra cifra de la partida), una meta y una recompensa. La descripción se genera con la plantilla de la métrica; en `strings.csv` solo va el nombre | Añadir un logro no toca código ni obliga a escribir dos frases |
+| T108 | Bonus de logros (concreta T104): +0,25 % a +2 % de producción cada uno, suma con tope de +50 %. Los 60 logros suman 62 %, así que el tope se alcanza antes de tenerlos todos | Recompensa permanente pero acotada; el balance fino queda para la Fase 16 |
+| T109 | Los logros se comprueban cada 0,5 s y al cargar. Al cargar se conceden en silencio (retroactivo); la producción se recalcula hasta que no salga ninguno nuevo | Una partida antigua no inunda de avisos; un logro de producción puede cumplirse gracias al bonus de otro |
+| T110 | Guardado formato 8: `achievements` (id → `true`). Lo desconocido se descarta; los contadores antiguos ya eran retroactivos o empezaban a cero (T103) | 06-SEGURIDAD: nada del archivo se usa como nombre libre |
+| T111 | Logros y Estadísticas son pestañas de la tienda (5 y 6); tecla `L` para Logros. `AchievementText` formatea y `ShopPanel` solo muestra | Decisión de Jorge (T99); mantiene `ShopPanel` y `ContentDB` por debajo de los límites del linter |
 
 ## Cómo añadir decisiones
 

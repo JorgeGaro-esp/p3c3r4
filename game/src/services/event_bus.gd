@@ -17,6 +17,8 @@ signal pearl_spawned(tank_index: int, fish: Fish, value: float)
 signal pearl_collected(value: float)
 ## Una especie se desbloqueó y ya está en la tienda.
 signal species_unlocked(species_id: String)
+## Se ha desbloqueado un logro.
+signal achievement_unlocked(achievement_id: String)
 ## El jugador hizo una compra importante (pide un guardado).
 signal purchase_made
 ## Hay algo que contarle al jugador; [param key] es una clave de traducción.

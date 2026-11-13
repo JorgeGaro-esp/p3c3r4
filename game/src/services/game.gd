@@ -13,6 +13,8 @@ enum DecorResult { OK, UNKNOWN, NOT_ENOUGH_SHELLS, NO_STOCK, TOO_MANY, OUT_OF_BO
 const DECORATION_COST_GROWTH: float = 1.3
 
 const START_SHELLS: float = 20.0
+## Cada cuántos segundos se comprueban los logros.
+const ACHIEVEMENT_CHECK_SECONDS: float = 0.5
 const DEFAULT_SEED: int = 20261113
 const START_FISH: PackedStringArray = ["pond_guppy", "pond_guppy"]
 
@@ -25,6 +27,7 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _stepper: FixedStepper = FixedStepper.new()
 var _last_shells: float = -1.0
 var _last_rate: float = -1.0
+var _achievement_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -33,10 +36,14 @@ func _ready() -> void:
 	var equipment_ok: bool = content.load_equipment_dir()
 	var decorations_ok: bool = content.load_decorations_dir()
 	var biomes_ok: bool = content.biomes.load_dir()
+	var achievements_ok: bool = content.achievements.load_dir()
 	var refs_ok: bool = BiomeCatalog.check_references(content)
+	var achievement_refs_ok: bool = AchievementCatalog.check_references(content)
 	var all_ok: bool = variants_ok and species_ok and equipment_ok and decorations_ok
-	if not all_ok or not biomes_ok or not refs_ok:
-		for message: String in content.errors + content.biomes.errors:
+	var extra_ok: bool = biomes_ok and refs_ok and achievements_ok and achievement_refs_ok
+	if not all_ok or not extra_ok:
+		var messages: PackedStringArray = content.errors + content.biomes.errors
+		for message: String in messages + content.achievements.errors:
 			push_error("ContentDB: %s" % message)
 	start_new_game(DEFAULT_SEED)
 
@@ -52,7 +59,12 @@ func _process(delta: float) -> void:
 			collect_pearl(spawn.value)
 	for hatching: HatchEvent in state.take_hatched():
 		EventBus.fish_added.emit(hatching.tank_index, hatching.fish)
+		state.stats.add(GameStats.EGGS_HATCHED)
 		_register_discovery(hatching.fish, true)
+	_achievement_timer += delta
+	if _achievement_timer >= ACHIEVEMENT_CHECK_SECONDS:
+		_achievement_timer = 0.0
+		_check_achievements(true)
 	_publish_changes()
 
 
@@ -103,6 +115,7 @@ func buy_fish(species_id: String) -> BuyResult:
 	if not state.wallet.spend(fish_cost(species_id)):
 		return BuyResult.NOT_ENOUGH_SHELLS
 	_add_fish(state.active_tank, species_id)
+	state.stats.add(GameStats.FISH_BOUGHT)
 	EventBus.purchase_made.emit()
 	return BuyResult.OK
 
@@ -131,6 +144,7 @@ func buy_equipment(equipment_id: String) -> EquipResult:
 	if not state.wallet.spend(equipment_cost(equipment_id)):
 		return EquipResult.NOT_ENOUGH_SHELLS
 	tank.set_level(equipment_id, level + 1, content)
+	state.stats.add(GameStats.EQUIPMENT_BOUGHT)
 	tank.feeder_timer = 0.0
 	EventBus.equipment_changed.emit(state.active_tank, equipment_id, level + 1)
 	EventBus.purchase_made.emit()
@@ -156,6 +170,7 @@ func buy_decoration(decoration_id: String) -> DecorResult:
 	if not state.wallet.spend(decoration_cost(decoration_id)):
 		return DecorResult.NOT_ENOUGH_SHELLS
 	state.decoration_stock[decoration_id] = owned + 1
+	state.stats.add(GameStats.DECORATIONS_BOUGHT)
 	EventBus.decoration_changed.emit(state.active_tank)
 	EventBus.purchase_made.emit()
 	return DecorResult.OK
@@ -208,6 +223,7 @@ func sell_fish(fish: Fish) -> float:
 	tank.remove_fish(fish)
 	state.wallet.add(value)
 	state.mark_production_dirty()
+	state.stats.add(GameStats.FISH_SOLD)
 	EventBus.fish_removed.emit(state.active_tank, fish)
 	EventBus.fish_sold.emit(value)
 	EventBus.purchase_made.emit()
@@ -222,6 +238,7 @@ func sell_surplus(species_id: String, variant_id: String) -> float:
 		var value: float = Selling.value_of(fish, content)
 		state.active().remove_fish(fish)
 		state.wallet.add(value)
+		state.stats.add(GameStats.FISH_SOLD)
 		EventBus.fish_removed.emit(state.active_tank, fish)
 		total += value
 	if total > 0.0:
@@ -241,6 +258,7 @@ func sell_all_fish(tank_index: int = -1) -> float:
 	for fish: Fish in tank.fish.duplicate():
 		total += Selling.value_of(fish, content)
 		tank.remove_fish(fish)
+		state.stats.add(GameStats.FISH_SOLD)
 		EventBus.fish_removed.emit(tank_index, fish)
 	tank.eggs.clear()
 	tank.breed_timers.clear()
@@ -256,6 +274,7 @@ func feed_fish(fish: Fish) -> bool:
 	if fish.hunger >= Care.MAX_HUNGER:
 		return false
 	fish.feed(Care.HUNGER_PER_FLAKE)
+	state.stats.add(GameStats.FISH_FED)
 	return true
 
 
@@ -266,12 +285,14 @@ func clean_spot(tank_index: int = -1) -> bool:
 	if tank.cleanliness >= Care.MAX_CLEANLINESS:
 		return false
 	tank.cleanliness = minf(tank.cleanliness + Care.SPOT_STEP, Care.MAX_CLEANLINESS)
+	state.stats.add(GameStats.SPOTS_CLEANED)
 	return true
 
 
 ## El jugador recoge una perla de [param value] conchas.
 func collect_pearl(value: float) -> void:
 	if state.wallet.add(value):
+		state.stats.add(GameStats.PEARLS_COLLECTED)
 		EventBus.pearl_collected.emit(value)
 
 
@@ -322,7 +343,23 @@ func _replace_state(fresh: GameState) -> void:
 	for tank: Tank in state.tanks:
 		for fish: Fish in tank.fish:
 			_register_discovery(fish, false)
+	_check_achievements(false)
 	_publish_changes()
+
+
+## Desbloquea los logros que ya se cumplen. Con [param announce] falso (al cargar)
+## se concede sin avisar. Un logro puede dar producción que cumple otro, así que
+## se repite hasta que no salga ninguno nuevo.
+func _check_achievements(announce: bool) -> void:
+	var pending: Array[AchievementDef] = Achievements.newly_met(state, content)
+	while not pending.is_empty():
+		for def: AchievementDef in pending:
+			state.achievements[def.id] = true
+			if announce:
+				EventBus.achievement_unlocked.emit(def.id)
+		state.mark_production_dirty()
+		Simulation.refresh_production(state, content)
+		pending = Achievements.newly_met(state, content)
 
 
 func _decor_result(verdict: DecorationLayout.Result) -> DecorResult:

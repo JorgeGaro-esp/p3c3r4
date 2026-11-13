@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AchievementDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/achievement_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "pearls_300"
+name_key = "ACH_PEARLS_300"
+order = 140
+metric = 0
+stat_id = "pearls_collected"
+target = 300.0
+reward_percent = 1.5

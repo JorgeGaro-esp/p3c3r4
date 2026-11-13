@@ -33,7 +33,7 @@
 | 8 | Equipamiento mejorable | M | 0.9.0 | 6 |
 | 9 | Decoración colocable | M | 0.10.0 | 5 |
 | 10 | Biomas y varias peceras | L | 0.11.0 | 7, 8, 9 |
-| 11 | Pecedex y logros | M | 0.12.0 | 10 |
+| 11 | Enciclopedia y logros | M | 0.12.0 | 10 |
 | 12 | Día/noche y eventos aleatorios | M | 0.13.0 | 10 |
 | 13 | Prestigio y meta final | M | 0.14.0 | 11 |
 | 14 | Audio | S | 0.15.0 | 5 |
@@ -263,12 +263,12 @@
 
 ---
 
-## Fase 11 · Pecedex y logros
+## Fase 11 · Enciclopedia y logros
 
 **Tareas**
 
-- 11.1 Modelo `Pokedex` y registro de descubrimientos.
-- 11.2 Panel de Pecedex con fichas, siluetas y progreso por bioma.
+- 11.1 Modelo `Encyclopedia` y registro de descubrimientos.
+- 11.2 Panel de Enciclopedia con fichas, siluetas y progreso por bioma.
 - 11.3 `AchievementDef` con condiciones declarativas sobre estadísticas.
 - 11.4 Entre 40 y 60 logros y sus recompensas.
 - 11.5 Panel de logros y de estadísticas.
@@ -301,7 +301,7 @@
 
 - 13.1 Cálculo de perlas negras y reinicio selectivo (P05).
 - 13.2 Tienda de mejoras permanentes.
-- 13.3 Detección de Pecedex completo y secuencia final en ASCII.
+- 13.3 Detección de Enciclopedia completo y secuencia final en ASCII.
 - 13.4 Modo infinito posterior.
 - 13.5 Tests: tras el prestigio se conserva exactamente lo acordado.
 
@@ -358,7 +358,7 @@
 
 **Criterios de aceptación**
 
-- Tiempos objetivo (ajustables): segundo bioma hacia la primera hora, primer prestigio entre 8 y 12 horas, Pecedex completo entre 40 y 60 horas.
+- Tiempos objetivo (ajustables): segundo bioma hacia la primera hora, primer prestigio entre 8 y 12 horas, Enciclopedia completo entre 40 y 60 horas.
 - Ningún error conocido que bloquee o corrompa la partida.
 - Etiqueta `v1.0.0`.
 

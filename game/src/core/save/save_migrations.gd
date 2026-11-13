@@ -7,7 +7,7 @@ extends RefCounted
 ## superior a la conocida no se migra: la rechaza [SaveCodec].
 
 ## Versión actual del formato. Sube en cada cambio incompatible.
-const CURRENT_FORMAT: int = 6
+const CURRENT_FORMAT: int = 8
 
 ## Especies de prueba de las fases 3 y 4 y la especie definitiva que las sustituye.
 const RENAMED_SPECIES: Dictionary[String, String] = {
@@ -35,6 +35,10 @@ static func migrate(data: Dictionary, from_version: int) -> Dictionary:
 				result = migrate_4_to_5(result)
 			5:
 				result = migrate_5_to_6(result)
+			6:
+				result = migrate_6_to_7(result)
+			7:
+				result = migrate_7_to_8(result)
 			_:
 				push_error("SaveMigrations: no hay migración desde la versión %d" % version)
 				return result
@@ -149,4 +153,21 @@ static func migrate_5_to_6(data: Dictionary) -> Dictionary:
 	var result: Dictionary = data.duplicate(true)
 	if not result.has("active_tank"):
 		result["active_tank"] = 0
+	return result
+
+
+## Fase 11: aparecen las estadísticas. Las partidas antiguas empiezan con todo a cero.
+static func migrate_6_to_7(data: Dictionary) -> Dictionary:
+	var result: Dictionary = data.duplicate(true)
+	if not result.has("stats"):
+		result["stats"] = {}
+	return result
+
+
+## Fase 11B: aparecen los logros. Las partidas antiguas empiezan sin ninguno y los
+## desbloquean al cargar si ya cumplen la condición.
+static func migrate_7_to_8(data: Dictionary) -> Dictionary:
+	var result: Dictionary = data.duplicate(true)
+	if not result.has("achievements"):
+		result["achievements"] = {}
 	return result

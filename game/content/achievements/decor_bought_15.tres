@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AchievementDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/achievement_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "decor_bought_15"
+name_key = "ACH_DECOR_BOUGHT_15"
+order = 220
+metric = 0
+stat_id = "decorations_bought"
+target = 15.0
+reward_percent = 0.75

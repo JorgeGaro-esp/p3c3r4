@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AchievementDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/achievement_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "equipment_10"
+name_key = "ACH_EQUIPMENT_10"
+order = 250
+metric = 0
+stat_id = "equipment_bought"
+target = 10.0
+reward_percent = 0.75
