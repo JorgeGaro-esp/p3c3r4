@@ -34,9 +34,10 @@ func test_production_multiplier_stays_between_quarter_and_one_and_a_quarter() ->
 
 func test_spots_follow_dirt_in_steps_of_ten() -> void:
 	assert_eq(Care.spots_for(100.0), 0)
-	assert_eq(Care.spots_for(95.0), 1)
+	assert_eq(Care.spots_for(95.0), 0)
 	assert_eq(Care.spots_for(90.0), 1)
-	assert_eq(Care.spots_for(89.0), 2)
+	assert_eq(Care.spots_for(89.0), 1)
+	assert_eq(Care.spots_for(80.0), 2)
 	assert_eq(Care.spots_for(0.0), Care.MAX_SPOTS)
 	assert_eq(Care.spots_for(-50.0), Care.MAX_SPOTS)
 

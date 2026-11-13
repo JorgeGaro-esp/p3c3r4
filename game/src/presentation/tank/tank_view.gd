@@ -149,6 +149,11 @@ func spot_count() -> int:
 	return _spots.count()
 
 
+## Verdadero si hay una mancha visible en [param cell].
+func spot_cell_hit(cell: Vector2i) -> bool:
+	return _spots.spot_at(cell) >= 0
+
+
 func pearl_count() -> int:
 	return _pearls.count()
 

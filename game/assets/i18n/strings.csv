@@ -69,6 +69,7 @@ SETTINGS_PANEL_MODE,Paneles (prototipo),Panels (prototype)
 SETTINGS_PANEL_REPLACE,A: sustituyen la pecera,A: replace the tank
 SETTINGS_PANEL_GROW,B: crece hacia arriba,B: grows upward
 UI_SHELLS,Conchas %s,Shells %s
+UI_CLEANLINESS,Limpieza %d %%,Cleanliness %d %%
 TOAST_SAVE_RECOVERED,Partida recuperada de una copia,Save recovered from a backup
 TOAST_SAVE_CORRUPT,Partida dañada: empiezas una nueva,Save damaged: starting a new game
 TOAST_SAVE_NEWER,Partida de una versión más nueva,Save is from a newer version

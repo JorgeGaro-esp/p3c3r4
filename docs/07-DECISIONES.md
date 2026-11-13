@@ -119,6 +119,8 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T53 | Las perlas las decide la simulación con el generador de la partida (cola `pending_pearls`) y las dibuja la vista; no se guardan | Determinismo; una perla sin recoger al cerrar no merece guardarse |
 | T54 | Perla = 30 s de producción del pez que la suelta (mínimo 1 concha); con más de 12 en pantalla la más antigua se recoge sola | Nada se pierde (pilar 1 del GDD) |
 | T55 | Orden del clic en el agua: limpiar mancha, recoger perla, abrir ficha de pez y, si no, echar comida | La mancha está «delante» del cristal; la comida es la acción por defecto |
+| T56 | Una mancha por cada 10 puntos de suciedad completos (`floor`, no `ceil`) | Con `ceil`, cualquier suciedad mínima mostraba una mancha que reaparecía al instante tras limpiarla (bug visto en pruebas manuales) |
+| T57 | La limpieza se muestra como texto con color en la fila 9 del panel lateral, solo con 11+ filas | Con 10 filas (mínimo) no hay hueco; las manchas siguen avisando |
 
 ## Cómo añadir decisiones
 

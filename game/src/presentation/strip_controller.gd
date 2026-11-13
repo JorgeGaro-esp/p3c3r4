@@ -56,6 +56,10 @@ func _ready() -> void:
 		_on_notice_requested(SaveService.start())
 
 
+func _process(_delta: float) -> void:
+	_sidebar.set_cleanliness(roundi(Game.state.tanks[0].cleanliness))
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key: InputEventKey = event as InputEventKey
 	if key != null and key.pressed and key.ctrl_pressed and key.keycode == KEY_Q:

@@ -4,6 +4,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [0.7.0] - 2026-11-13 · Fase 6
 
+### Corregido
+- (nuevo) La limpieza de la pecera se muestra en el panel lateral (`Limpieza 85 %`, verde/ámbar/rojo); se oculta si la franja tiene menos de 11 filas.
+- Las manchas del cristal no se podían quitar: con suciedad mínima reaparecían al instante. Ahora hay una mancha por cada 10 puntos de suciedad completos.
+
 ### Añadido
 - Hambre por pez (se vacía en 10 minutos) y limpieza por pecera (baja con el número de peces); la felicidad sale de ambas (`Care`).
 - Alimentar: clic en el agua suelta copos; los peces hambrientos nadan hacia el más cercano y se lo comen.

@@ -48,10 +48,12 @@ static func happiness(hunger: float, cleanliness: float) -> float:
 	return 100.0 * (HUNGER_WEIGHT * fed + CLEANLINESS_WEIGHT * clean)
 
 
-## Manchas de alga que se ven con esa limpieza (0 con la pecera impecable).
+## Manchas de alga que se ven con esa limpieza: una por cada [constant SPOT_STEP]
+## puntos de suciedad completos. Así limpiar una mancha (que devuelve exactamente
+## SPOT_STEP puntos) quita siempre una, aunque la suciedad vuelva a subir un poco.
 static func spots_for(cleanliness: float) -> int:
 	var dirt: float = MAX_CLEANLINESS - clampf(cleanliness, 0.0, MAX_CLEANLINESS)
-	return clampi(ceili(dirt / SPOT_STEP - 1.0e-9), 0, MAX_SPOTS)
+	return clampi(floori(dirt / SPOT_STEP), 0, MAX_SPOTS)
 
 
 ## Conchas que da una perla soltada por un pez que produce [param fish_rate].

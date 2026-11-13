@@ -130,3 +130,27 @@ func test_the_fish_card_shows_satiety() -> void:
 		if text.begins_with("Saciedad 40"):
 			found = true
 	assert_true(found)
+
+
+func test_real_clicks_remove_one_spot_each_even_while_dirt_keeps_growing() -> void:
+	get_tree().root.size = Vector2i(960, 240)
+	await wait_frames(3)
+	Game.state.tanks[0].cleanliness = 0.0
+	await wait_frames(2)
+	_canvas.process_mode = Node.PROCESS_MODE_DISABLED
+	for _round: int in range(Care.MAX_SPOTS):
+		var spots: int = _tank.spot_count()
+		var target: Vector2i = Vector2i(-1, -1)
+		for x: int in range(_canvas.columns):
+			for y: int in range(_canvas.row_count):
+				if _tank.spot_cell_hit(Vector2i(x, y)):
+					target = Vector2i(x, y)
+		await _click_cell(target)
+		assert_eq(_tank.spot_count(), spots - 1)
+	_canvas.process_mode = Node.PROCESS_MODE_INHERIT
+
+
+func test_the_sidebar_shows_the_tank_cleanliness() -> void:
+	Game.state.tanks[0].cleanliness = 42.0
+	await wait_frames(3)
+	assert_true("Limpieza 42 %" in _visible_label_texts())

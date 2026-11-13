@@ -11,11 +11,16 @@ signal close_pressed
 
 const TOAST_ROWS: int = 2
 const WINDOW_BUTTON_WIDTH: int = 3
+## Filas mínimas del panel para que quepa la fila de limpieza (la última es el borde).
+const ROWS_FOR_CLEANLINESS: int = 11
+const CLEAN_GOOD: int = 60
+const CLEAN_OK: int = 30
 
 var _frame: AsciiFrame = AsciiFrame.new()
 var _toast: AsciiToast = AsciiToast.new()
 var _shells: AsciiLabel = null
 var _rate: AsciiLabel = null
+var _cleanliness: AsciiLabel = null
 var _shop: AsciiButton = null
 var _dex: AsciiButton = null
 var _settings: AsciiButton = null
@@ -30,6 +35,7 @@ func _init(root: UiRoot) -> void:
 	_add(_frame, UiRoot.LAYER_PANEL)
 	_shells = _make_label("", AsciiColors.AMBER)
 	_rate = _make_label("", AsciiColors.TEXT_DIM)
+	_cleanliness = _make_label("", AsciiColors.SEAWEED_LIGHT)
 	_add(_toast)
 	_shop = _make_button(_text("UI_SHOP"), _text("UI_SHOP_KEY"))
 	_dex = _make_button(_text("UI_DEX"), _text("UI_DEX_KEY"))
@@ -58,6 +64,17 @@ func set_rate(text: String) -> void:
 	_rate.text = text
 
 
+## Escribe la limpieza de la pecera (0-100) y la colorea según lo sucia que esté.
+func set_cleanliness(percent: int) -> void:
+	_cleanliness.text = _text("UI_CLEANLINESS") % percent
+	if percent >= CLEAN_GOOD:
+		_cleanliness.color = AsciiColors.SEAWEED_LIGHT
+	elif percent >= CLEAN_OK:
+		_cleanliness.color = AsciiColors.AMBER
+	else:
+		_cleanliness.color = AsciiColors.WARNING
+
+
 func layout(area: Rect2i) -> void:
 	_frame.rect = area
 	var left: int = area.position.x + 1
@@ -73,3 +90,5 @@ func layout(area: Rect2i) -> void:
 	_shop.rect = Rect2i(left, top + 6, inner, 1)
 	_dex.rect = Rect2i(left, top + 7, inner, 1)
 	_settings.rect = Rect2i(left, top + 8, inner, 1)
+	var has_room: bool = area.size.y >= ROWS_FOR_CLEANLINESS
+	_cleanliness.rect = Rect2i(left, top + 9, inner if has_room else 0, 1)
