@@ -1,0 +1,9 @@
+# deco_bridge · decoración
+[frame]
+  ▄▄▄▄▄▄▄▄
+ ▐█▀▀▀▀▀▀█▌
+▐█▌      ▐█▌
+[colors]
+  aaaaaaaa
+ aabbbbbbaa
+aaa      aaa

@@ -9,6 +9,8 @@ extends Node
 
 ## El jugador hizo clic sobre un pez.
 signal fish_clicked(fish: Fish)
+## Hay algo que contar sobre la decoración (para un aviso en la barra lateral).
+signal decor_message(text: String)
 
 const SEED: int = 20261112
 const SURFACE_ROWS: int = 1
@@ -79,6 +81,10 @@ var _spots: GlassSpots = GlassSpots.new()
 var _pearls: PearlField = PearlField.new()
 var _eggs: EggField = EggField.new()
 var _equipment: EquipmentField = EquipmentField.new()
+var _decor_back: DecorationField = DecorationField.new(false)
+var _decor_front: DecorationField = DecorationField.new(true)
+var _decorating: bool = false
+var _held_id: String = ""
 var _aerator_clock: float = 0.0
 var _next_bubble_in: float = 1.0
 
@@ -96,8 +102,20 @@ func _ready() -> void:
 	_spots.layer = LAYER_FRONT + 1
 	_eggs.layer = LAYER_BACK + 2
 	_equipment.layer = LAYER_BACK + 3
+	_decor_back.layer = LAYER_BACK + 4
+	_decor_front.layer = LAYER_FISH + 4
 	for drawable: AsciiDrawable in [
-		_sand, _weeds, _eggs, _equipment, _bubbles, _surface, _food, _pearls, _spots
+		_sand,
+		_weeds,
+		_eggs,
+		_equipment,
+		_decor_back,
+		_decor_front,
+		_bubbles,
+		_surface,
+		_food,
+		_pearls,
+		_spots
 	]:
 		canvas.add_drawable(drawable)
 	_load_looks()
@@ -113,6 +131,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_update_care()
 	_update_equipment(delta)
+	_update_decoration()
 	_next_bubble_in -= delta
 	if _next_bubble_in > 0.0 or _fish.is_empty():
 		return
@@ -126,6 +145,9 @@ func _process(delta: float) -> void:
 ## más abajo en el árbol y por tanto recibe antes) y solo si éste no lo consumió.
 func _input(event: InputEvent) -> void:
 	if get_viewport().is_input_handled():
+		return
+	if _decorating and _handle_decor_input(event):
+		get_viewport().set_input_as_handled()
 		return
 	var button: InputEventMouseButton = event as InputEventMouseButton
 	if button != null:
@@ -418,6 +440,11 @@ func _on_grid_changed() -> void:
 	_pearls.floor_row = float(sand_top - 1)
 	_eggs.floor_row = float(sand_top)
 	_equipment.configure(area.size.x, area.position.y + SURFACE_ROWS, sand_top)
+	for field: DecorationField in [_decor_back, _decor_front]:
+		field.configure(area.position.x, area.size.x, sand_top)
+	_decor_front.hint_cell = Vector2(
+		float(area.position.x + 1), float(area.position.y + SURFACE_ROWS)
+	)
 	_spots.configure(
 		Rect2i(
 			area.position.x,
@@ -445,3 +472,204 @@ func _bounds_for(fish: FishView) -> Rect2:
 	var bottom: float = float(area.end.y - SAND_ROWS - fish.height)
 	var right: float = float(area.size.x - fish.width)
 	return Rect2(0.0, top, maxf(right, 0.0), maxf(bottom - top, 0.0))
+
+
+## Entra o sale del modo decorar.
+func set_decorating(value: bool) -> void:
+	_decorating = value
+	_decor_front.clear_ghost()
+	_decor_front.hint = tr("DECOR_HINT") if value else ""
+	if value:
+		_held_id = _first_stock_id()
+		decor_message.emit(tr("TOAST_DECOR_MODE_ON"))
+		if _held_id.is_empty():
+			decor_message.emit(tr("TOAST_DECOR_EMPTY"))
+		else:
+			_announce_held()
+	else:
+		_held_id = ""
+
+
+func is_decorating() -> bool:
+	return _decorating
+
+
+## Objeto del inventario que se está colocando ("" si ninguno).
+func held_id() -> String:
+	return _held_id
+
+
+## Pasa al siguiente (o anterior) objeto del inventario.
+func _cycle_held(step: int) -> void:
+	var ids: PackedStringArray = _stock_ids()
+	if ids.is_empty():
+		_held_id = ""
+		return
+	var index: int = ids.find(_held_id)
+	index = posmod(index + step, ids.size()) if index >= 0 else 0
+	_held_id = ids[index]
+	_announce_held()
+
+
+## Clic en el modo decorar: coloca el objeto que se lleva o recoge el que hay en
+## [param cell]. Devuelve verdadero si hizo algo.
+func decor_click(cell: Vector2i) -> bool:
+	if not _in_water(cell):
+		return false
+	if not _held_id.is_empty() and _try_place(cell):
+		return true
+	var hit: PlacedDecoration = decoration_at(cell)
+	if hit != null:
+		var id: String = hit.def.id
+		if Game.remove_decoration(hit):
+			_held_id = id
+			decor_message.emit(tr("TOAST_DECOR_STORED") % tr(hit.def.name_key))
+		return true
+	if not _held_id.is_empty():
+		decor_message.emit(tr("TOAST_DECOR_OVERLAP"))
+	return true
+
+
+## Guarda en el inventario el objeto que haya en [param cell]. Verdadero si había uno.
+func _store_at(cell: Vector2i) -> bool:
+	var hit: PlacedDecoration = decoration_at(cell)
+	if hit == null:
+		return false
+	var name_key: String = hit.def.name_key
+	if Game.remove_decoration(hit):
+		decor_message.emit(tr("TOAST_DECOR_STORED") % tr(name_key))
+	return true
+
+
+## El objeto colocado que ocupa [param cell] (el de delante si se solapan), o null.
+func decoration_at(cell: Vector2i) -> PlacedDecoration:
+	var area: Rect2i = _current_area()
+	var sand_top: int = area.end.y - SAND_ROWS
+	var found: PlacedDecoration = null
+	for placed: PlacedDecoration in Game.state.tanks[0].decorations:
+		var rect: Rect2i = placed.rect(area.size.x)
+		var top: int = sand_top - rect.position.y - rect.size.y
+		var world: Rect2i = Rect2i(area.position.x + rect.position.x, top, rect.size.x, rect.size.y)
+		if world.has_point(cell):
+			if found == null or placed.def.layer >= found.def.layer:
+				found = placed
+	return found
+
+
+## Número de objetos de decoración que se dibujan.
+func decoration_count() -> int:
+	return _decor_back.count() + _decor_front.count()
+
+
+func _handle_decor_input(event: InputEvent) -> bool:
+	var button: InputEventMouseButton = event as InputEventMouseButton
+	var handled: bool = false
+	if button != null and button.pressed:
+		var cell: Vector2i = canvas.cell_at(button.position)
+		match button.button_index:
+			MOUSE_BUTTON_LEFT:
+				handled = decor_click(cell)
+			MOUSE_BUTTON_RIGHT:
+				handled = _store_at(cell)
+			MOUSE_BUTTON_WHEEL_UP:
+				_cycle_held(-1)
+				handled = true
+			MOUSE_BUTTON_WHEEL_DOWN:
+				_cycle_held(1)
+				handled = true
+			_:
+				pass
+	var key: InputEventKey = event as InputEventKey
+	if key != null and key.pressed and not key.echo and key.keycode == KEY_C:
+		_cycle_held(1)
+		handled = true
+	return handled
+
+
+func _try_place(cell: Vector2i) -> bool:
+	var def: DecorationDef = Game.content.get_decoration(_held_id)
+	if def == null:
+		return false
+	var spot: Vector2i = _spot_for(def, cell)
+	var area: Rect2i = _current_area()
+	var result: GameService.DecorResult = Game.place_decoration(
+		_held_id, spot.x, spot.y, area.size.x, _water_rows()
+	)
+	match result:
+		GameService.DecorResult.OK:
+			decor_message.emit(tr("TOAST_DECOR_PLACED") % tr(def.name_key))
+			if not Game.state.decoration_stock.has(_held_id):
+				_held_id = _first_stock_id()
+			return true
+		GameService.DecorResult.TOO_MANY:
+			decor_message.emit(tr("TOAST_DECOR_TOO_MANY") % Tank.MAX_DECORATIONS)
+		GameService.DecorResult.OVERLAP:
+			return false
+		_:
+			decor_message.emit(tr("TOAST_DECOR_BOUNDS"))
+	return false
+
+
+## Permilésimas y filas de suelo que corresponden a apuntar con el ratón a [param cell]
+## con [param def] (el objeto queda centrado en horizontal y con su base en la celda).
+func _spot_for(def: DecorationDef, cell: Vector2i) -> Vector2i:
+	var area: Rect2i = _current_area()
+	var sand_top: int = area.end.y - SAND_ROWS
+	var column: int = cell.x - area.position.x - def.cells_wide / 2
+	var permille: int = DecorationLayout.permille_for_column(column, def, area.size.x)
+	var lift: int = 0
+	if def.anchor == DecorationDef.Anchor.WATER:
+		lift = maxi(sand_top - 1 - cell.y, 0)
+	return Vector2i(permille, lift)
+
+
+func _water_rows() -> int:
+	var area: Rect2i = _current_area()
+	return area.size.y - SURFACE_ROWS - SAND_ROWS
+
+
+func _stock_ids() -> PackedStringArray:
+	var ids: PackedStringArray = PackedStringArray()
+	for id: String in Game.content.decoration_ids():
+		if Game.state.decoration_stock.get(id, 0) > 0:
+			ids.append(id)
+	return ids
+
+
+func _first_stock_id() -> String:
+	var ids: PackedStringArray = _stock_ids()
+	return "" if ids.is_empty() else ids[0]
+
+
+func _announce_held() -> void:
+	var def: DecorationDef = Game.content.get_decoration(_held_id)
+	if def != null:
+		decor_message.emit(tr("TOAST_DECOR_HOLDING") % tr(def.name_key))
+
+
+## Pasa la decoración al dibujo y, en el modo decorar, coloca la vista previa.
+func _update_decoration() -> void:
+	var items: Array[PlacedDecoration] = Game.state.tanks[0].decorations
+	_decor_back.set_items(items)
+	_decor_front.set_items(items)
+	if not _decorating:
+		return
+	if _held_id.is_empty() or not Game.state.decoration_stock.has(_held_id):
+		_held_id = _first_stock_id()
+	var def: DecorationDef = Game.content.get_decoration(_held_id)
+	if def == null:
+		_decor_front.clear_ghost()
+		return
+	var cell: Vector2i = canvas.cell_at(get_viewport().get_mouse_position())
+	if not _in_water(cell):
+		_decor_front.clear_ghost()
+		return
+	var spot: Vector2i = _spot_for(def, cell)
+	var area: Rect2i = _current_area()
+	var verdict: DecorationLayout.Result = DecorationLayout.check(
+		Game.state.tanks[0], def, spot.x, spot.y, area.size.x, _water_rows()
+	)
+	var rect: Rect2i = PlacedDecoration.new(def, spot.x, spot.y).rect(area.size.x)
+	_decor_front.set_ghost(
+		def, rect.position.x, rect.position.y, verdict == DecorationLayout.Result.OK
+	)

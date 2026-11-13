@@ -25,6 +25,8 @@ static func progress_value(def: SpeciesDef, state: GameState) -> float:
 			return float(state.fish_total())
 		SpeciesDef.UnlockKind.SPECIES_COUNT:
 			return float(state.count_of(def.unlock_species_id))
+		SpeciesDef.UnlockKind.DECORATION_TAG:
+			return float(state.count_tag(def.unlock_tag))
 		_:
 			return 0.0
 

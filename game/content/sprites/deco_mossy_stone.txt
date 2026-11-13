@@ -1,0 +1,9 @@
+# deco_mossy_stone · decoración
+[frame]
+ ▄▄▄
+▐███▌
+▀▀▀▀▀
+[colors]
+ bbb
+aaaaa
+bbbbb

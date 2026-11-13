@@ -1,0 +1,11 @@
+# deco_sunken_boat · decoración
+[frame]
+   │▄
+  ┌┴┴────┐
+ / ○ ○ ○  \
+▀▀▀▀▀▀▀▀▀▀▀▀
+[colors]
+   aa
+  aaaaaaaa
+ a b b b  a
+aaaaaaaaaaaa

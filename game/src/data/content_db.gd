@@ -8,6 +8,7 @@ extends RefCounted
 const SPECIES_DIR: String = "res://content/species"
 const VARIANTS_DIR: String = "res://content/variants"
 const EQUIPMENT_DIR: String = "res://content/equipment"
+const DECORATIONS_DIR: String = "res://content/decorations"
 const ID_PATTERN: String = "^[a-z][a-z0-9_]*$"
 
 var errors: PackedStringArray = PackedStringArray()
@@ -18,6 +19,8 @@ var _variants: Dictionary[String, VariantDef] = {}
 var _variant_order: PackedStringArray = PackedStringArray()
 var _equipment: Dictionary[String, EquipmentDef] = {}
 var _equipment_order: PackedStringArray = PackedStringArray()
+var _decorations: Dictionary[String, DecorationDef] = {}
+var _decoration_order: PackedStringArray = PackedStringArray()
 
 
 ## Carga todas las especies de [param directory]. Devuelve verdadero si todo es válido.
@@ -150,6 +153,11 @@ static func validate_species(species: SpeciesDef) -> PackedStringArray:
 	for extra_path: String in [species.fry_sprite_path, species.juvenile_sprite_path]:
 		if not extra_path.is_empty() and not FileAccess.file_exists(extra_path):
 			problems.append("el sprite no existe: %s" % extra_path)
+	if (
+		species.unlock_kind == SpeciesDef.UnlockKind.DECORATION_TAG
+		and species.unlock_tag.is_empty()
+	):
+		problems.append("unlock_tag no puede estar vacío con DECORATION_TAG")
 	if species.speed <= 0.0:
 		problems.append("speed debe ser mayor que 0")
 	if species.frame_duration <= 0.0:
@@ -243,3 +251,73 @@ func has_equipment(equipment_id: String) -> bool:
 ## Ids de equipos en orden de carga (alfabético por archivo).
 func equipment_ids() -> PackedStringArray:
 	return _equipment_order
+
+
+## Carga las decoraciones de [param directory]. Devuelve verdadero si todo es válido.
+func load_decorations_dir(directory: String = DECORATIONS_DIR) -> bool:
+	var names: PackedStringArray = DirAccess.get_files_at(directory)
+	names.sort()
+	for file_name: String in names:
+		var clean_name: String = file_name.trim_suffix(".remap")
+		if not clean_name.ends_with(".tres"):
+			continue
+		var path: String = directory.path_join(clean_name)
+		var decoration: DecorationDef = load(path) as DecorationDef
+		if decoration == null:
+			errors.append("%s: no es una DecorationDef" % path)
+			continue
+		add_decoration(decoration, path)
+	return errors.is_empty()
+
+
+## Valida y registra [param decoration]. Devuelve falso si es inválida o repetida.
+func add_decoration(decoration: DecorationDef, source: String = "") -> bool:
+	var problems: PackedStringArray = validate_decoration(decoration)
+	if _decorations.has(decoration.id):
+		problems.append("id repetido: %s" % decoration.id)
+	if not problems.is_empty():
+		var label: String = source if not source.is_empty() else decoration.id
+		for problem: String in problems:
+			errors.append("%s: %s" % [label, problem])
+		return false
+	_decorations[decoration.id] = decoration
+	_decoration_order.append(decoration.id)
+	return true
+
+
+## Lista los problemas de una decoración (vacía si es válida).
+static func validate_decoration(decoration: DecorationDef) -> PackedStringArray:
+	var problems: PackedStringArray = PackedStringArray()
+	var pattern: RegEx = RegEx.create_from_string(ID_PATTERN)
+	if pattern.search(decoration.id) == null:
+		problems.append("id inválido '%s' (minúsculas, cifras y _)" % decoration.id)
+	if decoration.name_key.is_empty() or decoration.description_key.is_empty():
+		problems.append("faltan name_key o description_key")
+	if decoration.base_cost <= 0.0 or is_nan(decoration.base_cost) or is_inf(decoration.base_cost):
+		problems.append("base_cost debe ser mayor que 0")
+	if decoration.amount < 0.0 or decoration.amount > 1.0 or is_nan(decoration.amount):
+		problems.append("amount debe estar entre 0 y 1")
+	if decoration.cells_wide < 1 or decoration.cells_high < 1:
+		problems.append("el tamaño debe ser al menos 1×1")
+	if decoration.sprite_path.is_empty() or not FileAccess.file_exists(decoration.sprite_path):
+		problems.append("el sprite no existe: %s" % decoration.sprite_path)
+	if decoration.palette_roles.size() != decoration.palette_colors.size():
+		problems.append("palette_roles y palette_colors tienen distinto tamaño")
+	if decoration.frame_duration <= 0.0:
+		problems.append("frame_duration debe ser mayor que 0")
+	return problems
+
+
+func get_decoration(decoration_id: String) -> DecorationDef:
+	if not _decorations.has(decoration_id):
+		return null
+	return _decorations[decoration_id]
+
+
+func has_decoration(decoration_id: String) -> bool:
+	return _decorations.has(decoration_id)
+
+
+## Ids de decoraciones en orden de carga (alfabético por archivo).
+func decoration_ids() -> PackedStringArray:
+	return _decoration_order

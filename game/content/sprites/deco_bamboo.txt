@@ -1,0 +1,13 @@
+# deco_bamboo · decoración
+[frame]
+█
+▌
+█
+▌
+█
+[colors]
+a
+b
+a
+b
+a

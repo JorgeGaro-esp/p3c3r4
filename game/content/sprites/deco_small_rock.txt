@@ -1,0 +1,7 @@
+# deco_small_rock · decoración
+[frame]
+ ▄▄
+▐██▌
+[colors]
+ aa
+baab

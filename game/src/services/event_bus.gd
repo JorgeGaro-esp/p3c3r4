@@ -27,3 +27,5 @@ signal fish_sold(value: float)
 signal variant_discovered(species_id: String, variant_id: String)
 ## Un equipo de la pecera [param tank_index] subió al nivel [param level].
 signal equipment_changed(tank_index: int, equipment_id: String, level: int)
+## Cambió la decoración o el inventario de decoración de la pecera [param tank_index].
+signal decoration_changed(tank_index: int)

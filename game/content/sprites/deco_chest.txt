@@ -1,0 +1,17 @@
+# deco_chest · decoración
+[frame]
+▄▄▄▄▄▄
+█◆██◆█
+▀▀▀▀▀▀
+[colors]
+aaaaaa
+abaaba
+aaaaaa
+[frame]
+▄▄▄▄▄▄
+█◇██◇█
+▀▀▀▀▀▀
+[colors]
+aaaaaa
+abaaba
+aaaaaa

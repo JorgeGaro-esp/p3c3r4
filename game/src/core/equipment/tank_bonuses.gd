@@ -16,6 +16,8 @@ const RARE_PER_LEVEL: float = 0.4
 const MAGNET_BASE_SECONDS: float = 24.0
 ## Máximo de la comodidad (fracción de felicidad que falta para el 100).
 const MAX_COMFORT: float = 0.9
+## Máximo de producción extra que dan las decoraciones.
+const MAX_PRODUCTION_BONUS: float = 0.5
 
 ## Multiplica la suciedad que producen los peces (1 sin filtro).
 var dirt_factor: float = 1.0
@@ -35,16 +37,21 @@ var hatch_speed: float = 1.0
 var rare_multiplier: float = 1.0
 ## Segundos hasta que el imán recoge una perla (0 si no hay).
 var magnet_delay: float = 0.0
+## Multiplica la producción de la pecera (decoración).
+var production_multiplier: float = 1.0
 
 
 ## Calcula las bonificaciones de [param levels] (id de equipo → nivel).
-static func compute(levels: Dictionary[String, int], content: ContentDB) -> TankBonuses:
+static func compute(
+	levels: Dictionary[String, int], content: ContentDB, decorations: Array[PlacedDecoration] = []
+) -> TankBonuses:
 	var result: TankBonuses = TankBonuses.new()
 	for equipment_id: String in levels:
 		var def: EquipmentDef = content.get_equipment(equipment_id)
 		var level: int = clampi(levels[equipment_id], 0, 99)
 		if def != null and level > 0:
 			result._apply(def, mini(level, def.max_level))
+	result._apply_decorations(decorations)
 	return result
 
 
@@ -68,3 +75,17 @@ func _apply(def: EquipmentDef, level: int) -> void:
 			rare_multiplier += RARE_PER_LEVEL * float(level)
 		EquipmentDef.Effect.PEARL_MAGNET:
 			magnet_delay = MAGNET_BASE_SECONDS / maxf(strength, 0.001)
+
+
+## Suma lo que dan los objetos colocados, con tope para que no rompan el juego.
+func _apply_decorations(decorations: Array[PlacedDecoration]) -> void:
+	var extra_production: float = 0.0
+	for placed: PlacedDecoration in decorations:
+		match placed.def.bonus:
+			DecorationDef.Bonus.COMFORT:
+				comfort = minf(comfort + placed.def.amount, MAX_COMFORT)
+			DecorationDef.Bonus.PRODUCTION:
+				extra_production = minf(extra_production + placed.def.amount, MAX_PRODUCTION_BONUS)
+			DecorationDef.Bonus.RARE_VARIANT:
+				rare_multiplier += placed.def.amount
+	production_multiplier = 1.0 + extra_production

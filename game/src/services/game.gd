@@ -7,6 +7,10 @@ extends Node
 
 enum BuyResult { OK, UNKNOWN_SPECIES, NOT_ENOUGH_SHELLS, TANK_FULL, LOCKED }
 enum EquipResult { OK, UNKNOWN, MAXED, NOT_ENOUGH_SHELLS }
+enum DecorResult { OK, UNKNOWN, NOT_ENOUGH_SHELLS, NO_STOCK, TOO_MANY, OUT_OF_BOUNDS, OVERLAP }
+
+## Aumento de coste de cada objeto de decoración que ya se tiene del mismo tipo.
+const DECORATION_COST_GROWTH: float = 1.3
 
 const START_SHELLS: float = 20.0
 const DEFAULT_SEED: int = 20261113
@@ -25,7 +29,8 @@ func _ready() -> void:
 	var variants_ok: bool = content.load_variants_dir()
 	var species_ok: bool = content.load_species_dir()
 	var equipment_ok: bool = content.load_equipment_dir()
-	if not variants_ok or not species_ok or not equipment_ok:
+	var decorations_ok: bool = content.load_decorations_dir()
+	if not variants_ok or not species_ok or not equipment_ok or not decorations_ok:
 		for message: String in content.errors:
 			push_error("ContentDB: %s" % message)
 	start_new_game(DEFAULT_SEED)
@@ -119,6 +124,67 @@ func buy_equipment(equipment_id: String) -> EquipResult:
 	EventBus.equipment_changed.emit(0, equipment_id, level + 1)
 	EventBus.purchase_made.emit()
 	return EquipResult.OK
+
+
+## Coste del siguiente objeto de [param decoration_id] (INF si no existe).
+func decoration_cost(decoration_id: String) -> float:
+	var def: DecorationDef = content.get_decoration(decoration_id)
+	if def == null:
+		return INF
+	var owned: int = state.decoration_owned(decoration_id)
+	return ceilf(def.base_cost * pow(DECORATION_COST_GROWTH, float(owned)) - 1.0e-9)
+
+
+## Compra un objeto de decoración: va al inventario, aún sin colocar.
+func buy_decoration(decoration_id: String) -> DecorResult:
+	if not content.has_decoration(decoration_id):
+		return DecorResult.UNKNOWN
+	var owned: int = state.decoration_stock.get(decoration_id, 0)
+	if owned >= GameState.MAX_STOCK:
+		return DecorResult.TOO_MANY
+	if not state.wallet.spend(decoration_cost(decoration_id)):
+		return DecorResult.NOT_ENOUGH_SHELLS
+	state.decoration_stock[decoration_id] = owned + 1
+	EventBus.decoration_changed.emit(0)
+	EventBus.purchase_made.emit()
+	return DecorResult.OK
+
+
+## Coloca un objeto del inventario en la pecera 0. [param tank_width] y
+## [param water_rows] son las celdas de la pecera que dibuja la vista.
+func place_decoration(
+	decoration_id: String, x_permille: int, lift: int, tank_width: int, water_rows: int
+) -> DecorResult:
+	var def: DecorationDef = content.get_decoration(decoration_id)
+	if def == null:
+		return DecorResult.UNKNOWN
+	if state.decoration_stock.get(decoration_id, 0) <= 0:
+		return DecorResult.NO_STOCK
+	var tank: Tank = state.tanks[0]
+	var verdict: DecorationLayout.Result = DecorationLayout.check(
+		tank, def, x_permille, lift, tank_width, water_rows
+	)
+	if verdict != DecorationLayout.Result.OK:
+		return _decor_result(verdict)
+	state.decoration_stock[decoration_id] = state.decoration_stock[decoration_id] - 1
+	if state.decoration_stock[decoration_id] <= 0:
+		state.decoration_stock.erase(decoration_id)
+	tank.decorations.append(PlacedDecoration.new(def, x_permille, lift))
+	_decorations_changed(tank)
+	return DecorResult.OK
+
+
+## Guarda en el inventario el objeto [param placed] de la pecera 0.
+func remove_decoration(placed: PlacedDecoration) -> bool:
+	var tank: Tank = state.tanks[0]
+	var index: int = tank.decorations.find(placed)
+	if index < 0:
+		return false
+	tank.decorations.remove_at(index)
+	var owned: int = state.decoration_stock.get(placed.def.id, 0)
+	state.decoration_stock[placed.def.id] = mini(owned + 1, GameState.MAX_STOCK)
+	_decorations_changed(tank)
+	return true
 
 
 ## Vende [param fish] de la pecera 0. Devuelve las conchas ganadas, o -1 si el pez
@@ -240,6 +306,23 @@ func _replace_state(fresh: GameState) -> void:
 		for fish: Fish in tank.fish:
 			_register_discovery(fish, false)
 	_publish_changes()
+
+
+func _decor_result(verdict: DecorationLayout.Result) -> DecorResult:
+	match verdict:
+		DecorationLayout.Result.TOO_MANY:
+			return DecorResult.TOO_MANY
+		DecorationLayout.Result.OVERLAP:
+			return DecorResult.OVERLAP
+		_:
+			return DecorResult.OUT_OF_BOUNDS
+
+
+func _decorations_changed(tank: Tank) -> void:
+	tank.refresh_bonuses(content)
+	state.mark_production_dirty()
+	EventBus.decoration_changed.emit(0)
+	EventBus.purchase_made.emit()
 
 
 func _add_fish(tank_index: int, species_id: String) -> void:

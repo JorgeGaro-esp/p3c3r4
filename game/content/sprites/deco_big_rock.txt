@@ -1,0 +1,9 @@
+# deco_big_rock · decoración
+[frame]
+  ▄▄▄▄
+ ▄████▒▄
+▐██████▌
+[colors]
+  aaaa
+ aaaaaba
+aaaaaaaa

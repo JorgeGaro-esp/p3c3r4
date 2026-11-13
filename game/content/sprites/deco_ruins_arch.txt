@@ -1,0 +1,11 @@
+# deco_ruins_arch · decoración
+[frame]
+▄██████▄
+█▀    ▀█
+█      █
+█▌    ▐█
+[colors]
+aaaaaaaa
+ab    ba
+a      a
+aa    aa

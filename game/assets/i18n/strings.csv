@@ -118,3 +118,64 @@ EQ_EFFECT_LAMP,Crecimiento ×%s,Growth ×%s
 EQ_EFFECT_AERATOR,Capacidad +%d,Capacity +%d
 EQ_EFFECT_INCUBATOR,Eclosión ×%s · raras ×%s,Hatching ×%s · rare ×%s
 EQ_EFFECT_PEARL_MAGNET,Recoge tras %s s,Collects after %s s
+DECOR_PEBBLES,Guijarros,Pebbles
+DECOR_PEBBLES_DESC,Piedrecitas sueltas sobre la arena.,Little stones scattered on the sand.
+DECOR_SMALL_ROCK,Roca pequeña,Small rock
+DECOR_SMALL_ROCK_DESC,Un refugio mínimo para los peces tímidos.,A tiny shelter for shy fish.
+DECOR_MOSSY_STONE,Piedra musgosa,Mossy stone
+DECOR_MOSSY_STONE_DESC,El musgo hace el agua más acogedora.,Moss makes the water feel homey.
+DECOR_BIG_ROCK,Roca grande,Big rock
+DECOR_BIG_ROCK_DESC,Una roca grande con muchos escondites.,A big rock with plenty of hiding spots.
+DECOR_FERN,Helecho,Fern
+DECOR_FERN_DESC,Un helecho que se mece con la corriente.,A fern swaying with the current.
+DECOR_TALL_PLANT,Planta alta,Tall plant
+DECOR_TALL_PLANT_DESC,Da sombra y oxígeno al fondo.,Gives shade and oxygen to the bottom.
+DECOR_REEDS,Juncos,Reeds
+DECOR_REEDS_DESC,Los juncos atraen a los peces curiosos.,Reeds attract curious fish.
+DECOR_BAMBOO,Bambú,Bamboo
+DECOR_BAMBOO_DESC,Cañas altas que dan buena suerte.,Tall canes that bring good luck.
+DECOR_WATER_LILY,Nenúfar,Water lily
+DECOR_WATER_LILY_DESC,Flota cerca de la superficie.,Floats near the surface.
+DECOR_AMPHORA,Ánfora,Amphora
+DECOR_AMPHORA_DESC,Un recuerdo de tiempos remotos.,A relic from ancient times.
+DECOR_DRIFTWOOD,Tronco,Driftwood
+DECOR_DRIFTWOOD_DESC,Un tronco hundido: casa de pececillos.,A sunken log: a home for little fish.
+DECOR_SHELL_PILE,Montón de conchas,Shell pile
+DECOR_SHELL_PILE_DESC,Conchas que dan algo de suerte.,Shells that bring a little luck.
+DECOR_BRIDGE,Puente,Bridge
+DECOR_BRIDGE_DESC,Un puente de piedra para pasar por debajo.,A stone bridge to swim under.
+DECOR_CAVE,Cueva,Cave
+DECOR_CAVE_DESC,Una cueva oscura. A la lota le encanta.,A dark cave. Loaches love it.
+DECOR_CHEST,Cofre del tesoro,Treasure chest
+DECOR_CHEST_DESC,Guarda un tesoro que atrae conchas.,Holds a treasure that draws shells.
+DECOR_STATUE,Estatua,Statue
+DECOR_STATUE_DESC,Una estatua que vigila el estanque.,A statue watching over the pond.
+DECOR_RUINS_ARCH,Arco en ruinas,Ruined arch
+DECOR_RUINS_ARCH_DESC,Ruinas antiguas: muy relajante.,Ancient ruins: very relaxing.
+DECOR_LANTERN,Farol,Lantern
+DECOR_LANTERN_DESC,Su luz atrae variantes raras.,Its light draws rare variants.
+DECOR_SUNKEN_BOAT,Barca hundida,Sunken boat
+DECOR_SUNKEN_BOAT_DESC,Un naufragio con mucho encanto.,A charming little wreck.
+DECOR_CRYSTAL,Cristal,Crystal
+DECOR_CRYSTAL_DESC,Un cristal brillante: más variantes raras.,A glowing crystal: more rare variants.
+SHOP_TAB_DECOR,Decoración,Decor
+SHOP_DECOR_STOCK,En inventario %d · colocadas %d,In stock %d · placed %d
+SHOP_DECOR_LIMIT,Máx. %d objetos por pecera,Max %d objects per tank
+UI_DECORATE,[D]ecorar,[D]ecorate
+TOAST_DECOR_BOUGHT,%s guardado en el inventario,%s added to your stock
+TOAST_DECOR_PLACED,%s colocado,%s placed
+TOAST_DECOR_STORED,%s guardado,%s stored
+TOAST_DECOR_OVERLAP,No cabe: se solapa con otro objeto,No room: it overlaps another object
+TOAST_DECOR_BOUNDS,No cabe en ese sitio,It does not fit there
+TOAST_DECOR_TOO_MANY,Ya hay %d objetos en la pecera,The tank already has %d objects
+TOAST_DECOR_MODE_ON,Modo decorar,Decorate mode
+TOAST_DECOR_EMPTY,No tienes objetos: cómpralos en la tienda,You have no objects: buy some in the shop
+TOAST_DECOR_HOLDING,Colocando: %s (rueda o C: cambiar),Placing: %s (wheel or C: switch)
+DECOR_HINT,DECORAR · clic: poner o recoger · clic der.: guardar · rueda: cambiar · Esc: salir,DECORATE · click: place or pick up · right click: store · wheel: switch · Esc: exit
+BONUS_COMFORT,Comodidad +%s %%,Comfort +%s %%
+BONUS_PRODUCTION,Producción +%s %%,Production +%s %%
+BONUS_RARE,Variantes raras +%s %%,Rare variants +%s %%
+TAG_CAVE,una cueva,a cave
+TAG_WRECK,un naufragio,a wreck
+TAG_LOG,un tronco,a log
+UNLOCK_DECORATION_TAG,coloques %s en la pecera,place %s in the tank

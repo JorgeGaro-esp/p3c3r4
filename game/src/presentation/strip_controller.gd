@@ -40,6 +40,7 @@ func _ready() -> void:
 	_canvas.grid_changed.connect(_apply_layout)
 	_ui.escape_pressed.connect(_on_escape)
 	_tank.fish_clicked.connect(_on_fish_clicked)
+	_tank.decor_message.connect(_sidebar.show_toast)
 	_ui.pointer_pressed.connect(Platform.enable_keyboard_focus)
 	Settings.changed.connect(_on_settings_changed)
 	Platform.display_changed.connect(_apply_window)
@@ -64,8 +65,21 @@ func _process(_delta: float) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key: InputEventKey = event as InputEventKey
-	if key != null and key.pressed and key.ctrl_pressed and key.keycode == KEY_Q:
+	if key == null or not key.pressed or key.echo:
+		return
+	if key.ctrl_pressed and key.keycode == KEY_Q:
 		Platform.request_quit()
+	elif key.keycode == KEY_D and not key.ctrl_pressed:
+		toggle_decorating()
+
+
+## Entra o sale del modo decorar (cierra los paneles al entrar).
+func toggle_decorating() -> void:
+	var entering: bool = not _tank.is_decorating()
+	if entering:
+		close_card()
+		close_panel()
+	_tank.set_decorating(entering)
 
 
 ## Abre [param kind], o lo cierra si ya estaba abierto.
@@ -116,7 +130,9 @@ func _on_fish_clicked(fish: Fish) -> void:
 
 
 func _on_escape() -> void:
-	if _card.fish() != null:
+	if _tank.is_decorating():
+		_tank.set_decorating(false)
+	elif _card.fish() != null:
 		close_card()
 	else:
 		close_panel()
@@ -160,6 +176,7 @@ func _build_panels() -> void:
 	_sidebar.minimize_pressed.connect(Platform.minimize)
 	_sidebar.close_pressed.connect(Platform.request_quit)
 	_shop.close_requested.connect(close_panel)
+	_shop.decorate_requested.connect(toggle_decorating)
 	_settings_panel.close_requested.connect(close_panel)
 	_shop.message.connect(_sidebar.show_toast)
 	_settings_panel.message.connect(_sidebar.show_toast)

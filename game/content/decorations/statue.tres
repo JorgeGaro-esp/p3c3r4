@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="DecorationDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/decoration_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "statue"
+name_key = "DECOR_STATUE"
+description_key = "DECOR_STATUE_DESC"
+layer = 0
+anchor = 0
+bonus = 1
+amount = 0.03
+tag = ""
+base_cost = 350.0
+sprite_path = "res://content/sprites/deco_statue.txt"
+cells_wide = 5
+cells_high = 4
+palette_roles = PackedStringArray("a")
+palette_colors = PackedColorArray(0.8, 0.8, 0.82, 1)
+frame_duration = 0.6

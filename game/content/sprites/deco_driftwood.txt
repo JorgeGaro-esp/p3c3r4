@@ -1,0 +1,9 @@
+# deco_driftwood · decoración
+[frame]
+  ,====,__
+ (=======)=
+  '-----'
+[colors]
+  aaaaaaaa
+ aaaaaaaaaa
+  aaaaaaa

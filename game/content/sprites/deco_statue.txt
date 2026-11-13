@@ -1,0 +1,11 @@
+# deco_statue · decoración
+[frame]
+  ○
+ /█\
+ ▐█▌
+▄███▄
+[colors]
+  a
+ aaa
+ aaa
+aaaaa

@@ -8,6 +8,8 @@ const MAX_TANKS: int = 16
 const MAX_SIM_TIME: float = 1.0e12
 ## Perlas sin publicar que se aceptan como máximo (por si nadie las recoge).
 const MAX_PENDING_PEARLS: int = 20
+## Cantidad máxima de un mismo objeto de decoración en el inventario.
+const MAX_STOCK: int = 99
 
 var wallet: Wallet = Wallet.new()
 var tanks: Array[Tank] = [Tank.new()]
@@ -26,8 +28,32 @@ var unlocked: Dictionary[String, bool] = {}
 ## Combinaciones de especie y variante que el jugador ya ha tenido (clave
 ## `especie|variante`). Es la base del Pecedex.
 var discovered: Dictionary[String, bool] = {}
+## Decoración comprada y sin colocar (id → cantidad). Se guarda.
+var decoration_stock: Dictionary[String, int] = {}
 ## Huevos que han eclosionado y `Game` aún no ha publicado.
 var pending_hatched: Array[HatchEvent] = []
+
+
+## Cuántos objetos con la etiqueta [param tag] hay colocados en todas las peceras.
+func count_tag(tag: String) -> int:
+	var total: int = 0
+	if tag.is_empty():
+		return total
+	for tank: Tank in tanks:
+		for placed: PlacedDecoration in tank.decorations:
+			if placed.def.tag == tag:
+				total += 1
+	return total
+
+
+## Cuántos objetos de [param decoration_id] se han comprado (colocados y guardados).
+func decoration_owned(decoration_id: String) -> int:
+	var total: int = decoration_stock.get(decoration_id, 0)
+	for tank: Tank in tanks:
+		for placed: PlacedDecoration in tank.decorations:
+			if placed.def.id == decoration_id:
+				total += 1
+	return total
 
 
 ## Avisa de que compra, venta o cambio de felicidad alteran la producción.
@@ -100,6 +126,7 @@ func to_dict() -> Dictionary:
 		"rng_state": str(rng_state),
 		"unlocked": unlocked.keys(),
 		"discovered": discovered.keys(),
+		"decoration_stock": decoration_stock.duplicate(),
 	}
 
 
@@ -137,6 +164,7 @@ static func from_dict(
 	state.rng_state = SaveFields.read_big_int(data, "rng_state", 0, warnings)
 	_read_unlocked(state, data, content, warnings)
 	_read_discovered(state, data, content, warnings)
+	_read_stock(state, data, content, warnings)
 	return state
 
 
@@ -178,3 +206,24 @@ static func _read_discovered(
 			continue
 		if content.has_species(parts[0]) and content.has_variant(parts[1]):
 			state.discovered[key] = true
+
+
+## Lee la decoración sin colocar; ignora las que no existen y limita las cantidades.
+static func _read_stock(
+	state: GameState, data: Dictionary, content: ContentDB, warnings: PackedStringArray
+) -> void:
+	if not data.has("decoration_stock"):
+		return
+	var raw: Variant = SaveFields.read_dict(data, "decoration_stock", warnings)
+	if raw == null:
+		return
+	var entries: Dictionary = raw
+	for key: Variant in entries:
+		if typeof(key) != TYPE_STRING:
+			continue
+		var decoration_id: String = key
+		if not content.has_decoration(decoration_id):
+			continue
+		var count: int = SaveFields.read_int(entries, decoration_id, 0, 0, MAX_STOCK, warnings)
+		if count > 0:
+			state.decoration_stock[decoration_id] = count

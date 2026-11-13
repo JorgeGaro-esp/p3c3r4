@@ -16,6 +16,7 @@ enum UnlockKind {
 	TOTAL_EARNED,  ## Conchas ganadas en total >= `unlock_amount`.
 	FISH_COUNT,  ## Peces en total >= `unlock_amount`.
 	SPECIES_COUNT,  ## Peces de `unlock_species_id` >= `unlock_amount`.
+	DECORATION_TAG,  ## Objetos colocados con la etiqueta `unlock_tag` >= `unlock_amount`.
 }
 ## Un símbolo por rareza, para no depender solo del color (GDD §4.2).
 const RARITY_SYMBOLS: String = "·+*#@"
@@ -35,6 +36,7 @@ const RARITY_SYMBOLS: String = "·+*#@"
 @export var unlock_amount: float = 0.0
 ## Solo para `SPECIES_COUNT`: la especie que hay que tener.
 @export var unlock_species_id: String = ""
+@export var unlock_tag: String = ""
 ## Ruta del archivo de sprite, por ejemplo `res://content/sprites/test_guppy.txt`.
 @export_file("*.txt") var sprite_path: String = ""
 ## Roles de color (`b`, `t`, `e`, `f`, `d`) y su color, en listas paralelas.

@@ -1,0 +1,11 @@
+# deco_cave · decoración
+[frame]
+ ▄████▄
+██░░░░██
+█░    ░█
+██    ██
+[colors]
+ aaaaaa
+aabbbbaa
+ab    ba
+aa    aa

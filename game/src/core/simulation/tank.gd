@@ -5,6 +5,8 @@ extends RefCounted
 const DEFAULT_CAPACITY: int = 40
 ## Límites al leer una partida (06-SEGURIDAD §3.4).
 const MAX_CAPACITY: int = 200
+## Objetos decorativos que caben en una pecera (rendimiento y legibilidad).
+const MAX_DECORATIONS: int = 12
 
 var biome_id: String = "pond"
 var capacity: int = DEFAULT_CAPACITY
@@ -18,6 +20,8 @@ var pearl_timer: float = Care.PEARL_MAX_SECONDS
 var breed_timers: Dictionary[String, float] = {}
 ## Nivel de cada equipo comprado (id → nivel). Se guarda.
 var equipment: Dictionary[String, int] = {}
+## Decoración colocada. Se guarda.
+var decorations: Array[PlacedDecoration] = []
 ## Bonificaciones del equipo (se recalculan con [method refresh_bonuses], no se guardan).
 var bonuses: TankBonuses = TankBonuses.new()
 ## Segundos desde la última comida del comedero (no se guarda).
@@ -50,7 +54,7 @@ func set_level(equipment_id: String, level: int, content: ContentDB) -> void:
 
 
 func refresh_bonuses(content: ContentDB) -> void:
-	bonuses = TankBonuses.compute(equipment, content)
+	bonuses = TankBonuses.compute(equipment, content, decorations)
 
 
 ## Añade [param new_fish] si hay sitio. Devuelve falso si la pecera está llena.
@@ -86,11 +90,15 @@ func to_dict() -> Dictionary:
 	var egg_data: Array = []
 	for egg: Egg in eggs:
 		egg_data.append(egg.to_dict())
+	var decoration_data: Array = []
+	for placed: PlacedDecoration in decorations:
+		decoration_data.append(placed.to_dict())
 	return {
 		"biome_id": biome_id,
 		"capacity": capacity,
 		"cleanliness": cleanliness,
 		"equipment": equipment.duplicate(),
+		"decorations": decoration_data,
 		"fish": fish_data,
 		"eggs": egg_data,
 	}
@@ -111,6 +119,7 @@ static func from_dict(source: Variant, content: ContentDB, warnings: PackedStrin
 	tank.cleanliness = SaveFields.read_float(
 		data, "cleanliness", Care.MAX_CLEANLINESS, 0.0, Care.MAX_CLEANLINESS, warnings
 	)
+	_read_decorations(tank, data, content, warnings)
 	_read_equipment(tank, data, content, warnings)
 	var raw_fish: Variant = SaveFields.read_array(data, "fish", warnings)
 	if raw_fish != null:
@@ -172,3 +181,22 @@ static func _read_equipment(
 		if level > 0:
 			tank.equipment[def.id] = level
 	tank.refresh_bonuses(content)
+
+
+## Lee la decoración colocada; descarta lo desconocido y lo que sobre del límite.
+static func _read_decorations(
+	tank: Tank, data: Dictionary, content: ContentDB, warnings: PackedStringArray
+) -> void:
+	if not data.has("decorations"):
+		return
+	var raw: Variant = SaveFields.read_array(data, "decorations", warnings)
+	if raw == null:
+		return
+	var entries: Array = raw
+	for entry: Variant in entries:
+		if tank.decorations.size() >= MAX_DECORATIONS:
+			warnings.append("decoración descartada: demasiados objetos")
+			break
+		var placed: PlacedDecoration = PlacedDecoration.from_dict(entry, content, warnings)
+		if placed != null:
+			tank.decorations.append(placed)

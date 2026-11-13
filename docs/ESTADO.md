@@ -3,8 +3,8 @@
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
 **Última actualización:** 2026-11-13
-**Fase actual:** Fase 8 · Equipamiento mejorable: código y 368 tests hechos (Fase 7 incluida, sin commit aún). Pendiente de Jorge: probar Fases 5–8 en la ventana real. Siguiente: **Fase 9 · Decoración**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
-**Versión:** `0.9.0` (pendiente de commit; la Fase 7 `0.8.0` tampoco tiene etiqueta aún). Etiquetas hasta `v0.7.0`.
+**Fase actual:** Fase 9 · Decoración colocable: código y 405 tests hechos (Fases 7 y 8 sin commit aún). Pendiente de Jorge: probar Fases 5–9 en la ventana real. Siguiente: **Fase 10 · Biomas y varias peceras**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
+**Versión:** `0.10.0` (pendiente de commit; `0.8.0` y `0.9.0` tampoco tienen etiqueta aún). Etiquetas hasta `v0.7.0`.
 
 ## Progreso por fases
 
@@ -19,7 +19,7 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 | 6 | Cuidados: hambre, limpieza y felicidad | Hecha en código; pendiente de prueba manual de Jorge |
 | 7 | Cría, variantes de color y venta | Hecha en código; pendiente de prueba manual de Jorge |
 | 8 | Equipamiento mejorable | Hecha en código; pendiente de prueba manual de Jorge |
-| 9 | Decoración colocable | Pendiente |
+| 9 | Decoración colocable | Hecha en código; pendiente de prueba manual de Jorge |
 | 10 | Biomas y varias peceras | Pendiente |
 | 11 | Pecedex y logros | Pendiente |
 | 12 | Día/noche y eventos aleatorios | Pendiente |
@@ -31,6 +31,7 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 
 ## Hecho hasta ahora
 
+- 2026-11-13 (sesión 7): Fase 9: 20 objetos de decoración con arte, tienda con pestaña de decoración, modo decorar (`D`), bonificaciones con tope, la lota pide una cueva, guardado formato 5. 405 tests.
 - 2026-11-13 (sesión 6): botón «Vender todos los peces» en Ajustes (T68) y Fase 8: siete equipos con 5 niveles, pestaña «Equipo» en la tienda, dibujo animado en la pecera, imán de perlas, `TankBonuses`, guardado formato 4. Con filtro 5 y comedero 3 una pecera de 40 peces se mantiene sola (test). 368 tests.
 - 2026-11-13 (sesión 5): arreglo de las manchas del cristal (T56) y limpieza visible en el panel (T57). Fase 7: etapas de vida, huevos y eclosión, 5 variantes con paletas (prismática animada), venta desde la ficha con confirmación y venta de sobrantes, aviso de variante nueva y registro de combinaciones descubiertas (base del Pecedex). Guardado formato 3. 337 tests.
 
@@ -48,7 +49,8 @@ Jorge: borrar `game/src/presentation/tank/swimmer_def.gd` y su `.uid` (ya no se 
 Jorge: borrar `game/content/species/test_*.tres` y `game/content/sprites/test_*.txt` (6 archivos y sus `.uid`; si no, aparecerían como especies extra). Probar: comprar peces en la tienda, ver desbloqueos, clic en un pez para su ficha (Esc la cierra) y cerrar/abrir para comprobar que se conserva la partida (las especies de prueba antiguas pasan a las del estanque). Elegir P02.
 Jorge (Fase 6): clic en el agua para echar comida; arrastrar sobre las manchas verdes para limpiar (aparecen con el tiempo); clic en las perlas `○` que caen. Para ver el efecto sin esperar: bajar `hunger` con el depurador no existe aún; esperar unos minutos basta.
 Jorge (Fase 8): reimportar traducciones (`--headless --import`), ganar conchas, abrir Tienda → pestaña «Equipo» (flechas ←/→), comprar el filtro y el comedero y ver cómo aparecen en la pecera.
-Claude: Fase 9 (decoración colocable).
+Jorge (Fase 9): reimportar traducciones; Tienda → pestaña «Decoración» (←/→), comprar una cueva, botón [D]ecorar o tecla D, clic para colocar, clic derecho para guardar, rueda para cambiar de objeto; comprobar que la lota aparece en la tienda.
+Claude: Fase 10 (biomas y varias peceras).
 
 ## Bloqueos y dudas abiertas
 

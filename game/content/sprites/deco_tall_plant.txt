@@ -1,0 +1,25 @@
+# deco_tall_plant · decoración
+[frame]
+ )
+( )
+ )
+( )
+ |
+[colors]
+ a
+a a
+ a
+a a
+ b
+[frame]
+ (
+) (
+ (
+) (
+ |
+[colors]
+ a
+a a
+ a
+a a
+ b

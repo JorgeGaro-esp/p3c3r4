@@ -1,0 +1,17 @@
+# deco_fern · decoración
+[frame]
+ \|/
+\\|//
+ \|/
+[colors]
+ aaa
+aaaaa
+ aaa
+[frame]
+ /|\
+//|\\
+ /|\
+[colors]
+ aaa
+aaaaa
+ aaa

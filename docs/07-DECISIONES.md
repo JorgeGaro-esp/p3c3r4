@@ -139,6 +139,14 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T73 | Capacidad = `capacity` (guardada) + hueco del aireador (`Tank.total_capacity()`) | Quitar el aireador nunca expulsa peces ya guardados: la pecera solo queda «llena» |
 | T74 | Tienda con pestañas Peces / Equipo; los equipos se dibujan en la pecera con animación de 2 fotogramas y el aireador suelta burbujas | Feedback visual de cada compra |
 | T75 | Guardado formato 4: peceras con `equipment`; migración 3→4 la crea vacía; ids desconocidos se descartan y niveles se limitan al máximo | Seguridad al cargar (06-SEGURIDAD §3.4) |
+| T76 | Decoración = `DecorationDef` (recurso en `content/decorations/`, 20 objetos): capa (fondo o delante de los peces), ancla (suelo o flotando), bonificación (comodidad, producción o variantes raras), etiqueta y tamaño en celdas | Añadir un objeto no toca código; una prueba comprueba que el tamaño coincide con el sprite |
+| T77 | La posición se guarda en milésimas del hueco libre (`x`) y filas sobre el suelo (`y`), no en celdas | Sobrevive a cambiar de monitor, escala o altura de la franja |
+| T78 | Reglas de colocación (`DecorationLayout`): máx. 12 objetos por pecera, que quepa en el agua, solo en el suelo si el ancla es suelo, y sin solape dentro de la misma capa (objetos de capas distintas pueden compartir celdas) | Legibilidad y rendimiento (GDD §8) |
+| T79 | Bonificaciones con tope: comodidad hasta 0,9 (suma la del calentador), producción hasta +50 %, variantes raras sumadas | Que la decoración ayude sin romper el equilibrio |
+| T80 | Inventario global `decoration_stock`: comprar guarda el objeto sin colocar; el coste sube ×1,3 por cada objeto del mismo tipo (colocado o guardado) | Comprar y colocar son pasos separados, como en el GDD |
+| T81 | Modo decorar (tecla `D` o botón en la pestaña de decoración): vista previa verde/roja, clic = colocar o recoger, clic derecho = guardar, rueda o `C` = cambiar de objeto, `Esc` = salir. Recoger un objeto lo devuelve al inventario y lo lleva en la mano; si se cancela, queda guardado | Cómodo dentro de la franja sin abrir paneles que tapen la pecera |
+| T82 | Algunas especies piden una etiqueta de decoración (`UnlockKind.DECORATION_TAG`): la lota ahora requiere una cueva (`cave`) | Es la idea del GDD §8; las partidas que ya la tenían la conservan |
+| T83 | Guardado formato 5: peceras con `decorations`, estado con `decoration_stock`; migración 4→5 los crea vacíos | Seguridad al cargar: ids desconocidos descartados, cantidades limitadas |
 
 ## Cómo añadir decisiones
 

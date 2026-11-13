@@ -1,0 +1,11 @@
+# deco_amphora · decoración
+[frame]
+ ┌┐
+ ││
+(  )
+ └┘
+[colors]
+ aa
+ aa
+a  a
+ aa

@@ -1,0 +1,17 @@
+# deco_lantern · decoración
+[frame]
+ ▄
+[●]
+ █
+[colors]
+ a
+aba
+ a
+[frame]
+ ▄
+[○]
+ █
+[colors]
+ a
+aba
+ a

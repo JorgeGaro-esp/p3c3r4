@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.10.0] - 2026-11-13 · Fase 9
+
+### Añadido
+- Decoración colocable: 20 objetos (`DecorationDef`, `content/decorations/`) con arte ASCII y animación, en capas detrás y delante de los peces.
+- Pestaña «Decoración» en la tienda (compra al inventario) y modo decorar (`D`): vista previa verde/roja, colocar, recoger y mover, guardar con clic derecho, cambiar de objeto con la rueda o `C`.
+- Bonificaciones de decoración: comodidad, producción y variantes raras, con tope; `TankBonuses` las suma con las del equipo.
+- La lota se desbloquea colocando una cueva (`UnlockKind.DECORATION_TAG`).
+- Reglas de colocación (`DecorationLayout`): límite de 12 objetos por pecera, límites del agua y solapes por capa.
+- Guardado formato 5 (decoración colocada e inventario) con migración 4→5; la posición no depende del tamaño de la ventana.
+
 ## [0.9.0] - 2026-11-13 · Fase 8
 
 ### Añadido

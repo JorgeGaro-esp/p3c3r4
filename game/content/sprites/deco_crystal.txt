@@ -1,0 +1,17 @@
+# deco_crystal · decoración
+[frame]
+ ▲
+◆█◆
+▀▀▀
+[colors]
+ a
+bab
+aaa
+[frame]
+ ▲
+◇█◇
+▀▀▀
+[colors]
+ a
+bab
+aaa

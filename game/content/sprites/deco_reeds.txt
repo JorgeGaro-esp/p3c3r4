@@ -1,0 +1,21 @@
+# deco_reeds · decoración
+[frame]
+| )|
+ |( |
+| )|
+ | |
+[colors]
+a aa
+ aa a
+a aa
+ a a
+[frame]
+ )||
+| ( |
+ )||
+| |
+[colors]
+ aaa
+a a a
+ aaa
+a a

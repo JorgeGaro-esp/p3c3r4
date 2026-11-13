@@ -8,6 +8,8 @@ extends UiPanel
 
 signal close_requested
 signal message(text: String)
+## El jugador quiere colocar decoración (pasa al modo decorar).
+signal decorate_requested
 
 const BIOME_ID: String = "pond"
 const MIN_LIST_WIDTH: int = 24
@@ -15,9 +17,11 @@ const MAX_LIST_WIDTH: int = 44
 const DETAIL_GAP: int = 2
 const CLOSE_BUTTON_WIDTH: int = 16
 const BUY_BUTTON_WIDTH: int = 12
+const DECORATE_BUTTON_WIDTH: int = 14
 
 var _ids: PackedStringArray = PackedStringArray()
 var _equipment_ids: PackedStringArray = PackedStringArray()
+var _decor_ids: PackedStringArray = PackedStringArray()
 var _tab: int = 0
 var _frame: AsciiFrame = AsciiFrame.new()
 var _tabs: AsciiTabs = AsciiTabs.new()
@@ -30,6 +34,7 @@ var _owned: AsciiLabel = null
 var _progress: AsciiProgress = AsciiProgress.new()
 var _buy: AsciiButton = null
 var _close: AsciiButton = null
+var _decorate: AsciiButton = null
 
 
 func _init(root: UiRoot) -> void:
@@ -47,10 +52,13 @@ func _init(root: UiRoot) -> void:
 	_add(_progress)
 	_buy = _make_button("")
 	_close = _make_button("")
+	_decorate = _make_button("", "D")
 	_list.selection_changed.connect(_show_detail)
 	_list.chosen.connect(func(_index: int) -> void: _buy_selected())
 	_buy.activated.connect(_buy_selected)
 	_close.activated.connect(func() -> void: close_requested.emit())
+	_decorate.activated.connect(func() -> void: decorate_requested.emit())
+	EventBus.decoration_changed.connect(_on_decoration_changed)
 	EventBus.shells_changed.connect(_on_state_changed)
 	EventBus.fish_added.connect(_on_fish_changed)
 	EventBus.fish_removed.connect(_on_fish_changed)
@@ -80,22 +88,49 @@ func layout(area: Rect2i) -> void:
 	_progress.rect = Rect2i(detail_x, owned_row + 1, mini(detail_width, 24), 1)
 	_buy.rect = Rect2i(detail_x, top + height - 2, BUY_BUTTON_WIDTH, 1)
 	_close.rect = Rect2i(detail_x + BUY_BUTTON_WIDTH + 1, top + height - 2, CLOSE_BUTTON_WIDTH, 1)
+	var decorate_x: int = detail_x + BUY_BUTTON_WIDTH + CLOSE_BUTTON_WIDTH + 2
+	_decorate.rect = Rect2i(decorate_x, top + height - 2, DECORATE_BUTTON_WIDTH, 1)
 	_show_detail(_list.selected_index())
 
 
 ## Vuelve a escribir todos los textos (cambio de idioma) y la lista.
 func refresh() -> void:
 	_frame.title = _text("SHOP_TITLE")
-	_tabs.set_titles(PackedStringArray([_text("SHOP_TAB_FISH"), _text("SHOP_TAB_EQUIPMENT")]))
+	_tabs.set_titles(
+		PackedStringArray(
+			[_text("SHOP_TAB_FISH"), _text("SHOP_TAB_EQUIPMENT"), _text("SHOP_TAB_DECOR")]
+		)
+	)
 	_tabs.selected = _tab
 	_buy.label = "[ %s ]" % _text("UI_BUY")
 	_close.label = _text("UI_CLOSE_PANEL")
+	_decorate.label = _text("UI_DECORATE")
 	_fill_list()
 
 
 ## Ids de las especies a la venta, de la más barata a la más cara.
 func species_ids() -> PackedStringArray:
 	return _ids
+
+
+## Muestra el botón de decorar solo en la pestaña de decoración.
+func set_active(value: bool) -> void:
+	super(value)
+	_decorate.is_shown = value and _tab == 2
+
+
+## Ids de la decoración a la venta, en el orden de la lista.
+func decoration_ids() -> PackedStringArray:
+	return _decor_ids
+
+
+## Selecciona la decoración [param decoration_id] (para los tests).
+func select_decoration(decoration_id: String) -> void:
+	select_tab(2)
+	var index: int = _decor_ids.find(decoration_id)
+	if index >= 0:
+		_list.model.select(index)
+		_show_detail(index)
 
 
 ## Ids de los equipos a la venta, en el orden de la lista.
@@ -140,8 +175,14 @@ func _on_equipment_changed(_tank_index: int, _equipment_id: String, _level: int)
 		_fill_list()
 
 
+func _on_decoration_changed(_tank_index: int) -> void:
+	if is_active:
+		_fill_list()
+
+
 func _on_tab_changed(index: int) -> void:
 	_tab = index
+	_decorate.is_shown = is_active and _tab == 2
 	_fill_list()
 
 
@@ -168,6 +209,9 @@ func _collect_ids() -> PackedStringArray:
 func _fill_list() -> void:
 	if _tab == 1:
 		_fill_equipment_list()
+		return
+	if _tab == 2:
+		_fill_decoration_list()
 		return
 	_ids = _collect_ids()
 	var previous: int = _list.selected_index()
@@ -207,6 +251,58 @@ func _fill_equipment_list() -> void:
 	if previous >= 0:
 		_list.model.select(previous)
 	_show_detail(_list.selected_index())
+
+
+func _fill_decoration_list() -> void:
+	_decor_ids = Game.content.decoration_ids()
+	var previous: int = _list.selected_index()
+	var names: PackedStringArray = PackedStringArray()
+	var prices: PackedStringArray = PackedStringArray()
+	var locale: String = TranslationServer.get_locale()
+	for decoration_id: String in _decor_ids:
+		var def: DecorationDef = Game.content.get_decoration(decoration_id)
+		var stock: int = Game.state.decoration_stock.get(decoration_id, 0)
+		var suffix: String = " ×%d" % stock if stock > 0 else ""
+		names.append("%s%s" % [_text(def.name_key), suffix])
+		prices.append("%s ¢" % NumberFormat.compact(Game.decoration_cost(def.id), locale))
+	_list.set_items(names, prices)
+	if previous >= 0:
+		_list.model.select(previous)
+	_show_detail(_list.selected_index())
+
+
+func _show_decoration_detail(index: int) -> void:
+	if index < 0 or index >= _decor_ids.size():
+		_clear_detail()
+		return
+	var def: DecorationDef = Game.content.get_decoration(_decor_ids[index])
+	var tank: Tank = Game.state.tanks[0]
+	var locale: String = TranslationServer.get_locale()
+	var stock: int = Game.state.decoration_stock.get(def.id, 0)
+	var placed: int = Game.state.decoration_owned(def.id) - stock
+	_name.text = _text(def.name_key)
+	_price.text = _text("SHOP_PRICE") % NumberFormat.compact(Game.decoration_cost(def.id), locale)
+	_rarity.text = DecorationText.bonus(def)
+	_rarity.color = AsciiColors.SEAWEED_LIGHT
+	_description.text = _text(def.description_key)
+	_owned.text = _text("SHOP_DECOR_STOCK") % [stock, placed]
+	_progress.value = float(tank.decorations.size()) / float(Tank.MAX_DECORATIONS)
+	_buy.is_enabled = true
+
+
+func _buy_decoration() -> void:
+	var index: int = _list.selected_index()
+	if index < 0 or index >= _decor_ids.size():
+		return
+	var def: DecorationDef = Game.content.get_decoration(_decor_ids[index])
+	match Game.buy_decoration(def.id):
+		GameService.DecorResult.OK:
+			message.emit(_text("TOAST_DECOR_BOUGHT") % _text(def.name_key))
+		GameService.DecorResult.NOT_ENOUGH_SHELLS:
+			message.emit(_text("TOAST_NOT_ENOUGH"))
+		_:
+			pass
+	_fill_list()
 
 
 func _show_equipment_detail(index: int) -> void:
@@ -250,6 +346,9 @@ func _buy_equipment() -> void:
 
 
 func _show_detail(index: int) -> void:
+	if _tab == 2:
+		_show_decoration_detail(index)
+		return
 	if _tab == 1:
 		_show_equipment_detail(index)
 		return
@@ -297,6 +396,9 @@ func _unlock_hint(def: SpeciesDef) -> String:
 			return _text("UNLOCK_TOTAL_EARNED") % NumberFormat.compact(def.unlock_amount, locale)
 		SpeciesDef.UnlockKind.FISH_COUNT:
 			return _text("UNLOCK_FISH_COUNT") % roundi(def.unlock_amount)
+		SpeciesDef.UnlockKind.DECORATION_TAG:
+			var tag_name: String = _text("TAG_%s" % def.unlock_tag.to_upper())
+			return _text("UNLOCK_DECORATION_TAG") % tag_name
 		SpeciesDef.UnlockKind.SPECIES_COUNT:
 			var needed: SpeciesDef = Game.content.get_species(def.unlock_species_id)
 			var needed_name: String = def.unlock_species_id
@@ -308,6 +410,9 @@ func _unlock_hint(def: SpeciesDef) -> String:
 
 
 func _buy_selected() -> void:
+	if _tab == 2:
+		_buy_decoration()
+		return
 	if _tab == 1:
 		_buy_equipment()
 		return

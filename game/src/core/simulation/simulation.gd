@@ -36,7 +36,9 @@ static func total_production(state: GameState, content: ContentDB) -> float:
 				continue
 			var species: SpeciesDef = content.get_species(fish.species_id)
 			if species != null:
-				total += Economy.fish_rate(species.base_production, fish.happiness)
+				total += Economy.fish_rate(
+					species.base_production, fish.happiness, tank.bonuses.production_multiplier
+				)
 	return total
 
 
