@@ -1,0 +1,11 @@
+# pond_tetra · adulto
+[frame]
+><{==°>
+[colors]
+ttbddeb
+[frame]
+<>{==°>
+[colors]
+ttbddeb
+[anchor]
+eye=5,0

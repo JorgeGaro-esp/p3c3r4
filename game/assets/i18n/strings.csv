@@ -13,24 +13,41 @@ UI_BUY,Comprar,Buy
 UI_YES,Sí,Yes
 UI_NO,No,No
 TOAST_DEX_SOON,El Pecedex llegará pronto,The Fishdex is coming soon
-TOAST_BOUGHT,¡%s comprado! (prototipo),%s bought! (prototype)
-SHOP_TITLE,Tienda (prototipo),Shop (prototype)
+SHOP_TITLE,Tienda,Shop
 SHOP_TAB_FISH,Peces,Fish
-SHOP_TAB_GEAR,Equipo,Gear
-SHOP_PRICE,Precio: %d ¢,Price: %d ¢
-SHOP_OWNED,En la pecera: %d/%d,In the tank: %d/%d
-SHOP_DESC,Texto de prueba: así se vería la descripción larga de una ficha dentro del panel.,Placeholder text: this is how a long item description would look inside the panel.
-SHOP_ITEM_GUPPY,Guppy,Guppy
-SHOP_ITEM_MINNOW,Carpita,Minnow
-SHOP_ITEM_TETRA,Tetra neón,Neon tetra
-SHOP_ITEM_LOACH,Locha,Loach
-SHOP_ITEM_SNAIL,Caracol,Snail
-SHOP_ITEM_GOLDFISH,Pez dorado,Goldfish
-SHOP_ITEM_ANGEL,Pez ángel,Angelfish
-SHOP_ITEM_KOI,Carpa koi,Koi carp
-SHOP_ITEM_FILTER,Filtro,Filter
-SHOP_ITEM_FEEDER,Comedero,Feeder
-SHOP_ITEM_LAMP,Lámpara,Lamp
+SHOP_PRICE,Precio: %s ¢,Price: %s ¢
+SHOP_OWNED,Tienes %d · pecera %d/%d,You have %d · tank %d/%d
+SHOP_LOCKED_NAME,???,???
+SHOP_LOCKED_HINT,Se desbloquea cuando: %s,Unlocks when you: %s
+SHOP_LOCKED_PRICE,Bloqueado,Locked
+SHOP_EMPTY,No hay nada a la venta,Nothing for sale
+UNLOCK_TOTAL_EARNED,ganes %s ¢ en total,earn %s ¢ in total
+UNLOCK_FISH_COUNT,tengas %d peces,have %d fish
+UNLOCK_SPECIES_COUNT,tengas %d × %s,have %d × %s
+TOAST_BOUGHT,¡%s comprado!,%s bought!
+TOAST_NOT_ENOUGH,Te faltan conchas,Not enough shells
+TOAST_TANK_FULL,La pecera está llena,The tank is full
+TOAST_LOCKED,Aún no está disponible,Not available yet
+TOAST_UNLOCKED,Nueva en la tienda: %s,New in the shop: %s
+FISH_CARD_TITLE,Ficha,Fish card
+FISH_PRODUCTION,Produce %s ¢/s,Produces %s ¢/s
+FISH_HAPPINESS,Felicidad %d %%,Happiness %d %%
+SPECIES_POND_GUPPY,Guppy,Guppy
+SPECIES_POND_GUPPY_DESC,Pequeño y nervioso. Cualquier estanque empieza con uno.,Small and jittery. Every pond starts with one.
+SPECIES_POND_MINNOW,Pececillo,Minnow
+SPECIES_POND_MINNOW_DESC,Plateado y veloz; va siempre en dirección a ninguna parte.,Silvery and fast; always heading nowhere in particular.
+SPECIES_POND_TETRA,Tetra neón,Neon tetra
+SPECIES_POND_TETRA_DESC,Una raya azul brillante recorre su costado.,A bright blue stripe runs along its side.
+SPECIES_POND_LOACH,Locha,Loach
+SPECIES_POND_LOACH_DESC,Larga y ondulante; se mueve como una cinta en el agua.,Long and wavy; it moves like a ribbon in the water.
+SPECIES_POND_SNAIL,Caracol,Snail
+SPECIES_POND_SNAIL_DESC,Lento pero constante. Recorre el fondo sin prisa.,Slow but steady. It wanders the bottom without hurry.
+SPECIES_POND_GOLDFISH,Pez dorado,Goldfish
+SPECIES_POND_GOLDFISH_DESC,Aletas de seda y una memoria mejor de lo que dicen.,Silky fins and a better memory than people say.
+SPECIES_POND_ANGELFISH,Pez ángel,Angelfish
+SPECIES_POND_ANGELFISH_DESC,Elegante y tranquilo; flota como si no pesara.,Elegant and calm; it floats as if weightless.
+SPECIES_POND_KOI,Carpa koi,Koi carp
+SPECIES_POND_KOI_DESC,La joya del estanque. Dicen que trae buena suerte.,The jewel of the pond. They say it brings good luck.
 RARITY_COMMON,Común,Common
 RARITY_UNCOMMON,Poco común,Uncommon
 RARITY_RARE,Rara,Rare
@@ -50,9 +67,6 @@ SETTINGS_PANEL_MODE,Paneles (prototipo),Panels (prototype)
 SETTINGS_PANEL_REPLACE,A: sustituyen la pecera,A: replace the tank
 SETTINGS_PANEL_GROW,B: crece hacia arriba,B: grows upward
 UI_SHELLS,Conchas %s,Shells %s
-SPECIES_TEST_GUPPY,Guppy de prueba,Test guppy
-SPECIES_TEST_MINNOW,Pececillo de prueba,Test minnow
-SPECIES_TEST_ANGELFISH,Pez ángel de prueba,Test angelfish
 TOAST_SAVE_RECOVERED,Partida recuperada de una copia,Save recovered from a backup
 TOAST_SAVE_CORRUPT,Partida dañada: empiezas una nueva,Save damaged: starting a new game
 TOAST_SAVE_NEWER,Partida de una versión más nueva,Save is from a newer version

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "pond_loach"
+name_key = "SPECIES_POND_LOACH"
+description_key = "SPECIES_POND_LOACH_DESC"
+biome_id = "pond"
+rarity = 1
+base_cost = 150.0
+base_production = 0.8
+unlock_kind = 2
+unlock_amount = 6.0
+unlock_species_id = ""
+sprite_path = "res://content/sprites/pond_loach.txt"
+palette_roles = PackedStringArray("b", "t", "e")
+palette_colors = PackedColorArray(0.75, 0.6, 0.4, 1, 0.55, 0.4, 0.25, 1, 1, 1, 1, 1)
+style = 1
+speed = 4.0
+amplitude = 0.3
+frequency = 1.8
+frame_duration = 0.45

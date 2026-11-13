@@ -1,0 +1,19 @@
+# pond_koi · adulto
+[frame]
+  _,--._
+><((@@@°>
+  '-..-'
+[colors]
+  ffffff
+ttbbdddeb
+  ffffff
+[frame]
+  _,--._
+<>((@@@°>
+  '-..-'
+[colors]
+  ffffff
+ttbbdddeb
+  ffffff
+[anchor]
+eye=7,1

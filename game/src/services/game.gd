@@ -5,11 +5,11 @@ extends Node
 ## Las acciones del jugador entran por aquí y se validan aquí: la interfaz nunca
 ## modifica el estado directamente. Lo ocurrido se anuncia por [EventBus].
 
-enum BuyResult { OK, UNKNOWN_SPECIES, NOT_ENOUGH_SHELLS, TANK_FULL }
+enum BuyResult { OK, UNKNOWN_SPECIES, NOT_ENOUGH_SHELLS, TANK_FULL, LOCKED }
 
 const START_SHELLS: float = 20.0
 const DEFAULT_SEED: int = 20261113
-const START_FISH: PackedStringArray = ["test_guppy", "test_minnow", "test_angelfish"]
+const START_FISH: PackedStringArray = ["pond_guppy", "pond_guppy"]
 
 var state: GameState = GameState.new()
 var content: ContentDB = ContentDB.new()
@@ -71,6 +71,8 @@ func fish_cost(species_id: String) -> float:
 func buy_fish(species_id: String) -> BuyResult:
 	if not content.has_species(species_id):
 		return BuyResult.UNKNOWN_SPECIES
+	if not state.is_unlocked(species_id):
+		return BuyResult.LOCKED
 	if state.tanks[0].is_full():
 		return BuyResult.TANK_FULL
 	if not state.wallet.spend(fish_cost(species_id)):
@@ -117,6 +119,7 @@ func _replace_state(fresh: GameState) -> void:
 			EventBus.fish_added.emit(tank_index, fish)
 	_last_shells = -1.0
 	_last_rate = -1.0
+	_refresh_unlocks(false)
 	_publish_changes()
 
 
@@ -127,7 +130,21 @@ func _add_fish(tank_index: int, species_id: String) -> void:
 		EventBus.fish_added.emit(tank_index, fish)
 
 
+## Desbloquea las especies cuya condición ya se cumple. Con [param announce] avisa
+## de cada una por [signal EventBus.species_unlocked].
+func _refresh_unlocks(announce: bool = true) -> void:
+	for species_id: String in content.species_ids():
+		if state.is_unlocked(species_id):
+			continue
+		var species: SpeciesDef = content.get_species(species_id)
+		if Unlocks.is_met(species, state):
+			state.unlocked[species_id] = true
+			if announce:
+				EventBus.species_unlocked.emit(species_id)
+
+
 func _publish_changes() -> void:
+	_refresh_unlocks()
 	if state.production_dirty:
 		state.production_rate = Simulation.total_production(state, content)
 		state.production_dirty = false

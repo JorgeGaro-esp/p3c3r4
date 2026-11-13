@@ -1,0 +1,15 @@
+# pond_snail · adulto
+[frame]
+ .--.
+(@@@@)_°
+[colors]
+ dddd
+ddddddbe
+[frame]
+ .--.
+(@@@@)_o
+[colors]
+ dddd
+ddddddbe
+[anchor]
+eye=7,1

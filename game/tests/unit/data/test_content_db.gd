@@ -1,6 +1,6 @@
 extends GutTest
 
-const SPRITE: String = "res://content/sprites/test_guppy.txt"
+const SPRITE: String = "res://content/sprites/pond_guppy.txt"
 
 
 func _valid(id: String = "pond_guppy") -> SpeciesDef:

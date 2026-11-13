@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "pond_tetra"
+name_key = "SPECIES_POND_TETRA"
+description_key = "SPECIES_POND_TETRA_DESC"
+biome_id = "pond"
+rarity = 1
+base_cost = 60.0
+base_production = 0.35
+unlock_kind = 1
+unlock_amount = 100.0
+unlock_species_id = ""
+sprite_path = "res://content/sprites/pond_tetra.txt"
+palette_roles = PackedStringArray("b", "d", "t", "e")
+palette_colors = PackedColorArray(0.3, 0.6, 1, 1, 0.2, 1, 0.9, 1, 1, 0.3, 0.3, 1, 1, 1, 1, 1)
+style = 0
+speed = 8.5
+amplitude = 0.15
+frequency = 2.0
+frame_duration = 0.3

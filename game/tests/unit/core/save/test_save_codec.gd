@@ -13,8 +13,8 @@ func _sample_state() -> GameState:
 	state.rng_seed = 7
 	state.rng_state = 123456789
 	state.wallet.add(250.0)
-	state.tanks[0].add_fish(Fish.new("test_guppy"))
-	state.tanks[0].add_fish(Fish.new("test_minnow"))
+	state.tanks[0].add_fish(Fish.new("pond_guppy"))
+	state.tanks[0].add_fish(Fish.new("pond_minnow"))
 	state.mark_production_dirty()
 	return state
 
@@ -119,3 +119,32 @@ func test_missing_wallet_is_invalid() -> void:
 	data.erase("wallet")
 	var result: DecodeResult = SaveCodec.decode(_reseal(envelope), _content)
 	assert_eq(result.status, DecodeResult.Status.INVALID)
+
+
+func test_format_1_saves_with_test_species_are_migrated() -> void:
+	var envelope: Dictionary = _envelope(SaveCodec.encode(_sample_state(), "0.5.0", 1000))
+	var data: Dictionary = envelope["data"]
+	var tanks: Array = data["tanks"]
+	var tank: Dictionary = tanks[0]
+	var fish_list: Array = tank["fish"]
+	var first: Dictionary = fish_list[0]
+	first["species_id"] = "test_guppy"
+	envelope["format_version"] = 1
+	data.erase("unlocked")
+	var result: DecodeResult = SaveCodec.decode(_reseal(envelope), _content)
+	assert_true(result.is_ok(), result.reason)
+	assert_eq(result.state.fish_total(), 2)
+	assert_eq(result.state.count_of("pond_guppy"), 1)
+
+
+func test_unlocked_species_round_trip_and_unknown_ones_are_ignored() -> void:
+	var state: GameState = _sample_state()
+	state.unlocked["pond_tetra"] = true
+	var envelope: Dictionary = _envelope(SaveCodec.encode(state, "0.5.0", 1000))
+	var data: Dictionary = envelope["data"]
+	var listed: Array = data["unlocked"]
+	listed.append("no_such_species")
+	var result: DecodeResult = SaveCodec.decode(_reseal(envelope), _content)
+	assert_true(result.is_ok(), result.reason)
+	assert_true(result.state.is_unlocked("pond_tetra"))
+	assert_false(result.state.is_unlocked("no_such_species"))

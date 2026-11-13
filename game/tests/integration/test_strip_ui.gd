@@ -189,7 +189,7 @@ func _find_label_starting_with(prefix: String) -> AsciiLabel:
 func test_fish_in_the_tank_match_the_model() -> void:
 	assert_eq(_tank.fish_count(), Game.state.fish_total())
 	Game.state.wallet.add(100.0)
-	Game.buy_fish("test_angelfish")
+	Game.buy_fish("pond_minnow")
 	await wait_frames(2)
 	assert_eq(_tank.fish_count(), Game.state.fish_total())
 	Game.debug_remove_fish(2)
@@ -216,3 +216,60 @@ func test_minimizing_pauses_the_simulation() -> void:
 	await wait_seconds(0.5)
 	assert_eq(Game.state.sim_time, before)
 	Game.set_paused(false)
+
+
+func _visible_label_texts() -> PackedStringArray:
+	var texts: PackedStringArray = PackedStringArray()
+	for widget: AsciiWidget in _ui.all_widgets():
+		var label: AsciiLabel = widget as AsciiLabel
+		if label != null and label.is_shown:
+			texts.append(label.text)
+	return texts
+
+
+func test_shop_lists_the_real_species_and_hides_locked_names() -> void:
+	_controller.open_panel(StripController.Kind.SHOP)
+	await wait_frames(2)
+	var found: bool = false
+	for widget: AsciiWidget in _ui.all_widgets():
+		var list: AsciiList = widget as AsciiList
+		if list != null and list.is_shown:
+			found = true
+			assert_eq(list.names.size(), 8)
+			assert_true(list.names[0].contains("Guppy"), list.names[0])
+			assert_true(list.names[7].contains("???"), "la koi empieza bloqueada")
+	assert_true(found)
+
+
+func test_buying_from_the_shop_adds_a_fish_to_the_tank() -> void:
+	_controller.open_panel(StripController.Kind.SHOP)
+	await wait_frames(2)
+	var before: int = Game.state.fish_total()
+	var buy: AsciiButton = _find_button("[ Comprar ]")
+	assert_not_null(buy)
+	await _click_cell(buy.rect.position)
+	await wait_frames(2)
+	assert_eq(Game.state.fish_total(), before + 1)
+	assert_eq(_tank.fish_count(), before + 1)
+
+
+func test_clicking_a_fish_opens_its_card_and_escape_closes_it() -> void:
+	var fish: Fish = Game.state.tanks[0].fish[0]
+	_canvas.process_mode = Node.PROCESS_MODE_DISABLED  # los peces se quedan quietos
+	var position: Vector2 = _tank.fish_position(fish)
+	var cell: Vector2i = Vector2i(floori(position.x) + 1, floori(position.y))
+	assert_eq(_tank.fish_at(cell), fish, "hit test %s %s" % [position, cell])
+	await _click_cell(cell)
+	_canvas.process_mode = Node.PROCESS_MODE_INHERIT
+	assert_eq(_controller.card_fish(), fish)
+	assert_true("Guppy" in _visible_label_texts())
+	await _press(KEY_ESCAPE)
+	assert_null(_controller.card_fish())
+
+
+func test_the_fish_card_disappears_when_its_fish_does() -> void:
+	var fish: Fish = Game.state.tanks[0].fish[0]
+	_controller.show_card(fish)
+	Game.debug_remove_fish(500)
+	await wait_frames(2)
+	assert_null(_controller.card_fish())

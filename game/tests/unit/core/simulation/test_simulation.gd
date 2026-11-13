@@ -15,7 +15,7 @@ func _species(id: String, production: float) -> SpeciesDef:
 	species.name_key = "SPECIES_" + id.to_upper()
 	species.base_cost = 10.0
 	species.base_production = production
-	species.sprite_path = "res://content/sprites/test_guppy.txt"
+	species.sprite_path = "res://content/sprites/pond_guppy.txt"
 	return species
 
 

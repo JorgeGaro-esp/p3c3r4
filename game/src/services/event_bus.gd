@@ -11,6 +11,8 @@ signal production_changed(rate: float)
 signal fish_added(tank_index: int, fish: Fish)
 ## Se quitó un pez de la pecera [param tank_index].
 signal fish_removed(tank_index: int, fish: Fish)
+## Una especie se desbloqueó y ya está en la tienda.
+signal species_unlocked(species_id: String)
 ## El jugador hizo una compra importante (pide un guardado).
 signal purchase_made
 ## Hay algo que contarle al jugador; [param key] es una clave de traducción.

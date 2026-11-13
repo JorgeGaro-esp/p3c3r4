@@ -106,6 +106,13 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T43 | `SaveService` no arranca solo: lo inicia `StripController`; los tests nunca tocan `user://saves` | Proteger la partida real del jugador |
 | T44 | `rng_seed` y `rng_state` se guardan como cadenas | JSON usa decimales de 64 bits y perdería enteros grandes |
 
+| T45 | Las condiciones de desbloqueo son datos en la especie: una sola condición por especie (conchas totales, peces totales o peces de otra especie) | Declarativo y sin código por especie; combinaciones más ricas (equipo, bioma) llegan con las fases 8 a 10 |
+| T46 | Una especie desbloqueada no se vuelve a bloquear; la lista se guarda en la partida | Vender peces no debe quitar lo conseguido |
+| T47 | Ids de especie definitivos con prefijo de bioma (`pond_guppy`…); la migración 1→2 renombra las de prueba | Las partidas de las fases 3 y 4 siguen funcionando |
+| T48 | Los peces se detectan con `_input` en `TankView` (no `_unhandled_input`) y solo si `UiRoot` no consumió el clic | En Godot 4.6 el clic no llegaba a `_unhandled_input` |
+| T49 | La ficha del pez es una superposición sobre la pecera, no un panel que sustituye la pecera | El clic sobre un pez no debe hacer desaparecer la pecera en el modo A de P02 |
+| T50 | Producciones de partida a ~0,3× de la primera propuesta; un jugador óptimo desbloquea la koi hacia el minuto 27 | Simulación rápida en la sesión; el ajuste real es de la Fase 16 |
+
 ## Cómo añadir decisiones
 
 Añadir una fila con el siguiente identificador libre, la fecha si no es del 2026-11-12 y el motivo. No borrar decisiones antiguas: si una cambia, marcarla como "sustituida por Dxx".

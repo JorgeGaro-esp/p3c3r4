@@ -1,0 +1,11 @@
+# pond_guppy · adulto
+[frame]
+><(((°>
+[colors]
+ttbbbeb
+[frame]
+><(((o>
+[colors]
+ttbbbeb
+[anchor]
+eye=5,0

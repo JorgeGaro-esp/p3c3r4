@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "pond_goldfish"
+name_key = "SPECIES_POND_GOLDFISH"
+description_key = "SPECIES_POND_GOLDFISH_DESC"
+biome_id = "pond"
+rarity = 2
+base_cost = 1200.0
+base_production = 5.5
+unlock_kind = 3
+unlock_amount = 3.0
+unlock_species_id = "pond_tetra"
+sprite_path = "res://content/sprites/pond_goldfish.txt"
+palette_roles = PackedStringArray("b", "t", "f", "e")
+palette_colors = PackedColorArray(1, 0.75, 0.1, 1, 1, 0.5, 0.1, 1, 1, 0.6, 0.15, 1, 1, 1, 1, 1)
+style = 1
+speed = 5.0
+amplitude = 0.2
+frequency = 1.4
+frame_duration = 0.4

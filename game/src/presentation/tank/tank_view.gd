@@ -7,6 +7,9 @@ extends Node
 ## (`fish_added`, `fish_removed`). El aspecto sale de las [SpeciesDef] del
 ## contenido, así que añadir una especie no requiere tocar este código.
 
+## El jugador hizo clic sobre un pez.
+signal fish_clicked(fish: Fish)
+
 const SEED: int = 20261112
 const SURFACE_ROWS: int = 1
 const SAND_ROWS: int = 2
@@ -73,6 +76,41 @@ func _process(delta: float) -> void:
 	var mouth: Vector2 = emitter.anchor_cell("eye") + Vector2(float(emitter.motion.facing), 0.0)
 	_bubbles.spawn(mouth, _rng)
 	_next_bubble_in = _rng.randf_range(BUBBLE_GAP_MIN, BUBBLE_GAP_MAX)
+
+
+## Se usa `_input` y no `_unhandled_input`: el clic llega después de `UiRoot` (que va
+## más abajo en el árbol y por tanto recibe antes) y solo si éste no lo consumió.
+func _input(event: InputEvent) -> void:
+	if get_viewport().is_input_handled():
+		return
+	var button: InputEventMouseButton = event as InputEventMouseButton
+	if button == null or not button.pressed or button.button_index != MOUSE_BUTTON_LEFT:
+		return
+	var hit: Fish = fish_at(canvas.cell_at(button.position))
+	if hit != null:
+		fish_clicked.emit(hit)
+		get_viewport().set_input_as_handled()
+
+
+## Esquina superior izquierda, en celdas, del pez [param fish]; (-1, -1) si no se dibuja.
+func fish_position(fish: Fish) -> Vector2:
+	if not _views.has(fish):
+		return Vector2(-1.0, -1.0)
+	return _views[fish].motion.position
+
+
+## El pez que ocupa la celda [param cell] (el último dibujado si se solapan), o null.
+func fish_at(cell: Vector2i) -> Fish:
+	var found: Fish = null
+	for fish: Fish in _views:
+		var view: FishView = _views[fish]
+		var origin: Vector2 = view.motion.position
+		var area: Rect2 = Rect2(
+			origin - Vector2(0.5, 0.5), Vector2(view.width + 1, view.height + 1)
+		)
+		if area.has_point(Vector2(cell) + Vector2(0.5, 0.5)):
+			found = fish
+	return found
 
 
 ## Fija la zona de la rejilla donde vive la pecera (en celdas). Sin zona, ocupa

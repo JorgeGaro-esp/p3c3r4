@@ -1,0 +1,19 @@
+# pond_goldfish · adulto
+[frame]
+  ,-.
+<{((((°>
+  '-'
+[colors]
+  fff
+ttbbbbeb
+  fff
+[frame]
+  ,-.
+>{((((°>
+  '-'
+[colors]
+  fff
+ttbbbbeb
+  fff
+[anchor]
+eye=6,1

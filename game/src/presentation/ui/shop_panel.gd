@@ -1,45 +1,22 @@
 class_name ShopPanel
 extends UiPanel
-## PROTOTIPO de la tienda (Fase 2, decisión P02): datos de mentira para probar
-## cómo caben pestañas, lista, ficha y botones en la franja. La tienda de verdad
-## (Fase 5) la sustituirá y leerá el contenido de `content/`.
+## Tienda de peces: lista las especies del estanque con su precio, rareza y
+## condición de desbloqueo, y compra con [method GameService.buy_fish].
+##
+## Solo muestra y pide: las reglas (coste, capacidad, desbloqueo) viven en `Game`.
+## Se refresca sola cuando cambian las conchas, los peces o los desbloqueos.
 
 signal close_requested
 signal message(text: String)
 
-const FISH_KEYS: Array[String] = [
-	"SHOP_ITEM_GUPPY",
-	"SHOP_ITEM_MINNOW",
-	"SHOP_ITEM_TETRA",
-	"SHOP_ITEM_LOACH",
-	"SHOP_ITEM_SNAIL",
-	"SHOP_ITEM_GOLDFISH",
-	"SHOP_ITEM_ANGEL",
-	"SHOP_ITEM_KOI",
-]
-const FISH_PRICES: Array[int] = [10, 25, 60, 150, 400, 1200, 4000, 15000]
-const FISH_RARITY: Array[int] = [0, 0, 1, 1, 2, 2, 3, 4]
-const GEAR_KEYS: Array[String] = ["SHOP_ITEM_FILTER", "SHOP_ITEM_FEEDER", "SHOP_ITEM_LAMP"]
-const GEAR_PRICES: Array[int] = [100, 500, 2500]
-const GEAR_RARITY: Array[int] = [0, 1, 2]
-const RARITY_KEYS: Array[String] = [
-	"RARITY_COMMON",
-	"RARITY_UNCOMMON",
-	"RARITY_RARE",
-	"RARITY_EPIC",
-	"RARITY_LEGENDARY",
-]
-## Símbolo de rareza: el color nunca es la única señal (GDD §4.2).
-const RARITY_SYMBOLS: Array[String] = ["·", "+", "*", "#", "@"]
-const FAKE_CAPACITY: int = 8
-const FAKE_OWNED_CYCLE: int = 5
+const BIOME_ID: String = "pond"
 const MIN_LIST_WIDTH: int = 24
 const MAX_LIST_WIDTH: int = 44
 const DETAIL_GAP: int = 2
 const CLOSE_BUTTON_WIDTH: int = 16
 const BUY_BUTTON_WIDTH: int = 12
 
-var _tab: int = 0
+var _ids: PackedStringArray = PackedStringArray()
 var _frame: AsciiFrame = AsciiFrame.new()
 var _tabs: AsciiTabs = AsciiTabs.new()
 var _list: AsciiList = AsciiList.new()
@@ -55,10 +32,8 @@ var _close: AsciiButton = null
 
 func _init(root: UiRoot) -> void:
 	super(root)
-	_frame.title = _text("SHOP_TITLE")
 	_frame.is_double = true
 	_add(_frame, UiRoot.LAYER_PANEL)
-	_tabs.set_titles(PackedStringArray([_text("SHOP_TAB_FISH"), _text("SHOP_TAB_GEAR")]))
 	_add(_tabs)
 	_add(_list)
 	_name = _make_label("", AsciiColors.AMBER)
@@ -68,14 +43,17 @@ func _init(root: UiRoot) -> void:
 	_description.wraps = true
 	_owned = _make_label("")
 	_add(_progress)
-	_buy = _make_button("[ %s ]" % _text("UI_BUY"))
-	_close = _make_button(_text("UI_CLOSE_PANEL"))
-	_tabs.tab_changed.connect(_on_tab_changed)
+	_buy = _make_button("")
+	_close = _make_button("")
 	_list.selection_changed.connect(_show_detail)
 	_list.chosen.connect(func(_index: int) -> void: _buy_selected())
 	_buy.activated.connect(_buy_selected)
 	_close.activated.connect(func() -> void: close_requested.emit())
-	_fill_list()
+	EventBus.shells_changed.connect(_on_state_changed)
+	EventBus.fish_added.connect(_on_fish_changed)
+	EventBus.fish_removed.connect(_on_fish_changed)
+	EventBus.species_unlocked.connect(_on_state_changed)
+	refresh()
 
 
 func layout(area: Rect2i) -> void:
@@ -98,49 +76,149 @@ func layout(area: Rect2i) -> void:
 	_progress.rect = Rect2i(detail_x, owned_row + 1, mini(detail_width, 24), 1)
 	_buy.rect = Rect2i(detail_x, top + height - 2, BUY_BUTTON_WIDTH, 1)
 	_close.rect = Rect2i(detail_x + BUY_BUTTON_WIDTH + 1, top + height - 2, CLOSE_BUTTON_WIDTH, 1)
+	_show_detail(_list.selected_index())
 
 
-func _keys() -> Array[String]:
-	return FISH_KEYS if _tab == 0 else GEAR_KEYS
-
-
-func _prices() -> Array[int]:
-	return FISH_PRICES if _tab == 0 else GEAR_PRICES
-
-
-func _rarities() -> Array[int]:
-	return FISH_RARITY if _tab == 0 else GEAR_RARITY
-
-
-func _on_tab_changed(index: int) -> void:
-	_tab = index
+## Vuelve a escribir todos los textos (cambio de idioma) y la lista.
+func refresh() -> void:
+	_frame.title = _text("SHOP_TITLE")
+	_tabs.set_titles(PackedStringArray([_text("SHOP_TAB_FISH")]))
+	_buy.label = "[ %s ]" % _text("UI_BUY")
+	_close.label = _text("UI_CLOSE_PANEL")
 	_fill_list()
 
 
+## Ids de las especies a la venta, de la más barata a la más cara.
+func species_ids() -> PackedStringArray:
+	return _ids
+
+
+## Pulsa «Comprar» sobre la especie seleccionada.
+func buy_selected() -> void:
+	_buy_selected()
+
+
+## Selecciona la especie [param species_id] (para los tests).
+func select_species(species_id: String) -> void:
+	var index: int = _ids.find(species_id)
+	if index >= 0:
+		_list.model.select(index)
+		_show_detail(index)
+
+
+func _on_state_changed(_value: Variant = null) -> void:
+	if is_active:
+		_fill_list()
+
+
+func _on_fish_changed(_tank_index: int, _fish: Fish) -> void:
+	if is_active:
+		_fill_list()
+
+
+func _collect_ids() -> PackedStringArray:
+	var entries: Array[SpeciesDef] = []
+	for species_id: String in Game.content.species_ids():
+		var def: SpeciesDef = Game.content.get_species(species_id)
+		if def.biome_id == BIOME_ID:
+			entries.append(def)
+	entries.sort_custom(
+		func(a: SpeciesDef, b: SpeciesDef) -> bool: return a.base_cost < b.base_cost
+	)
+	var result: PackedStringArray = PackedStringArray()
+	for def: SpeciesDef in entries:
+		result.append(def.id)
+	return result
+
+
 func _fill_list() -> void:
+	_ids = _collect_ids()
+	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
 	var prices: PackedStringArray = PackedStringArray()
-	for index: int in range(_keys().size()):
-		names.append(_text(_keys()[index]))
-		prices.append("%d ¢" % _prices()[index])
+	var locale: String = TranslationServer.get_locale()
+	for species_id: String in _ids:
+		var def: SpeciesDef = Game.content.get_species(species_id)
+		var unlocked: bool = Game.state.is_unlocked(species_id)
+		var shown_name: String = _text(def.name_key) if unlocked else _text("SHOP_LOCKED_NAME")
+		names.append("%s %s" % [def.rarity_symbol(), shown_name])
+		if unlocked:
+			prices.append("%s ¢" % NumberFormat.compact(Game.fish_cost(species_id), locale))
+		else:
+			prices.append(_text("SHOP_LOCKED_PRICE"))
 	_list.set_items(names, prices)
+	if previous >= 0:
+		_list.model.select(previous)
 	_show_detail(_list.selected_index())
 
 
 func _show_detail(index: int) -> void:
-	if index < 0 or index >= _keys().size():
+	if index < 0 or index >= _ids.size():
+		_clear_detail()
 		return
-	var rarity: int = _rarities()[index]
-	var owned: int = index % FAKE_OWNED_CYCLE
-	_name.text = _text(_keys()[index])
-	_price.text = _text("SHOP_PRICE") % _prices()[index]
-	_rarity.text = "%s %s" % [RARITY_SYMBOLS[rarity], _text(RARITY_KEYS[rarity])]
-	_description.text = _text("SHOP_DESC")
-	_owned.text = _text("SHOP_OWNED") % [owned, FAKE_CAPACITY]
-	_progress.value = float(owned) / float(FAKE_CAPACITY)
+	var def: SpeciesDef = Game.content.get_species(_ids[index])
+	var unlocked: bool = Game.state.is_unlocked(def.id)
+	var locale: String = TranslationServer.get_locale()
+	_rarity.text = "%s %s" % [def.rarity_symbol(), _text(RarityStyle.name_key(def.rarity))]
+	_rarity.color = RarityStyle.color(def.rarity)
+	_buy.is_enabled = unlocked
+	if unlocked:
+		var tank: Tank = Game.state.tanks[0]
+		_name.text = _text(def.name_key)
+		_price.text = _text("SHOP_PRICE") % NumberFormat.compact(Game.fish_cost(def.id), locale)
+		_description.text = _text(def.description_key)
+		_owned.text = _text("SHOP_OWNED") % [tank.count_of(def.id), tank.fish.size(), tank.capacity]
+		_progress.value = float(tank.fish.size()) / float(maxi(tank.capacity, 1))
+	else:
+		_name.text = _text("SHOP_LOCKED_NAME")
+		_price.text = _text("SHOP_LOCKED_PRICE")
+		_description.text = _text("SHOP_LOCKED_HINT") % _unlock_hint(def)
+		_owned.text = ""
+		_progress.value = Unlocks.progress_ratio(def, Game.state)
+
+
+func _clear_detail() -> void:
+	_name.text = ""
+	_price.text = _text("SHOP_EMPTY")
+	_rarity.text = ""
+	_description.text = ""
+	_owned.text = ""
+	_progress.value = 0.0
+	_buy.is_enabled = false
+
+
+## Frase de lo que falta para desbloquear [param def] («ganes 100 ¢ en total»).
+func _unlock_hint(def: SpeciesDef) -> String:
+	var locale: String = TranslationServer.get_locale()
+	match def.unlock_kind:
+		SpeciesDef.UnlockKind.TOTAL_EARNED:
+			return _text("UNLOCK_TOTAL_EARNED") % NumberFormat.compact(def.unlock_amount, locale)
+		SpeciesDef.UnlockKind.FISH_COUNT:
+			return _text("UNLOCK_FISH_COUNT") % roundi(def.unlock_amount)
+		SpeciesDef.UnlockKind.SPECIES_COUNT:
+			var needed: SpeciesDef = Game.content.get_species(def.unlock_species_id)
+			var needed_name: String = def.unlock_species_id
+			if needed != null:
+				needed_name = _text(needed.name_key)
+			return _text("UNLOCK_SPECIES_COUNT") % [roundi(def.unlock_amount), needed_name]
+		_:
+			return ""
 
 
 func _buy_selected() -> void:
 	var index: int = _list.selected_index()
-	if index >= 0 and index < _keys().size():
-		message.emit(_text("TOAST_BOUGHT") % _text(_keys()[index]))
+	if index < 0 or index >= _ids.size():
+		return
+	var def: SpeciesDef = Game.content.get_species(_ids[index])
+	match Game.buy_fish(def.id):
+		GameService.BuyResult.OK:
+			message.emit(_text("TOAST_BOUGHT") % _text(def.name_key))
+		GameService.BuyResult.NOT_ENOUGH_SHELLS:
+			message.emit(_text("TOAST_NOT_ENOUGH"))
+		GameService.BuyResult.TANK_FULL:
+			message.emit(_text("TOAST_TANK_FULL"))
+		GameService.BuyResult.LOCKED:
+			message.emit(_text("TOAST_LOCKED"))
+		_:
+			pass
+	_fill_list()

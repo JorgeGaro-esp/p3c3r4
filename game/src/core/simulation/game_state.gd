@@ -17,11 +17,25 @@ var rng_state: int = 0
 var production_rate: float = 0.0
 ## Verdadero cuando hay que recalcular [member production_rate].
 var production_dirty: bool = true
+## Especies que ya se pueden comprar. Una vez desbloqueada, no se vuelve a bloquear.
+var unlocked: Dictionary[String, bool] = {}
 
 
 ## Avisa de que compra, venta o cambio de felicidad alteran la producción.
 func mark_production_dirty() -> void:
 	production_dirty = true
+
+
+## Cuántos peces de [param species_id] hay en todas las peceras.
+func count_of(species_id: String) -> int:
+	var total: int = 0
+	for tank: Tank in tanks:
+		total += tank.count_of(species_id)
+	return total
+
+
+func is_unlocked(species_id: String) -> bool:
+	return unlocked.has(species_id)
 
 
 ## Total de peces en todas las peceras.
@@ -43,6 +57,7 @@ func to_dict() -> Dictionary:
 		# 64 bits no caben en un número JSON sin perder precisión: van como texto.
 		"rng_seed": str(rng_seed),
 		"rng_state": str(rng_state),
+		"unlocked": unlocked.keys(),
 	}
 
 
@@ -78,4 +93,24 @@ static func from_dict(
 	state.sim_time = SaveFields.read_float(data, "sim_time", 0.0, 0.0, MAX_SIM_TIME, warnings)
 	state.rng_seed = SaveFields.read_big_int(data, "rng_seed", 0, warnings)
 	state.rng_state = SaveFields.read_big_int(data, "rng_state", 0, warnings)
+	_read_unlocked(state, data, content, warnings)
 	return state
+
+
+## Lee la lista de especies desbloqueadas; ignora las que no existen. Si falta,
+## `Game` la recalcula al adoptar la partida.
+static func _read_unlocked(
+	state: GameState, data: Dictionary, content: ContentDB, warnings: PackedStringArray
+) -> void:
+	if not data.has("unlocked"):
+		return
+	var raw: Variant = SaveFields.read_array(data, "unlocked", warnings)
+	if raw == null:
+		return
+	var items: Array = raw
+	for item: Variant in items:
+		if typeof(item) != TYPE_STRING:
+			continue
+		var species_id: String = item
+		if content.has_species(species_id):
+			state.unlocked[species_id] = true

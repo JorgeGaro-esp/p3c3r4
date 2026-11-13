@@ -26,6 +26,7 @@ var _ui: UiRoot
 var _sidebar: SidebarPanel
 var _shop: ShopPanel
 var _settings_panel: SettingsPanel
+var _card: FishCard
 var _open: Kind = Kind.NONE
 var _available_rows: int = UNLIMITED_ROWS
 
@@ -37,12 +38,14 @@ func _ready() -> void:
 	assert(_canvas != null and _tank != null and _ui != null, "StripController needs its nodes")
 	_build_panels()
 	_canvas.grid_changed.connect(_apply_layout)
-	_ui.escape_pressed.connect(close_panel)
+	_ui.escape_pressed.connect(_on_escape)
+	_tank.fish_clicked.connect(_on_fish_clicked)
 	_ui.pointer_pressed.connect(Platform.enable_keyboard_focus)
 	Settings.changed.connect(_on_settings_changed)
 	Platform.display_changed.connect(_apply_window)
 	Platform.minimized_changed.connect(_on_minimized_changed)
 	EventBus.shells_changed.connect(_on_shells_changed)
+	EventBus.species_unlocked.connect(_on_species_unlocked)
 	EventBus.production_changed.connect(_on_production_changed)
 	_on_shells_changed(Game.state.wallet.shells)
 	_on_production_changed(Game.state.production_rate)
@@ -85,10 +88,45 @@ func open_kind() -> Kind:
 	return _open
 
 
+## Muestra la ficha del pez [param fish] sobre la pecera.
+func show_card(fish: Fish) -> void:
+	_card.show_fish(fish)
+	_apply_layout()
+
+
+func close_card() -> void:
+	_card.show_fish(null)
+	_apply_layout()
+
+
+## Pez cuya ficha está abierta, o null.
+func card_fish() -> Fish:
+	return _card.fish()
+
+
+func _on_fish_clicked(fish: Fish) -> void:
+	show_card(fish)
+
+
+func _on_escape() -> void:
+	if _card.fish() != null:
+		close_card()
+	else:
+		close_panel()
+
+
+func _on_species_unlocked(species_id: String) -> void:
+	var def: SpeciesDef = Game.content.get_species(species_id)
+	if def != null:
+		_sidebar.show_toast(tr("TOAST_UNLOCKED") % tr(def.name_key))
+
+
 func _build_panels() -> void:
 	_sidebar = SidebarPanel.new(_ui)
 	_shop = ShopPanel.new(_ui)
 	_settings_panel = SettingsPanel.new(_ui)
+	_card = FishCard.new(_ui)
+	_card.close_requested.connect(close_card)
 	_sidebar.set_active(true)
 	_sidebar.shop_pressed.connect(toggle_panel.bind(Kind.SHOP))
 	_sidebar.settings_pressed.connect(toggle_panel.bind(Kind.SETTINGS))
@@ -154,12 +192,20 @@ func _apply_layout() -> void:
 	_sidebar.layout(layout.sidebar_rect)
 	_place_panel(_shop, Kind.SHOP, layout.panel_rect)
 	_place_panel(_settings_panel, Kind.SETTINGS, layout.panel_rect)
+	_place_card(layout.tank_rect)
 
 
 func _place_panel(panel: UiPanel, kind: Kind, area: Rect2i) -> void:
 	panel.set_active(_open == kind and area.has_area())
 	if panel.is_active:
 		panel.layout(area)
+
+
+func _place_card(tank_area: Rect2i) -> void:
+	var area: Rect2i = FishCard.fit_in(tank_area)
+	_card.set_active(_card.fish() != null and area.has_area())
+	if _card.is_active:
+		_card.layout(area)
 
 
 func _on_minimized_changed(is_minimized: bool) -> void:

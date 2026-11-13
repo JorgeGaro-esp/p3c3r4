@@ -1,0 +1,11 @@
+# pond_loach · adulto
+[frame]
+~=~=~=~°>
+[colors]
+tbbbbbbeb
+[frame]
+=~=~=~=°>
+[colors]
+tbbbbbbeb
+[anchor]
+eye=7,0

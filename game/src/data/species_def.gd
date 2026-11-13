@@ -9,18 +9,32 @@ extends Resource
 
 enum Rarity { COMMON, UNCOMMON, RARE, EPIC, LEGENDARY }
 
+## Qué hay que cumplir para que la especie aparezca en la tienda (GDD §4.2).
+## Una vez cumplido, la especie queda desbloqueada para siempre.
+enum UnlockKind {
+	NONE,  ## Disponible desde el principio.
+	TOTAL_EARNED,  ## Conchas ganadas en total >= `unlock_amount`.
+	FISH_COUNT,  ## Peces en total >= `unlock_amount`.
+	SPECIES_COUNT,  ## Peces de `unlock_species_id` >= `unlock_amount`.
+}
 ## Un símbolo por rareza, para no depender solo del color (GDD §4.2).
 const RARITY_SYMBOLS: String = "·+*#@"
 
 @export var id: String = ""
 ## Clave de traducción del nombre (`SPECIES_POND_GUPPY`).
 @export var name_key: String = ""
+## Clave de traducción de la descripción (`SPECIES_POND_GUPPY_DESC`).
+@export var description_key: String = ""
 @export var biome_id: String = "pond"
 @export var rarity: Rarity = Rarity.COMMON
 ## Coste del primer pez de esta especie, en conchas.
 @export var base_cost: float = 10.0
 ## Conchas por segundo de un adulto con felicidad máxima, sin bonificaciones.
 @export var base_production: float = 0.1
+@export var unlock_kind: UnlockKind = UnlockKind.NONE
+@export var unlock_amount: float = 0.0
+## Solo para `SPECIES_COUNT`: la especie que hay que tener.
+@export var unlock_species_id: String = ""
 ## Ruta del archivo de sprite, por ejemplo `res://content/sprites/test_guppy.txt`.
 @export_file("*.txt") var sprite_path: String = ""
 ## Roles de color (`b`, `t`, `e`, `f`, `d`) y su color, en listas paralelas.
