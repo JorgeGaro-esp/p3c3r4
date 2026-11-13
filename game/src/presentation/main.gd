@@ -1,10 +1,7 @@
 extends Control
-## Escena principal. En la Fase 1 muestra la pecera ASCII viva.
-
-## Límite de fotogramas por segundo (T07).
-const TARGET_FPS: int = 30
+## Escena principal. Monta la pecera ASCII viva y la interfaz en la franja; el
+## tamaño y la posición de la ventana los gestiona [StripController].
 
 
 func _ready() -> void:
-	Engine.max_fps = TARGET_FPS
 	RenderingServer.set_default_clear_color(Color.BLACK)

@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://src/presentation/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://src/presentation/ascii/ascii_canvas.gd" id="2_canvas"]
 [ext_resource type="Script" path="res://src/presentation/tank/tank_view.gd" id="3_tank"]
 [ext_resource type="Script" path="res://src/presentation/ui/debug_overlay.gd" id="4_debug"]
+[ext_resource type="Script" path="res://src/presentation/ui/ui_root.gd" id="5_ui"]
+[ext_resource type="Script" path="res://src/presentation/strip_controller.gd" id="6_strip"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -20,6 +22,16 @@ script = ExtResource("2_canvas")
 [node name="TankView" type="Node" parent="."]
 script = ExtResource("3_tank")
 canvas_path = NodePath("../AsciiCanvas")
+
+[node name="UiRoot" type="Node" parent="."]
+script = ExtResource("5_ui")
+canvas_path = NodePath("../AsciiCanvas")
+
+[node name="StripController" type="Node" parent="."]
+script = ExtResource("6_strip")
+canvas_path = NodePath("../AsciiCanvas")
+tank_path = NodePath("../TankView")
+ui_path = NodePath("../UiRoot")
 
 [node name="DebugOverlay" type="CanvasLayer" parent="."]
 script = ExtResource("4_debug")

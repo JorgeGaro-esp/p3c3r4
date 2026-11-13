@@ -86,7 +86,7 @@ Hacer trampas editando la partida no se considera una amenaza: es un juego de un
 
 ## 7. Código y dependencias
 
-- Sin `OS.execute`, `OS.shell_open` con datos externos, `Expression` ni carga dinámica de scripts.
+- Sin `OS.execute`, `OS.shell_open` con datos externos, `Expression` ni carga dinámica de scripts. **Única excepción (T26):** `Platform.set_launch_with_windows` ejecuta `reg.exe` con argumentos fijos para la clave `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, solo en Windows y con el juego exportado; la ruta se valida (`AutostartCommand.is_safe_path`) y no interviene ningún dato externo.
 - Sin acceso a red. Si algún día se añade (versión web, nube), se revisa este documento antes.
 - Complementos incluidos en `addons/` con la versión anotada en `LICENSE-THIRD-PARTY.md`. Se actualizan a propósito y entre fases, leyendo antes sus notas de versión.
 - En la CI, las acciones de terceros se fijan por identificador de commit y el flujo declara permisos mínimos (`contents: read`).

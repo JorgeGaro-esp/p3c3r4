@@ -2,27 +2,27 @@ class_name AsciiCanvas
 extends Node2D
 ## Lienzo único donde se dibuja todo el arte ASCII con la fuente del juego (T06).
 ##
-## Convierte celdas de la rejilla en píxeles y ajusta el tamaño de la fuente al
-## tamaño de la ventana, de modo que la pecera ocupa siempre [member target_rows]
-## filas. No hay un nodo por pez ni por carácter: cada elemento es un
-## [AsciiDrawable] que dibuja con [method put_char] dentro de [method _draw].
+## Convierte celdas de la rejilla en píxeles. El tamaño de la fuente lo fija
+## quien manda sobre la ventana con [method set_font_size] (así la altura de una
+## fila no cambia cuando la ventana crece), y las columnas y filas salen de
+## dividir el tamaño de la ventana entre el de una celda. No hay un nodo por pez
+## ni por carácter: cada elemento es un [AsciiDrawable] que dibuja con
+## [method put_char] dentro de [method _draw].
 
 ## Se emite cuando cambia la rejilla (tamaño de ventana o de fuente).
 signal grid_changed
 
 const DEFAULT_FONT_PATH: String = "res://assets/fonts/DejaVuSansMono.ttf"
 const MIN_FONT_SIZE: int = 8
+const DEFAULT_FONT_SIZE: int = 17
 const MAX_DELTA: float = 0.1
-const _REFERENCE_SIZE: int = 100
 const _WIDEST_CHARACTER: int = 77  # "M"
 
 @export var font: Font
-## Filas de la rejilla que caben en la altura de la ventana.
-@export_range(4, 40) var target_rows: int = 12
 
 ## Tamaño en píxeles de una celda (un carácter).
 var cell_size: Vector2 = Vector2(10.0, 20.0)
-var font_size: int = 16
+var font_size: int = DEFAULT_FONT_SIZE
 ## Columnas y filas completas que caben en la ventana.
 var columns: int = 0
 var row_count: int = 0
@@ -76,6 +76,17 @@ func remove_drawable(drawable: AsciiDrawable) -> void:
 	_drawables.erase(drawable)
 
 
+## Cambia el tamaño de la fuente y rehace la rejilla.
+func set_font_size(new_size: int) -> void:
+	font_size = maxi(MIN_FONT_SIZE, new_size)
+	_recompute_grid()
+
+
+## Celda de la rejilla que contiene el punto [param pixel] de la ventana.
+func cell_at(pixel: Vector2) -> Vector2i:
+	return Vector2i(floori(pixel.x / cell_size.x), floori(pixel.y / cell_size.y))
+
+
 ## Dibuja un carácter en la celda [param cell] (admite decimales).
 func put_char(character: String, cell: Vector2, color: Color) -> void:
 	var origin: Vector2 = Vector2(cell.x * cell_size.x, cell.y * cell_size.y + _ascent)
@@ -95,10 +106,13 @@ func fill_cell(cell: Vector2, color: Color) -> void:
 	draw_rect(Rect2(cell * cell_size, cell_size), color)
 
 
+## Rellena un rectángulo de celdas con un color liso (para paneles opacos).
+func fill_rect_cells(rect: Rect2i, color: Color) -> void:
+	draw_rect(Rect2(Vector2(rect.position) * cell_size, Vector2(rect.size) * cell_size), color)
+
+
 func _recompute_grid() -> void:
 	var viewport_size: Vector2 = get_viewport_rect().size
-	var line_ratio: float = font.get_height(_REFERENCE_SIZE) / float(_REFERENCE_SIZE)
-	font_size = maxi(MIN_FONT_SIZE, int(viewport_size.y / (float(target_rows) * line_ratio)))
 	cell_size = Vector2(
 		font.get_char_size(_WIDEST_CHARACTER, font_size).x, font.get_height(font_size)
 	)

@@ -23,6 +23,7 @@ const LAYER_FRONT: int = 20
 
 var canvas: AsciiCanvas
 
+var _area: Rect2i = Rect2i()
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _sprites: Array[AsciiSprite] = []
 var _palettes: Array[AsciiPalette] = []
@@ -81,6 +82,15 @@ func remove_fish(count: int) -> void:
 		canvas.remove_drawable(last)
 
 
+## Fija la zona de la rejilla donde vive la pecera (en celdas). Sin zona, ocupa
+## toda la ventana. La zona cambia cuando aparece la barra lateral o crece la
+## ventana hacia arriba.
+func set_area(area: Rect2i) -> void:
+	_area = area
+	if canvas != null:
+		_on_grid_changed()
+
+
 ## Número de peces que hay ahora mismo.
 func fish_count() -> int:
 	return _fish.size()
@@ -133,19 +143,28 @@ func _add_one_fish() -> void:
 
 
 func _on_grid_changed() -> void:
-	var sand_top: int = canvas.row_count - SAND_ROWS
-	_surface.configure(canvas.columns)
-	_sand.configure(canvas.columns, sand_top, SAND_ROWS)
-	_weeds.configure(canvas.columns, sand_top, sand_top - SURFACE_ROWS - 2)
-	_bubbles.surface_row = float(SURFACE_ROWS)
+	var area: Rect2i = _current_area()
+	var sand_top: int = area.end.y - SAND_ROWS
+	_surface.configure(area.size.x, area.position.y)
+	_sand.configure(area.size.x, sand_top, SAND_ROWS)
+	_weeds.configure(area.size.x, sand_top, sand_top - area.position.y - SURFACE_ROWS - 2)
+	_bubbles.surface_row = float(area.position.y + SURFACE_ROWS)
 	for fish: FishView in _fish:
 		fish.motion.set_bounds(_bounds_for(fish))
+
+
+## Zona de la pecera: la que se fijó o, si no hay, toda la ventana.
+func _current_area() -> Rect2i:
+	if _area.has_area():
+		return _area
+	return Rect2i(0, 0, canvas.columns, canvas.row_count)
 
 
 ## Zona donde puede estar la esquina superior izquierda de un pez: bajo la
 ## superficie, sobre la arena y sin salirse por los lados.
 func _bounds_for(fish: FishView) -> Rect2:
-	var top: float = float(SURFACE_ROWS + 1)
-	var bottom: float = float(canvas.row_count - SAND_ROWS - fish.height)
-	var right: float = float(canvas.columns - fish.width)
+	var area: Rect2i = _current_area()
+	var top: float = float(area.position.y + SURFACE_ROWS + 1)
+	var bottom: float = float(area.end.y - SAND_ROWS - fish.height)
+	var right: float = float(area.size.x - fish.width)
 	return Rect2(0.0, top, maxf(right, 0.0), maxf(bottom - top, 0.0))

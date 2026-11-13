@@ -37,6 +37,9 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | D29 | Guardado | Autoguardado con copia de seguridad y versión de formato |
 | D30 | Carpeta | `Proyecto P3C3R4` en el escritorio, creada por Claude |
 | D31 | Forma de preguntar | Preguntas interactivas de opciones, también en futuros proyectos |
+| D32 | Altura de la franja (P01) | Ajustable por el jugador; 12 filas por defecto (entre 10 y 24). 2026-11-13 |
+| D33 | Arranque con Windows (P09) | Opción en Ajustes, desactivada por defecto. 2026-11-13 |
+| D34 | Varios monitores (P10) | Monitor principal por defecto, con selector en Ajustes para elegir otro. 2026-11-13 |
 
 ## B. Decisiones técnicas derivadas
 
@@ -64,21 +67,30 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T20 | El texto del indicador de depuración (F3) no pasa por `strings.csv` | Herramienta de desarrollo, no se muestra al jugador |
 | T21 | Los nodos se enlazan con `NodePath` y `get_node` en `_ready`, no con `@export` de tipo nodo | Con `@export` de tipo nodo el valor llegaba nulo en ejecución |
 | T22 | Para exportar (Fase 16) hará falta incluir `content/sprites/*.txt` en el filtro de exportación | Godot no empaqueta .txt por defecto |
+| T23 | Los componentes de interfaz son `AsciiDrawable` propios (`AsciiWidget`), no nodos `Control` | Mantiene un solo lienzo (T06/T18) y estética ASCII exacta; `UiRoot` reparte ratón y teclado |
+| T24 | Tamaño de fuente = 17 px × escala de Windows (DPI/96); altura de ventana = filas × alto de celda | `screen_get_scale` no existe en Windows; la franja se ve igual a 100, 125 y 150 % |
+| T25 | `Platform` (autoload) consulta pantallas cada 1 s y recoloca la franja (máx. 3 intentos) | `dpi_changed` solo funciona en macOS y Wayland; cubre cambios de resolución, escala, monitor y barra de tareas |
+| T26 | Único uso de `OS.execute`: `reg.exe` para la clave `HKCU\...\Run`, solo en Windows con juego exportado, con argumentos fijos de `AutostartCommand` | No hay API de Godot para el arranque con Windows. Excepción a doc 06 §7, acotada y comprobada por tests |
+| T27 | La ventana arranca con `no_focus` (no roba el foco); el primer clic llama a `Platform.enable_keyboard_focus()` | Con `no_focus` Godot ignora el teclado; así se ve y se usa sin interrumpir lo que Jorge esté haciendo |
+| T28 | Ajustes en `user://settings.json`, validación estricta con límites y valores por defecto; guardado diferido 0,5 s y escritura atómica | Doc 06 §6 |
+| T29 | Minimizada, la ventana pone en pausa dibujo y simulación (`PROCESS_MODE_DISABLED`) | Bajo consumo (T07) |
+| T30 | Símbolos de rareza accesibles sin depender del color: `· + * # @` | Doc 05 y accesibilidad (Fase 15) |
+| T31 | Orden de foco por grupos (`focus_group`): un panel abierto recibe el foco con Tab antes que la barra lateral | Teclado natural al abrir tienda o ajustes |
 
 ## C. Pendientes (no bloquean el inicio)
 
 | ID | Pregunta | Cuándo hace falta |
 |---|---|---|
-| P01 | Altura de la franja y si es ajustable por el jugador | Fase 2 |
-| P02 | Cómo se abren tienda y Pecedex dentro de la franja: panel lateral o ventana que crece hacia arriba | Fase 2, con prototipo |
+| P01 | Altura de la franja y si es ajustable por el jugador | Resuelta en Fase 2: D32 |
+| P02 | Cómo se abren tienda y Pecedex dentro de la franja: panel lateral o ventana que crece hacia arriba | Prototipo hecho en Fase 2 con ambos modos (Ajustes → modo de paneles). **Pendiente de que Jorge elija** |
 | P03 | Lista definitiva de biomas y especies (el GDD trae una propuesta) | Fase 5 y Fase 10 |
 | P04 | Nombre de la moneda y de la moneda de prestigio | Fase 3 |
 | P05 | Qué conserva exactamente el prestigio | Fase 13 |
 | P06 | Estilo concreto de la música y origen de los sonidos | Fase 14 |
 | P07 | Título definitivo | Antes de cualquier publicación |
 | P08 | Fuente definitiva | Resuelta en Fase 1: T17 |
-| P09 | ¿Arranque automático con Windows como opción? | Fase 2 |
-| P10 | Franja en varios monitores: en cuál se coloca | Fase 2 |
+| P09 | ¿Arranque automático con Windows como opción? | Resuelta en Fase 2: D33 |
+| P10 | Franja en varios monitores: en cuál se coloca | Resuelta en Fase 2: D34 |
 
 ## Cómo añadir decisiones
 

@@ -1,2 +1,51 @@
 keys,es,en
 GAME_TITLE,P3C3R4,P3C3R4
+UI_SHOP,[T]ienda,[S]hop
+UI_SHOP_KEY,T,S
+UI_DEX,[P]ecedex,[F]ishdex
+UI_DEX_KEY,P,F
+UI_SETTINGS,[A]justes,[O]ptions
+UI_SETTINGS_KEY,A,O
+UI_MINIMIZE,[_],[_]
+UI_CLOSE,[X],[X]
+UI_CLOSE_PANEL,[Esc] Cerrar,[Esc] Close
+UI_BUY,Comprar,Buy
+UI_YES,Sí,Yes
+UI_NO,No,No
+TOAST_DEX_SOON,El Pecedex llegará pronto,The Fishdex is coming soon
+TOAST_BOUGHT,¡%s comprado! (prototipo),%s bought! (prototype)
+SHOP_TITLE,Tienda (prototipo),Shop (prototype)
+SHOP_TAB_FISH,Peces,Fish
+SHOP_TAB_GEAR,Equipo,Gear
+SHOP_PRICE,Precio: %d ¢,Price: %d ¢
+SHOP_OWNED,En la pecera: %d/%d,In the tank: %d/%d
+SHOP_DESC,Texto de prueba: así se vería la descripción larga de una ficha dentro del panel.,Placeholder text: this is how a long item description would look inside the panel.
+SHOP_ITEM_GUPPY,Guppy,Guppy
+SHOP_ITEM_MINNOW,Carpita,Minnow
+SHOP_ITEM_TETRA,Tetra neón,Neon tetra
+SHOP_ITEM_LOACH,Locha,Loach
+SHOP_ITEM_SNAIL,Caracol,Snail
+SHOP_ITEM_GOLDFISH,Pez dorado,Goldfish
+SHOP_ITEM_ANGEL,Pez ángel,Angelfish
+SHOP_ITEM_KOI,Carpa koi,Koi carp
+SHOP_ITEM_FILTER,Filtro,Filter
+SHOP_ITEM_FEEDER,Comedero,Feeder
+SHOP_ITEM_LAMP,Lámpara,Lamp
+RARITY_COMMON,Común,Common
+RARITY_UNCOMMON,Poco común,Uncommon
+RARITY_RARE,Rara,Rare
+RARITY_EPIC,Épica,Epic
+RARITY_LEGENDARY,Legendaria,Legendary
+SETTINGS_TITLE,Ajustes,Settings
+SETTINGS_STRIP_HEIGHT,Altura de la franja (filas),Strip height (rows)
+SETTINGS_MONITOR,Monitor,Monitor
+SETTINGS_MONITOR_AUTO,Principal (monitor %d),Primary (monitor %d)
+SETTINGS_MONITOR_N,Monitor %d (%d×%d),Monitor %d (%d×%d)
+SETTINGS_ALWAYS_ON_TOP,Siempre visible,Always on top
+SETTINGS_FPS,Límite de fotogramas,Frame rate limit
+SETTINGS_AUTOSTART,Iniciar con Windows,Start with Windows
+SETTINGS_AUTOSTART_UNAVAILABLE,Solo funciona en el juego exportado,Only works in the exported game
+SETTINGS_AUTOSTART_FAILED,No se pudo cambiar el inicio con Windows,Could not change Start with Windows
+SETTINGS_PANEL_MODE,Paneles (prototipo),Panels (prototype)
+SETTINGS_PANEL_REPLACE,A: sustituyen la pecera,A: replace the tank
+SETTINGS_PANEL_GROW,B: crece hacia arriba,B: grows upward

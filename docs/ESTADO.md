@@ -2,17 +2,17 @@
 
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
-**Última actualización:** 2026-11-12
-**Fase actual:** Fase 1 · Motor de render ASCII y pecera viva: terminada (falta que Jorge haga el commit). Siguiente: **Fase 2 · Ventana en franja y prototipo de interfaz**.
-**Versión:** `0.2.0` (pendiente de etiquetar en Git).
+**Última actualización:** 2026-11-13
+**Fase actual:** Fase 2 · Ventana en franja y prototipo de interfaz: código y tests hechos; falta que Jorge la pruebe a mano (escalas 125/150 %, segundo monitor) y elija P02. Siguiente: **Fase 3 · Núcleo de simulación y economía**.
+**Versión:** `0.3.0` (pendiente de etiquetar en Git). Etiquetas existentes: `v0.1.0`, `v0.2.0`.
 
 ## Progreso por fases
 
 | Fase | Nombre | Estado |
 |---|---|---|
-| 0 | Entorno y esqueleto | Hecha (falta activar el CI) |
+| 0 | Entorno y esqueleto | Hecha |
 | 1 | Motor de render ASCII y pecera viva | Hecha |
-| 2 | Ventana en franja y prototipo de interfaz | Pendiente |
+| 2 | Ventana en franja y prototipo de interfaz | Hecha en código; pendiente de prueba manual de Jorge y de P02 |
 | 3 | Núcleo de simulación y economía | Pendiente |
 | 4 | Guardado | Pendiente |
 | 5 | Tienda, especies y rarezas | Pendiente |
@@ -36,10 +36,12 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 - 2026-11-12 (sesión 2, cierre): Godot 4.6 importa el proyecto; GUT 9.6.1 instalado y activado; F5 muestra "P3C3R4" con 0 errores y 0 avisos; GUT: "All tests passed" (test_smoke.gd). Commit inicial subido a GitHub (JorgeGaro-esp/p3c3r4).
 - 2026-11-12 (sesión 3): Fase 1 completa. Verificado en Godot: 0 errores y 0 avisos en Salida; F5 muestra la pecera con 3 especies nadando; 40 peces a 30 FPS (update 0,11 ms, dibujo 0,86 ms); GUT: 27 tests, 30288 aserciones, todo pasa; gdformat y gdlint limpios.
 
+- 2026-11-13 (sesión 4): Fase 2 escrita y probada en un Godot 4.6 de Linux (headless): 138 tests, 32151 aserciones, gdformat y gdlint limpios. Incluye la matemática de la franja a 100/125/150 % y varios monitores (tests unitarios), ajustes, widgets, paneles y tests de integración con clics y teclado sobre la escena completa.
+
 ## Siguiente paso concreto
 
-Jorge: `git add .`, `git commit -m "feat: fase 1, motor de render ASCII y pecera viva"`, `git tag v0.2.0`, `git push --follow-tags`. Si aún no se hizo, mover el CI (`git mv ci.yml.propuesto .github\workflows\ci.yml`) y comprobar que sale en verde.
-Claude: empezar la Fase 2 (ventana en franja). Antes hay que preguntar a Jorge P01, P02, P09 y P10.
+Jorge: abrir el proyecto en Godot (se generarán los `.uid` nuevos), F5, y comprobar: franja sobre la barra de tareas sin cubrirla, sin robar el foco, `[_]`/`[X]`, barra lateral (Tienda, Ajustes), cambios en Ajustes. Probar 125/150 % de escala y un segundo monitor si es posible. Elegir P02 (paneles que sustituyen la pecera, o ventana que crece hacia arriba). Luego `git add .`, commit y `git tag v0.3.0`.
+Claude: Fase 3 (núcleo de simulación y economía) tras la validación de Jorge. Sustituir la tienda de prueba (datos fijos) en la Fase 5.
 
 ## Bloqueos y dudas abiertas
 
@@ -47,9 +49,16 @@ Ninguno técnico; la Fase 0 depende de las instalaciones de Jorge. Las decisione
 
 ## Notas de la última sesión
 
+- Fase 2: no se pudo cambiar la escala de Windows desde aquí (es un ajuste del sistema); 125/150 % está cubierto por tests de cálculo, no por prueba en pantalla.
+- El arranque con Windows no se ha probado en vivo para no tocar el registro de Jorge; probar con una versión exportada.
+- Corregido: la nota antigua sobre el commit pendiente de la Fase 1 estaba obsoleta (ya hecho, con v0.1.0 y v0.2.0).
+- Bajo consumo al minimizar: hecho (T29).
+
+### Sesión 3 (anterior)
+
+
 - Fase 1 escrita en el entorno de Claude, copiada al equipo de Jorge y probada en Godot controlando la pantalla.
 - La copia de archivos al equipo a veces dejó una versión anterior del archivo; se detectó comparando tamaños. Comprobar siempre tras copiar.
-- Aplazado a la Fase 2: modo de bajo consumo cuando la ventana esté en segundo plano.
 - Anterior (sesión 2):
 
 - El proyecto se escribió sin poder ejecutar Godot (no hay consola en el equipo de Jorge desde la sesión). Ya verificado en la sesión 2.
