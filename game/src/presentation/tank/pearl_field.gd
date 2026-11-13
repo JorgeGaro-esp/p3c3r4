@@ -58,10 +58,26 @@ func take(index: int) -> float:
 	return value
 
 
+## Quita las perlas que llevan al menos [param delay] segundos en el suelo y
+## devuelve sus valores (lo que hace el imán de perlas).
+func take_ripe(delay: float) -> PackedFloat64Array:
+	var values: PackedFloat64Array = PackedFloat64Array()
+	var kept: Array[Pearl] = []
+	for pearl: Pearl in _pearls:
+		if pearl.resting_seconds >= delay:
+			values.append(pearl.value)
+		else:
+			kept.append(pearl)
+	_pearls = kept
+	return values
+
+
 func update(delta: float, _canvas: AsciiCanvas) -> void:
 	_clock += delta
 	for pearl: Pearl in _pearls:
 		pearl.position.y = minf(pearl.position.y + FALL_SPEED * delta, floor_row)
+		if pearl.position.y >= floor_row:
+			pearl.resting_seconds += delta
 
 
 func draw(canvas: AsciiCanvas) -> void:
@@ -73,3 +89,5 @@ func draw(canvas: AsciiCanvas) -> void:
 class Pearl:
 	var position: Vector2 = Vector2.ZERO
 	var value: float = 0.0
+	## Segundos que lleva quieta en el suelo.
+	var resting_seconds: float = 0.0

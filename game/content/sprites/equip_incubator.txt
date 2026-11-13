@@ -1,0 +1,13 @@
+# equip_incubator · equipo
+[frame]
+(◦)
+▀▀▀
+[colors]
+eee
+fff
+[frame]
+(○)
+▀▀▀
+[colors]
+eee
+fff

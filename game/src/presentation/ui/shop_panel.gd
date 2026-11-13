@@ -17,6 +17,8 @@ const CLOSE_BUTTON_WIDTH: int = 16
 const BUY_BUTTON_WIDTH: int = 12
 
 var _ids: PackedStringArray = PackedStringArray()
+var _equipment_ids: PackedStringArray = PackedStringArray()
+var _tab: int = 0
 var _frame: AsciiFrame = AsciiFrame.new()
 var _tabs: AsciiTabs = AsciiTabs.new()
 var _list: AsciiList = AsciiList.new()
@@ -53,6 +55,8 @@ func _init(root: UiRoot) -> void:
 	EventBus.fish_added.connect(_on_fish_changed)
 	EventBus.fish_removed.connect(_on_fish_changed)
 	EventBus.species_unlocked.connect(_on_state_changed)
+	EventBus.equipment_changed.connect(_on_equipment_changed)
+	_tabs.tab_changed.connect(_on_tab_changed)
 	refresh()
 
 
@@ -82,7 +86,8 @@ func layout(area: Rect2i) -> void:
 ## Vuelve a escribir todos los textos (cambio de idioma) y la lista.
 func refresh() -> void:
 	_frame.title = _text("SHOP_TITLE")
-	_tabs.set_titles(PackedStringArray([_text("SHOP_TAB_FISH")]))
+	_tabs.set_titles(PackedStringArray([_text("SHOP_TAB_FISH"), _text("SHOP_TAB_EQUIPMENT")]))
+	_tabs.selected = _tab
 	_buy.label = "[ %s ]" % _text("UI_BUY")
 	_close.label = _text("UI_CLOSE_PANEL")
 	_fill_list()
@@ -91,6 +96,25 @@ func refresh() -> void:
 ## Ids de las especies a la venta, de la más barata a la más cara.
 func species_ids() -> PackedStringArray:
 	return _ids
+
+
+## Ids de los equipos a la venta, en el orden de la lista.
+func equipment_ids() -> PackedStringArray:
+	return _equipment_ids
+
+
+## Cambia a la pestaña [param index] (0 peces, 1 equipo).
+func select_tab(index: int) -> void:
+	_tabs.select(index)
+
+
+## Selecciona el equipo [param equipment_id] (para los tests).
+func select_equipment(equipment_id: String) -> void:
+	select_tab(1)
+	var index: int = _equipment_ids.find(equipment_id)
+	if index >= 0:
+		_list.model.select(index)
+		_show_detail(index)
 
 
 ## Pulsa «Comprar» sobre la especie seleccionada.
@@ -109,6 +133,16 @@ func select_species(species_id: String) -> void:
 func _on_state_changed(_value: Variant = null) -> void:
 	if is_active:
 		_fill_list()
+
+
+func _on_equipment_changed(_tank_index: int, _equipment_id: String, _level: int) -> void:
+	if is_active:
+		_fill_list()
+
+
+func _on_tab_changed(index: int) -> void:
+	_tab = index
+	_fill_list()
 
 
 func _on_fish_changed(_tank_index: int, _fish: Fish) -> void:
@@ -132,6 +166,9 @@ func _collect_ids() -> PackedStringArray:
 
 
 func _fill_list() -> void:
+	if _tab == 1:
+		_fill_equipment_list()
+		return
 	_ids = _collect_ids()
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
@@ -152,7 +189,70 @@ func _fill_list() -> void:
 	_show_detail(_list.selected_index())
 
 
+func _fill_equipment_list() -> void:
+	_equipment_ids = Game.content.equipment_ids()
+	var previous: int = _list.selected_index()
+	var names: PackedStringArray = PackedStringArray()
+	var extras: PackedStringArray = PackedStringArray()
+	var tank: Tank = Game.state.tanks[0]
+	var locale: String = TranslationServer.get_locale()
+	for equipment_id: String in _equipment_ids:
+		var def: EquipmentDef = Game.content.get_equipment(equipment_id)
+		names.append("%s %d/%d" % [_text(def.name_key), tank.level_of(def.id), def.max_level])
+		var cost: float = Game.equipment_cost(def.id)
+		extras.append(
+			"%s ¢" % NumberFormat.compact(cost, locale) if cost < INF else _text("SHOP_EQ_MAXED")
+		)
+	_list.set_items(names, extras)
+	if previous >= 0:
+		_list.model.select(previous)
+	_show_detail(_list.selected_index())
+
+
+func _show_equipment_detail(index: int) -> void:
+	if index < 0 or index >= _equipment_ids.size():
+		_clear_detail()
+		return
+	var def: EquipmentDef = Game.content.get_equipment(_equipment_ids[index])
+	var tank: Tank = Game.state.tanks[0]
+	var level: int = tank.level_of(def.id)
+	var cost: float = Game.equipment_cost(def.id)
+	var locale: String = TranslationServer.get_locale()
+	_name.text = _text(def.name_key)
+	_rarity.text = _text("SHOP_EQ_LEVEL") % [level, def.max_level]
+	_rarity.color = AsciiColors.TEXT
+	_description.text = _text(def.description_key)
+	_owned.text = EquipmentText.effect(def, level, Game.content)
+	_progress.value = float(level) / float(def.max_level)
+	if cost < INF:
+		_price.text = _text("SHOP_EQ_NEXT") % NumberFormat.compact(cost, locale)
+	else:
+		_price.text = _text("SHOP_EQ_MAXED")
+	_buy.is_enabled = cost < INF
+
+
+func _buy_equipment() -> void:
+	var index: int = _list.selected_index()
+	if index < 0 or index >= _equipment_ids.size():
+		return
+	var def: EquipmentDef = Game.content.get_equipment(_equipment_ids[index])
+	match Game.buy_equipment(def.id):
+		GameService.EquipResult.OK:
+			var level: int = Game.state.tanks[0].level_of(def.id)
+			message.emit(_text("TOAST_EQ_BOUGHT") % [_text(def.name_key), level])
+		GameService.EquipResult.NOT_ENOUGH_SHELLS:
+			message.emit(_text("TOAST_NOT_ENOUGH"))
+		GameService.EquipResult.MAXED:
+			message.emit(_text("TOAST_EQ_MAXED"))
+		_:
+			pass
+	_fill_list()
+
+
 func _show_detail(index: int) -> void:
+	if _tab == 1:
+		_show_equipment_detail(index)
+		return
 	if index < 0 or index >= _ids.size():
 		_clear_detail()
 		return
@@ -167,8 +267,10 @@ func _show_detail(index: int) -> void:
 		_name.text = _text(def.name_key)
 		_price.text = _text("SHOP_PRICE") % NumberFormat.compact(Game.fish_cost(def.id), locale)
 		_description.text = _text(def.description_key)
-		_owned.text = _text("SHOP_OWNED") % [tank.count_of(def.id), tank.fish.size(), tank.capacity]
-		_progress.value = float(tank.fish.size()) / float(maxi(tank.capacity, 1))
+		_owned.text = (
+			_text("SHOP_OWNED") % [tank.count_of(def.id), tank.fish.size(), tank.total_capacity()]
+		)
+		_progress.value = float(tank.fish.size()) / float(maxi(tank.total_capacity(), 1))
 	else:
 		_name.text = _text("SHOP_LOCKED_NAME")
 		_price.text = _text("SHOP_LOCKED_PRICE")
@@ -206,6 +308,9 @@ func _unlock_hint(def: SpeciesDef) -> String:
 
 
 func _buy_selected() -> void:
+	if _tab == 1:
+		_buy_equipment()
+		return
 	var index: int = _list.selected_index()
 	if index < 0 or index >= _ids.size():
 		return

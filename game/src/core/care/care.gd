@@ -36,16 +36,21 @@ static func hunger_after(hunger: float, dt: float) -> float:
 
 
 ## Limpieza de una pecera con [param fish_count] peces tras [param dt] segundos.
-static func cleanliness_after(cleanliness: float, fish_count: int, dt: float) -> float:
-	var lost: float = DIRT_PER_FISH_PER_SECOND * float(fish_count) * dt
-	return clampf(cleanliness - lost, 0.0, MAX_CLEANLINESS)
+## [param dirt_factor] y [param regen] vienen del filtro (ver [TankBonuses]).
+static func cleanliness_after(
+	cleanliness: float, fish_count: int, dt: float, dirt_factor: float = 1.0, regen: float = 0.0
+) -> float:
+	var lost: float = DIRT_PER_FISH_PER_SECOND * float(fish_count) * dt * dirt_factor
+	return clampf(cleanliness - lost + regen * dt, 0.0, MAX_CLEANLINESS)
 
 
-## Felicidad de 0 a 100 a partir de saciedad y limpieza.
-static func happiness(hunger: float, cleanliness: float) -> float:
+## Felicidad de 0 a 100 a partir de saciedad y limpieza. [param comfort] (0 a 1, del
+## calentador) cubre esa fracción de lo que falta para llegar a 100.
+static func happiness(hunger: float, cleanliness: float, comfort: float = 0.0) -> float:
 	var fed: float = clampf(hunger / MAX_HUNGER, 0.0, 1.0)
 	var clean: float = clampf(cleanliness / MAX_CLEANLINESS, 0.0, 1.0)
-	return 100.0 * (HUNGER_WEIGHT * fed + CLEANLINESS_WEIGHT * clean)
+	var base: float = 100.0 * (HUNGER_WEIGHT * fed + CLEANLINESS_WEIGHT * clean)
+	return base + (100.0 - base) * clampf(comfort, 0.0, 1.0)
 
 
 ## Manchas de alga que se ven con esa limpieza: una por cada [constant SPOT_STEP]

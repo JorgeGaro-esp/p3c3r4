@@ -1,0 +1,13 @@
+# equip_feeder · equipo
+[frame]
+[▓▓]
+  ▼ 
+[colors]
+ffff
+  d 
+[frame]
+[▓▓]
+  v 
+[colors]
+ffff
+  d 

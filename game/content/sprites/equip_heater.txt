@@ -1,0 +1,17 @@
+# equip_heater · equipo
+[frame]
+╔╗
+║║
+╚╝
+[colors]
+ff
+dd
+ff
+[frame]
+╔╗
+║║
+╚╝
+[colors]
+ff
+ee
+ff

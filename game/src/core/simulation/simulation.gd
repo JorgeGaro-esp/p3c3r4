@@ -48,15 +48,31 @@ static func _care(
 		var tank: Tank = state.tanks[tank_index]
 		if tank.fish.is_empty():
 			continue
-		tank.cleanliness = Care.cleanliness_after(tank.cleanliness, tank.fish.size(), dt)
+		var bonuses: TankBonuses = tank.bonuses
+		tank.cleanliness = Care.cleanliness_after(
+			tank.cleanliness, tank.fish.size(), dt, bonuses.dirt_factor, bonuses.clean_regen
+		)
+		_feeder_tick(tank, dt)
 		for fish: Fish in tank.fish:
 			fish.hunger = Care.hunger_after(fish.hunger, dt)
-			var mood: float = Care.happiness(fish.hunger, tank.cleanliness)
+			var mood: float = Care.happiness(fish.hunger, tank.cleanliness, bonuses.comfort)
 			if absf(mood - fish.happiness) >= HAPPINESS_EPSILON:
 				fish.happiness = mood
 				state.mark_production_dirty()
 		_pearl_tick(state, tank_index, dt, content, rng)
 		Lifecycle.step(state, tank_index, dt, content, rng)
+
+
+## El comedero da de comer a todos los peces cada cierto tiempo.
+static func _feeder_tick(tank: Tank, dt: float) -> void:
+	if tank.bonuses.feed_interval <= 0.0:
+		return
+	tank.feeder_timer += dt
+	if tank.feeder_timer < tank.bonuses.feed_interval:
+		return
+	tank.feeder_timer = 0.0
+	for fish: Fish in tank.fish:
+		fish.feed(tank.bonuses.feed_amount)
 
 
 static func _pearl_tick(

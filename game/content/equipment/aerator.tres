@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EquipmentDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/equipment_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "aerator"
+name_key = "EQUIP_AERATOR"
+description_key = "EQUIP_AERATOR_DESC"
+effect = 4
+max_level = 5
+base_cost = 1200.0
+per_level = 4.0
+sprite_path = "res://content/sprites/equip_aerator.txt"
+palette_roles = PackedStringArray("f", "b")
+palette_colors = PackedColorArray(0.55, 0.6, 0.65, 1, 0.7, 0.9, 1.0, 1)
+placement = 1
+place_x = 0.75
+frame_duration = 0.4

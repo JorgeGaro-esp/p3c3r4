@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EquipmentDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/equipment_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "feeder"
+name_key = "EQUIP_FEEDER"
+description_key = "EQUIP_FEEDER_DESC"
+effect = 1
+max_level = 5
+base_cost = 350.0
+per_level = 1.0
+sprite_path = "res://content/sprites/equip_feeder.txt"
+palette_roles = PackedStringArray("f", "d")
+palette_colors = PackedColorArray(0.75, 0.75, 0.8, 1, 0.95, 0.7, 0.3, 1)
+placement = 0
+place_x = 0.5
+frame_duration = 0.8

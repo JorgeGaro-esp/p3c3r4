@@ -2,6 +2,20 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.9.0] - 2026-11-13 · Fase 8
+
+### Añadido
+- Equipamiento mejorable (`EquipmentDef`, `content/equipment/`): filtro, comedero, calentador, lámpara, aireador, incubadora e imán de perlas, de 5 niveles cada uno; el nivel k cuesta base × 1,6^k.
+- `TankBonuses`: suma los efectos del equipo de una pecera (suciedad, limpieza automática, comida automática, comodidad, crecimiento, capacidad, eclosión, variantes raras e imán).
+- Tienda con pestaña «Equipo»: nivel, efecto actual y coste del siguiente nivel; se compra con el botón o con Intro.
+- Los equipos se dibujan en la pecera con animación; el aireador suelta burbujas y el imán recoge solo las perlas que llevan un rato en el suelo.
+- `Game.buy_equipment`, `Game.equipment_cost`, `EventBus.equipment_changed`.
+- Guardado formato 4 (equipo por pecera) con migración 3→4.
+
+### Cambiado
+- `Care.cleanliness_after` y `Care.happiness` aceptan los bonos del equipo; `Lifecycle` usa velocidad de crecimiento, de eclosión y peso de variantes raras.
+- La capacidad mostrada en la tienda incluye el aireador (`Tank.total_capacity()`).
+
 ## [0.8.0] - 2026-11-13 · Fase 7
 
 ### Añadido

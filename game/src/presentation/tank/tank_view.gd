@@ -24,6 +24,7 @@ const SEEK_RADIUS: float = 30.0
 const EAT_DISTANCE: float = 1.8
 ## Sprites de alevín y juvenil de las especies que no traen los suyos.
 const GENERIC_FRY: String = "res://content/sprites/stage_fry.txt"
+const AERATOR_BUBBLE_SECONDS: float = 0.7
 const GENERIC_JUVENILE: String = "res://content/sprites/stage_juvenile.txt"
 
 
@@ -77,6 +78,8 @@ var _food: FoodField = FoodField.new()
 var _spots: GlassSpots = GlassSpots.new()
 var _pearls: PearlField = PearlField.new()
 var _eggs: EggField = EggField.new()
+var _equipment: EquipmentField = EquipmentField.new()
+var _aerator_clock: float = 0.0
 var _next_bubble_in: float = 1.0
 
 
@@ -92,8 +95,9 @@ func _ready() -> void:
 	_pearls.layer = LAYER_FISH + 3
 	_spots.layer = LAYER_FRONT + 1
 	_eggs.layer = LAYER_BACK + 2
+	_equipment.layer = LAYER_BACK + 3
 	for drawable: AsciiDrawable in [
-		_sand, _weeds, _eggs, _bubbles, _surface, _food, _pearls, _spots
+		_sand, _weeds, _eggs, _equipment, _bubbles, _surface, _food, _pearls, _spots
 	]:
 		canvas.add_drawable(drawable)
 	_load_looks()
@@ -108,6 +112,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_update_care()
+	_update_equipment(delta)
 	_next_bubble_in -= delta
 	if _next_bubble_in > 0.0 or _fish.is_empty():
 		return
@@ -324,6 +329,26 @@ func _update_care() -> void:
 			_hunt(view, fish)
 
 
+## Equipo dibujado, burbujas del aireador y perlas que recoge el imán.
+func _update_equipment(delta: float) -> void:
+	var tank: Tank = Game.state.tanks[0]
+	_equipment.set_equipment(tank.equipment, Game.content)
+	if tank.bonuses.magnet_delay > 0.0:
+		for value: float in _pearls.take_ripe(tank.bonuses.magnet_delay):
+			Game.collect_pearl(value)
+	if tank.level_of("aerator") > 0 and _equipment.count() > 0:
+		_aerator_clock += delta
+		if _aerator_clock >= AERATOR_BUBBLE_SECONDS:
+			_aerator_clock = 0.0
+			var origin: Vector2 = _equipment.position_of("aerator")
+			_bubbles.spawn(origin + Vector2(0.0, -1.0), _rng)
+
+
+## Número de equipos que se dibujan.
+func equipment_count() -> int:
+	return _equipment.count()
+
+
 ## Un pez hambriento nada hacia el copo más cercano y se lo come al llegar.
 func _hunt(view: FishView, fish: Fish) -> void:
 	var mouth: Vector2 = view.anchor_cell("eye")
@@ -392,6 +417,7 @@ func _on_grid_changed() -> void:
 	_food.floor_row = float(sand_top)
 	_pearls.floor_row = float(sand_top - 1)
 	_eggs.floor_row = float(sand_top)
+	_equipment.configure(area.size.x, area.position.y + SURFACE_ROWS, sand_top)
 	_spots.configure(
 		Rect2i(
 			area.position.x,

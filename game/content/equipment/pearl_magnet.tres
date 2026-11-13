@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EquipmentDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/equipment_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "pearl_magnet"
+name_key = "EQUIP_PEARL_MAGNET"
+description_key = "EQUIP_PEARL_MAGNET_DESC"
+effect = 6
+max_level = 5
+base_cost = 1500.0
+per_level = 1.0
+sprite_path = "res://content/sprites/equip_pearl_magnet.txt"
+palette_roles = PackedStringArray("f", "r", "d")
+palette_colors = PackedColorArray(0.5, 0.5, 0.55, 1, 0.9, 0.25, 0.25, 1, 1.0, 0.5, 0.5, 1)
+placement = 1
+place_x = 0.6
+frame_duration = 0.5

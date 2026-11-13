@@ -1,0 +1,13 @@
+# equip_pearl_magnet · equipo
+[frame]
+┌┐
+▓▓
+[colors]
+rr
+ff
+[frame]
+┌┐
+▓▓
+[colors]
+dd
+ff

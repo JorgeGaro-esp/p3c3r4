@@ -20,8 +20,8 @@ static func step(
 	state: GameState, tank_index: int, dt: float, content: ContentDB, rng: RandomNumberGenerator
 ) -> void:
 	var tank: Tank = state.tanks[tank_index]
-	_grow(state, tank, dt, content)
-	_hatch(state, tank_index, dt, content)
+	_grow(state, tank, dt * tank.bonuses.growth_speed, content)
+	_hatch(state, tank_index, dt * tank.bonuses.hatch_speed, content)
 	_breed(tank, dt, content, rng)
 
 
@@ -100,6 +100,6 @@ static func _breed(tank: Tank, dt: float, content: ContentDB, rng: RandomNumberG
 static func _lay_egg(
 	tank: Tank, species: SpeciesDef, content: ContentDB, rng: RandomNumberGenerator
 ) -> void:
-	var variant_id: String = VariantRoll.pick(content, rng)
+	var variant_id: String = VariantRoll.pick(content, rng, tank.bonuses.rare_multiplier)
 	var egg: Egg = Egg.new(species.id, variant_id, species.hatch_seconds, rng.randf())
 	tank.eggs.append(egg)

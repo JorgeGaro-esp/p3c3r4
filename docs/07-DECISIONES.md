@@ -132,6 +132,13 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T66 | `GameState.discovered` guarda las combinaciones especie+variante vistas | Base del Pecedex (Fase 11) y del aviso de variante nueva |
 | T67 | Guardado formato 3: peces con `maturity` y `variant_id`, peceras con `eggs`, estado con `discovered` | Migración 2→3 rellena los valores por defecto |
 | T68 | Vaciar la pecera = botón «Vender todos los peces» en Ajustes, con tres pulsaciones (pedir, confirmar, vender); paga el valor de venta y descarta los huevos | Jorge quería una forma de vaciar la pecera persistente; vender evita perder conchas |
+| T69 | Equipo = `EquipmentDef` (recurso en `content/equipment/`) con efecto, niveles (máx. 5), coste base y fuerza por nivel; el nivel k cuesta base × 1,6^k | Añadir un equipo no toca código salvo un efecto nuevo |
+| T70 | Los efectos se suman en `TankBonuses` (calculado al comprar o cargar, no se guarda); la partida solo guarda `equipment` (id → nivel) por pecera | Una sola fuente de verdad y bonos que se acumulan sin errores |
+| T71 | Efectos: filtro (suciedad −20 %/nivel hasta ×0,2 y limpia 0,36 pts/min por nivel), comedero (+30 de saciedad cada 300/nivel s), calentador (+12 % de comodidad/nivel), lámpara (crecimiento +25 %/nivel), aireador (+4 huecos/nivel), incubadora (eclosión +30 % y variantes raras +40 %/nivel), imán (recoge perlas tras 24/nivel s en el suelo) | Con filtro 5 y comedero 3 una pecera llena se mantiene sola (test); cifras finales en la Fase 16 |
+| T72 | El calentador sube la felicidad de todos los peces (no hay especies tropicales aún) y la lámpara aún no atenúa la noche (llega con el día/noche, Fase 12) | Se completa en la Fase 12 |
+| T73 | Capacidad = `capacity` (guardada) + hueco del aireador (`Tank.total_capacity()`) | Quitar el aireador nunca expulsa peces ya guardados: la pecera solo queda «llena» |
+| T74 | Tienda con pestañas Peces / Equipo; los equipos se dibujan en la pecera con animación de 2 fotogramas y el aireador suelta burbujas | Feedback visual de cada compra |
+| T75 | Guardado formato 4: peceras con `equipment`; migración 3→4 la crea vacía; ids desconocidos se descartan y niveles se limitan al máximo | Seguridad al cargar (06-SEGURIDAD §3.4) |
 
 ## Cómo añadir decisiones
 

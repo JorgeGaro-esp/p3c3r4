@@ -1,0 +1,13 @@
+# equip_lamp · equipo
+[frame]
+▄▄▄▄▄
+\|||/
+[colors]
+fffff
+eeeee
+[frame]
+▄▄▄▄▄
+ \|/ 
+[colors]
+fffff
+ eee 

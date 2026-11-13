@@ -16,6 +16,12 @@ var cleanliness: float = Care.MAX_CLEANLINESS
 var pearl_timer: float = Care.PEARL_MAX_SECONDS
 ## Segundos acumulados hacia la próxima puesta de cada especie (no se guarda).
 var breed_timers: Dictionary[String, float] = {}
+## Nivel de cada equipo comprado (id → nivel). Se guarda.
+var equipment: Dictionary[String, int] = {}
+## Bonificaciones del equipo (se recalculan con [method refresh_bonuses], no se guardan).
+var bonuses: TankBonuses = TankBonuses.new()
+## Segundos desde la última comida del comedero (no se guarda).
+var feeder_timer: float = 0.0
 
 
 ## Huecos usados: peces más huevos.
@@ -24,7 +30,27 @@ func occupied() -> int:
 
 
 func is_full() -> bool:
-	return occupied() >= capacity
+	return occupied() >= total_capacity()
+
+
+## Capacidad base más la del equipo (aireador).
+func total_capacity() -> int:
+	return capacity + bonuses.capacity_bonus
+
+
+## Nivel del equipo [param equipment_id] (0 si no lo tiene).
+func level_of(equipment_id: String) -> int:
+	return equipment.get(equipment_id, 0)
+
+
+## Pone el equipo [param equipment_id] a [param level] y recalcula los bonos.
+func set_level(equipment_id: String, level: int, content: ContentDB) -> void:
+	equipment[equipment_id] = level
+	refresh_bonuses(content)
+
+
+func refresh_bonuses(content: ContentDB) -> void:
+	bonuses = TankBonuses.compute(equipment, content)
 
 
 ## Añade [param new_fish] si hay sitio. Devuelve falso si la pecera está llena.
@@ -64,6 +90,7 @@ func to_dict() -> Dictionary:
 		"biome_id": biome_id,
 		"capacity": capacity,
 		"cleanliness": cleanliness,
+		"equipment": equipment.duplicate(),
 		"fish": fish_data,
 		"eggs": egg_data,
 	}
@@ -84,6 +111,7 @@ static func from_dict(source: Variant, content: ContentDB, warnings: PackedStrin
 	tank.cleanliness = SaveFields.read_float(
 		data, "cleanliness", Care.MAX_CLEANLINESS, 0.0, Care.MAX_CLEANLINESS, warnings
 	)
+	_read_equipment(tank, data, content, warnings)
 	var raw_fish: Variant = SaveFields.read_array(data, "fish", warnings)
 	if raw_fish != null:
 		var fish_list: Array = raw_fish
@@ -119,3 +147,28 @@ static func _read_eggs(
 			warnings.append("huevo descartado: la pecera está llena")
 			break
 		tank.eggs.append(egg)
+
+
+## Lee el equipo antes que los peces: la capacidad del aireador cuenta al cargarlos.
+## Los equipos desconocidos se descartan y los niveles se limitan al máximo.
+static func _read_equipment(
+	tank: Tank, data: Dictionary, content: ContentDB, warnings: PackedStringArray
+) -> void:
+	if not data.has("equipment"):
+		return
+	var raw: Variant = SaveFields.read_dict(data, "equipment", warnings)
+	if raw == null:
+		return
+	var entries: Dictionary = raw
+	for key: Variant in entries:
+		var def: EquipmentDef = null
+		if typeof(key) == TYPE_STRING:
+			var equipment_id: String = key
+			def = content.get_equipment(equipment_id)
+		if def == null:
+			warnings.append("equipo desconocido descartado")
+			continue
+		var level: int = SaveFields.read_int(entries, def.id, 0, 0, def.max_level, warnings)
+		if level > 0:
+			tank.equipment[def.id] = level
+	tank.refresh_bonuses(content)

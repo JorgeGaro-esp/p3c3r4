@@ -7,7 +7,7 @@ extends RefCounted
 ## superior a la conocida no se migra: la rechaza [SaveCodec].
 
 ## Versión actual del formato. Sube en cada cambio incompatible.
-const CURRENT_FORMAT: int = 3
+const CURRENT_FORMAT: int = 4
 
 ## Especies de prueba de las fases 3 y 4 y la especie definitiva que las sustituye.
 const RENAMED_SPECIES: Dictionary[String, String] = {
@@ -29,6 +29,8 @@ static func migrate(data: Dictionary, from_version: int) -> Dictionary:
 				result = migrate_1_to_2(result)
 			2:
 				result = migrate_2_to_3(result)
+			3:
+				result = migrate_3_to_4(result)
 			_:
 				push_error("SaveMigrations: no hay migración desde la versión %d" % version)
 				return result
@@ -101,4 +103,20 @@ static func migrate_2_to_3(data: Dictionary) -> Dictionary:
 				fish_data["maturity"] = LifeStage.ADULT_FROM
 			if not fish_data.has("variant_id"):
 				fish_data["variant_id"] = VariantDef.NORMAL_ID
+	return result
+
+
+## Fase 8: las peceras antiguas no tienen equipo.
+static func migrate_3_to_4(data: Dictionary) -> Dictionary:
+	var result: Dictionary = data.duplicate(true)
+	var tanks: Variant = result.get("tanks")
+	if typeof(tanks) != TYPE_ARRAY:
+		return result
+	var tank_list: Array = tanks
+	for tank: Variant in tank_list:
+		if typeof(tank) != TYPE_DICTIONARY:
+			continue
+		var tank_data: Dictionary = tank
+		if not tank_data.has("equipment"):
+			tank_data["equipment"] = {}
 	return result

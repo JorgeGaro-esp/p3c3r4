@@ -1,0 +1,13 @@
+# equip_aerator · equipo
+[frame]
+▒▒
+°°
+[colors]
+ff
+bb
+[frame]
+▒▒
+ °
+[colors]
+ff
+ b

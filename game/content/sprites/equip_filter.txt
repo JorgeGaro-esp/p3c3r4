@@ -1,0 +1,17 @@
+# equip_filter · equipo
+[frame]
+┌┐
+││
+└┘
+[colors]
+ff
+ff
+ff
+[frame]
+┌┐
+│║
+└┘
+[colors]
+ff
+ff
+ff

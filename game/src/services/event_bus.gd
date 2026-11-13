@@ -25,3 +25,5 @@ signal notice_requested(key: String)
 signal fish_sold(value: float)
 ## Salió por primera vez una variante de una especie (no se emite para la normal).
 signal variant_discovered(species_id: String, variant_id: String)
+## Un equipo de la pecera [param tank_index] subió al nivel [param level].
+signal equipment_changed(tank_index: int, equipment_id: String, level: int)

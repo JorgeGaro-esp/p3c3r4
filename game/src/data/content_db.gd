@@ -7,6 +7,7 @@ extends RefCounted
 
 const SPECIES_DIR: String = "res://content/species"
 const VARIANTS_DIR: String = "res://content/variants"
+const EQUIPMENT_DIR: String = "res://content/equipment"
 const ID_PATTERN: String = "^[a-z][a-z0-9_]*$"
 
 var errors: PackedStringArray = PackedStringArray()
@@ -15,6 +16,8 @@ var _species: Dictionary[String, SpeciesDef] = {}
 var _order: PackedStringArray = PackedStringArray()
 var _variants: Dictionary[String, VariantDef] = {}
 var _variant_order: PackedStringArray = PackedStringArray()
+var _equipment: Dictionary[String, EquipmentDef] = {}
+var _equipment_order: PackedStringArray = PackedStringArray()
 
 
 ## Carga todas las especies de [param directory]. Devuelve verdadero si todo es válido.
@@ -168,3 +171,75 @@ func has_species(species_id: String) -> bool:
 ## Ids en orden de carga (alfabético por archivo).
 func species_ids() -> PackedStringArray:
 	return _order
+
+
+## Carga los equipos de [param directory]. Devuelve verdadero si todo es válido.
+func load_equipment_dir(directory: String = EQUIPMENT_DIR) -> bool:
+	var names: PackedStringArray = DirAccess.get_files_at(directory)
+	names.sort()
+	for file_name: String in names:
+		var clean_name: String = file_name.trim_suffix(".remap")
+		if not clean_name.ends_with(".tres"):
+			continue
+		var path: String = directory.path_join(clean_name)
+		var equipment: EquipmentDef = load(path) as EquipmentDef
+		if equipment == null:
+			errors.append("%s: no es una EquipmentDef" % path)
+			continue
+		add_equipment(equipment, path)
+	return errors.is_empty()
+
+
+## Valida y registra [param equipment]. Devuelve falso si es inválido o repetido.
+func add_equipment(equipment: EquipmentDef, source: String = "") -> bool:
+	var problems: PackedStringArray = validate_equipment(equipment)
+	if _equipment.has(equipment.id):
+		problems.append("id repetido: %s" % equipment.id)
+	if not problems.is_empty():
+		var label: String = source if not source.is_empty() else equipment.id
+		for problem: String in problems:
+			errors.append("%s: %s" % [label, problem])
+		return false
+	_equipment[equipment.id] = equipment
+	_equipment_order.append(equipment.id)
+	return true
+
+
+## Lista los problemas de un equipo (vacía si es válido).
+static func validate_equipment(equipment: EquipmentDef) -> PackedStringArray:
+	var problems: PackedStringArray = PackedStringArray()
+	var pattern: RegEx = RegEx.create_from_string(ID_PATTERN)
+	if pattern.search(equipment.id) == null:
+		problems.append("id inválido '%s' (minúsculas, cifras y _)" % equipment.id)
+	if equipment.name_key.is_empty() or equipment.description_key.is_empty():
+		problems.append("faltan name_key o description_key")
+	if equipment.max_level < 1 or equipment.max_level > 20:
+		problems.append("max_level debe estar entre 1 y 20")
+	if equipment.base_cost <= 0.0 or is_nan(equipment.base_cost) or is_inf(equipment.base_cost):
+		problems.append("base_cost debe ser mayor que 0")
+	if equipment.per_level <= 0.0 or is_nan(equipment.per_level) or is_inf(equipment.per_level):
+		problems.append("per_level debe ser mayor que 0")
+	if equipment.sprite_path.is_empty() or not FileAccess.file_exists(equipment.sprite_path):
+		problems.append("el sprite no existe: %s" % equipment.sprite_path)
+	if equipment.palette_roles.size() != equipment.palette_colors.size():
+		problems.append("palette_roles y palette_colors tienen distinto tamaño")
+	if equipment.frame_duration <= 0.0:
+		problems.append("frame_duration debe ser mayor que 0")
+	if equipment.place_x < 0.0 or equipment.place_x > 1.0:
+		problems.append("place_x debe estar entre 0 y 1")
+	return problems
+
+
+func get_equipment(equipment_id: String) -> EquipmentDef:
+	if not _equipment.has(equipment_id):
+		return null
+	return _equipment[equipment_id]
+
+
+func has_equipment(equipment_id: String) -> bool:
+	return _equipment.has(equipment_id)
+
+
+## Ids de equipos en orden de carga (alfabético por archivo).
+func equipment_ids() -> PackedStringArray:
+	return _equipment_order

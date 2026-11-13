@@ -91,3 +91,30 @@ TOAST_VARIANT_NEW,¡Variante nueva! %s (%s),New variant! %s (%s)
 SETTINGS_SELL_ALL,Vender todos los peces,Sell all fish
 SETTINGS_SELL_ALL_ASK,¿Vender %d peces? +%s ¢,Sell %d fish? +%s ¢
 SETTINGS_SELL_ALL_SURE,¿Seguro? Última pulsación,Sure? Last press
+SHOP_TAB_EQUIPMENT,Equipo,Equipment
+SHOP_EQ_LEVEL,Nivel %d/%d,Level %d/%d
+SHOP_EQ_MAXED,Nivel máximo,Max level
+SHOP_EQ_NEXT,Siguiente nivel: %s ¢,Next level: %s ¢
+TOAST_EQ_BOUGHT,%s mejorado al nivel %d,%s upgraded to level %d
+TOAST_EQ_MAXED,Ya está al nivel máximo,Already at max level
+EQUIP_FILTER,Filtro,Filter
+EQUIP_FILTER_DESC,El agua se ensucia más despacio y a niveles altos se limpia sola.,Water gets dirty slower and at high levels cleans itself.
+EQUIP_FEEDER,Comedero,Feeder
+EQUIP_FEEDER_DESC,Da de comer a los peces cada cierto tiempo. Más nivel: más a menudo.,Feeds the fish now and then. Higher level: more often.
+EQUIP_HEATER,Calentador,Heater
+EQUIP_HEATER_DESC,Mantiene a los peces cómodos y sube su felicidad.,Keeps the fish comfortable and raises their happiness.
+EQUIP_LAMP,Lámpara,Lamp
+EQUIP_LAMP_DESC,Los peces jóvenes crecen más deprisa.,Young fish grow faster.
+EQUIP_AERATOR,Aireador,Aerator
+EQUIP_AERATOR_DESC,Oxigena el agua: caben más peces en la pecera.,Oxygenates the water: more fish fit in the tank.
+EQUIP_INCUBATOR,Incubadora,Incubator
+EQUIP_INCUBATOR_DESC,Los huevos eclosionan antes y salen más variantes raras.,Eggs hatch sooner and rare variants turn up more.
+EQUIP_PEARL_MAGNET,Imán de perlas,Pearl magnet
+EQUIP_PEARL_MAGNET_DESC,Recoge solo las perlas que llevan un rato en el suelo.,Picks up pearls that have sat on the floor for a while.
+EQ_EFFECT_FILTER,Suciedad -%d %% · se limpia %s/min,Dirt -%d %% · cleans %s/min
+EQ_EFFECT_FEEDER,Comida cada %s s,Feeds every %s s
+EQ_EFFECT_HEATER,Comodidad +%d %%,Comfort +%d %%
+EQ_EFFECT_LAMP,Crecimiento ×%s,Growth ×%s
+EQ_EFFECT_AERATOR,Capacidad +%d,Capacity +%d
+EQ_EFFECT_INCUBATOR,Eclosión ×%s · raras ×%s,Hatching ×%s · rare ×%s
+EQ_EFFECT_PEARL_MAGNET,Recoge tras %s s,Collects after %s s

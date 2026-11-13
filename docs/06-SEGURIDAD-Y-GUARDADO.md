@@ -24,7 +24,7 @@ Hacer trampas editando la partida no se considera una amenaza: es un juego de un
 
 ```json
 {
-  "format_version": 3,
+  "format_version": 4,
   "game_version": "0.5.0",
   "saved_at_unix": 1794500000,
   "checksum": "sha256 del campo data serializado de forma canónica",

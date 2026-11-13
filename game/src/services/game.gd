@@ -6,6 +6,7 @@ extends Node
 ## modifica el estado directamente. Lo ocurrido se anuncia por [EventBus].
 
 enum BuyResult { OK, UNKNOWN_SPECIES, NOT_ENOUGH_SHELLS, TANK_FULL, LOCKED }
+enum EquipResult { OK, UNKNOWN, MAXED, NOT_ENOUGH_SHELLS }
 
 const START_SHELLS: float = 20.0
 const DEFAULT_SEED: int = 20261113
@@ -23,7 +24,8 @@ var _last_rate: float = -1.0
 func _ready() -> void:
 	var variants_ok: bool = content.load_variants_dir()
 	var species_ok: bool = content.load_species_dir()
-	if not variants_ok or not species_ok:
+	var equipment_ok: bool = content.load_equipment_dir()
+	if not variants_ok or not species_ok or not equipment_ok:
 		for message: String in content.errors:
 			push_error("ContentDB: %s" % message)
 	start_new_game(DEFAULT_SEED)
@@ -87,6 +89,36 @@ func buy_fish(species_id: String) -> BuyResult:
 	_add_fish(0, species_id)
 	EventBus.purchase_made.emit()
 	return BuyResult.OK
+
+
+## Coste de subir el equipo [param equipment_id] de la pecera 0 al nivel siguiente
+## (INF si no existe o ya está al máximo).
+func equipment_cost(equipment_id: String) -> float:
+	var def: EquipmentDef = content.get_equipment(equipment_id)
+	if def == null:
+		return INF
+	var level: int = state.tanks[0].level_of(equipment_id)
+	if level >= def.max_level:
+		return INF
+	return Economy.equipment_cost(def.base_cost, level)
+
+
+## Sube un nivel el equipo [param equipment_id] de la pecera 0.
+func buy_equipment(equipment_id: String) -> EquipResult:
+	var def: EquipmentDef = content.get_equipment(equipment_id)
+	if def == null:
+		return EquipResult.UNKNOWN
+	var tank: Tank = state.tanks[0]
+	var level: int = tank.level_of(equipment_id)
+	if level >= def.max_level:
+		return EquipResult.MAXED
+	if not state.wallet.spend(equipment_cost(equipment_id)):
+		return EquipResult.NOT_ENOUGH_SHELLS
+	tank.set_level(equipment_id, level + 1, content)
+	tank.feeder_timer = 0.0
+	EventBus.equipment_changed.emit(0, equipment_id, level + 1)
+	EventBus.purchase_made.emit()
+	return EquipResult.OK
 
 
 ## Vende [param fish] de la pecera 0. Devuelve las conchas ganadas, o -1 si el pez
@@ -194,6 +226,8 @@ func _replace_state(fresh: GameState) -> void:
 		for fish: Fish in state.tanks[tank_index].fish.duplicate():
 			EventBus.fish_removed.emit(tank_index, fish)
 	state = fresh
+	for tank: Tank in state.tanks:
+		tank.refresh_bonuses(content)
 	state.mark_production_dirty()
 	_stepper.reset()
 	for tank_index: int in range(state.tanks.size()):

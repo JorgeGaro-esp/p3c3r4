@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EquipmentDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/equipment_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "lamp"
+name_key = "EQUIP_LAMP"
+description_key = "EQUIP_LAMP_DESC"
+effect = 3
+max_level = 5
+base_cost = 800.0
+per_level = 0.25
+sprite_path = "res://content/sprites/equip_lamp.txt"
+palette_roles = PackedStringArray("f", "e")
+palette_colors = PackedColorArray(0.8, 0.8, 0.85, 1, 1.0, 0.95, 0.55, 1)
+placement = 0
+place_x = 0.3
+frame_duration = 0.7
