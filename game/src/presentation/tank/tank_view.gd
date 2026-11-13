@@ -18,6 +18,10 @@ const BUBBLE_GAP_MAX: float = 1.6
 const LAYER_BACK: int = 0
 const LAYER_FISH: int = 10
 const LAYER_FRONT: int = 20
+## A qué distancia, en celdas, un pez hambriento ve la comida.
+const SEEK_RADIUS: float = 30.0
+## A qué distancia de la boca se come un copo.
+const EAT_DISTANCE: float = 1.8
 
 
 ## Lo necesario para dibujar una especie: se prepara una vez y se reutiliza.
@@ -41,11 +45,15 @@ var _area: Rect2i = Rect2i()
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _looks: Dictionary[String, Look] = {}
 var _views: Dictionary[Fish, FishView] = {}
+var _owners: Dictionary[FishView, Fish] = {}
 var _fish: Array[FishView] = []
 var _surface: SurfaceView = SurfaceView.new()
 var _sand: SandView = SandView.new()
 var _weeds: SeaweedView = SeaweedView.new()
 var _bubbles: BubbleField = BubbleField.new()
+var _food: FoodField = FoodField.new()
+var _spots: GlassSpots = GlassSpots.new()
+var _pearls: PearlField = PearlField.new()
 var _next_bubble_in: float = 1.0
 
 
@@ -57,18 +65,23 @@ func _ready() -> void:
 	_sand.layer = LAYER_BACK
 	_weeds.layer = LAYER_BACK + 1
 	_bubbles.layer = LAYER_FISH + 1
-	for drawable: AsciiDrawable in [_sand, _weeds, _bubbles, _surface]:
+	_food.layer = LAYER_FISH + 2
+	_pearls.layer = LAYER_FISH + 3
+	_spots.layer = LAYER_FRONT + 1
+	for drawable: AsciiDrawable in [_sand, _weeds, _bubbles, _surface, _food, _pearls, _spots]:
 		canvas.add_drawable(drawable)
 	_load_looks()
 	canvas.grid_changed.connect(_on_grid_changed)
 	_on_grid_changed()
 	EventBus.fish_added.connect(_on_fish_added)
 	EventBus.fish_removed.connect(_on_fish_removed)
+	EventBus.pearl_spawned.connect(_on_pearl_spawned)
 	for fish: Fish in Game.state.tanks[0].fish:
 		_add_view(fish)
 
 
 func _process(delta: float) -> void:
+	_update_care()
 	_next_bubble_in -= delta
 	if _next_bubble_in > 0.0 or _fish.is_empty():
 		return
@@ -84,12 +97,60 @@ func _input(event: InputEvent) -> void:
 	if get_viewport().is_input_handled():
 		return
 	var button: InputEventMouseButton = event as InputEventMouseButton
-	if button == null or not button.pressed or button.button_index != MOUSE_BUTTON_LEFT:
+	if button != null:
+		if button.pressed and button.button_index == MOUSE_BUTTON_LEFT:
+			if click_cell(canvas.cell_at(button.position)):
+				get_viewport().set_input_as_handled()
 		return
-	var hit: Fish = fish_at(canvas.cell_at(button.position))
+	var motion: InputEventMouseMotion = event as InputEventMouseMotion
+	if motion != null and (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+		if clean_at(canvas.cell_at(motion.position)):
+			get_viewport().set_input_as_handled()
+
+
+## Clic del jugador sobre la celda [param cell]. Por orden: limpiar una mancha,
+## recoger una perla, abrir la ficha de un pez o echar comida al agua. Devuelve
+## verdadero si hizo algo.
+func click_cell(cell: Vector2i) -> bool:
+	if not _in_water(cell):
+		return false
+	if clean_at(cell) or _collect_pearl_at(cell):
+		return true
+	var hit: Fish = fish_at(cell)
 	if hit != null:
 		fish_clicked.emit(hit)
-		get_viewport().set_input_as_handled()
+	else:
+		drop_food(cell)
+	return true
+
+
+## Limpia la mancha de alga que haya en [param cell]. Devuelve verdadero si limpió.
+func clean_at(cell: Vector2i) -> bool:
+	var index: int = _spots.spot_at(cell)
+	if index < 0:
+		return false
+	_spots.mark_for_removal(index)
+	if not Game.clean_spot(0):
+		return false
+	_spots.set_count(Care.spots_for(Game.state.tanks[0].cleanliness))
+	return true
+
+
+## Echa comida desde la celda [param cell] (lo mismo que hace un clic en el agua).
+func drop_food(cell: Vector2i) -> void:
+	_food.drop(Vector2(cell) + Vector2(0.5, 0.0), _rng)
+
+
+func food_count() -> int:
+	return _food.count()
+
+
+func spot_count() -> int:
+	return _spots.count()
+
+
+func pearl_count() -> int:
+	return _pearls.count()
 
 
 ## Esquina superior izquierda, en celdas, del pez [param fish]; (-1, -1) si no se dibuja.
@@ -155,9 +216,64 @@ func _add_view(fish: Fish) -> void:
 	view.layer = LAYER_FISH
 	motion.set_bounds(_bounds_for(view))
 	motion.scatter()
+	view.set_mood(fish.happiness)
 	_views[fish] = view
+	_owners[view] = fish
 	_fish.append(view)
 	canvas.add_drawable(view)
+
+
+## Estado de ánimo, manchas y búsqueda de comida de cada pez.
+func _update_care() -> void:
+	_spots.set_count(Care.spots_for(Game.state.tanks[0].cleanliness))
+	for view: FishView in _fish:
+		var fish: Fish = _owners[view]
+		view.set_mood(fish.happiness)
+		if _food.count() > 0 and fish.hunger < Care.HUNGRY_BELOW:
+			_hunt(view, fish)
+
+
+## Un pez hambriento nada hacia el copo más cercano y se lo come al llegar.
+func _hunt(view: FishView, fish: Fish) -> void:
+	var mouth: Vector2 = view.anchor_cell("eye")
+	var index: int = _food.nearest_to(mouth, SEEK_RADIUS)
+	if index < 0:
+		return
+	var flake: Vector2 = _food.position_of(index)
+	if mouth.distance_to(flake) <= EAT_DISTANCE:
+		if Game.feed_fish(fish):
+			_food.remove_at(index)
+		return
+	view.motion.seek(flake - (mouth - view.motion.position))
+
+
+func _in_water(cell: Vector2i) -> bool:
+	var area: Rect2i = _current_area()
+	var water: Rect2i = Rect2i(
+		area.position.x,
+		area.position.y + SURFACE_ROWS,
+		area.size.x,
+		area.size.y - SURFACE_ROWS - SAND_ROWS
+	)
+	return water.has_point(cell)
+
+
+func _collect_pearl_at(cell: Vector2i) -> bool:
+	var index: int = _pearls.pearl_at(cell)
+	if index < 0:
+		return false
+	Game.collect_pearl(_pearls.take(index))
+	return true
+
+
+func _on_pearl_spawned(tank_index: int, fish: Fish, value: float) -> void:
+	if tank_index != 0 or not _views.has(fish):
+		return
+	var view: FishView = _views[fish]
+	var start: Vector2 = view.motion.position + Vector2(float(view.width) * 0.5, float(view.height))
+	var evicted: float = _pearls.add(start, value)
+	if evicted > 0.0:
+		Game.collect_pearl(evicted)
 
 
 func _on_fish_added(tank_index: int, fish: Fish) -> void:
@@ -170,6 +286,7 @@ func _on_fish_removed(tank_index: int, fish: Fish) -> void:
 		return
 	var view: FishView = _views[fish]
 	_views.erase(fish)
+	_owners.erase(view)
 	_fish.erase(view)
 	canvas.remove_drawable(view)
 
@@ -181,6 +298,16 @@ func _on_grid_changed() -> void:
 	_sand.configure(area.size.x, sand_top, SAND_ROWS)
 	_weeds.configure(area.size.x, sand_top, sand_top - area.position.y - SURFACE_ROWS - 2)
 	_bubbles.surface_row = float(area.position.y + SURFACE_ROWS)
+	_food.floor_row = float(sand_top)
+	_pearls.floor_row = float(sand_top - 1)
+	_spots.configure(
+		Rect2i(
+			area.position.x,
+			area.position.y + SURFACE_ROWS,
+			area.size.x,
+			area.size.y - SURFACE_ROWS - SAND_ROWS
+		)
+	)
 	for fish: FishView in _fish:
 		fish.motion.set_bounds(_bounds_for(fish))
 

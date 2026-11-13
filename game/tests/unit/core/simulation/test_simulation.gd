@@ -43,7 +43,8 @@ func test_production_matches_the_formula() -> void:
 	var state: GameState = _state_with(["guppy", "angel"])
 	assert_almost_eq(Simulation.total_production(state, _content), 1.0, 0.0001)
 	_run(state, 100, 1)
-	assert_almost_eq(state.wallet.shells, 10.0, 0.001, "10 s a 1,0 conchas/s")
+	# Tolerancia: en 10 s el hambre ya baja un poco y con ella la felicidad.
+	assert_almost_eq(state.wallet.shells, 10.0, 0.05, "10 s a 1,0 conchas/s")
 	assert_almost_eq(state.sim_time, 10.0, 0.0001)
 
 
@@ -87,3 +88,49 @@ func test_values_stay_finite_over_a_long_run() -> void:
 	_run(state, 20000, 3)
 	assert_false(is_nan(state.wallet.shells) or is_inf(state.wallet.shells))
 	assert_gte(state.wallet.shells, 0.0)
+
+
+func test_neglect_lowers_production_but_never_to_zero() -> void:
+	var state: GameState = _state_with(["guppy", "angel"])
+	var full: float = Simulation.total_production(state, _content)
+	_run(state, 36000, 1)
+	assert_eq(state.tanks[0].fish[0].hunger, 0.0)
+
+	var starving: float = Simulation.total_production(state, _content)
+	assert_gt(starving, 0.0)
+	assert_lt(starving, full)
+	assert_gt(state.wallet.shells, 0.0, "no se pierde nada: se sigue ganando")
+
+
+func test_fed_fish_keep_their_happiness() -> void:
+	var state: GameState = _state_with(["guppy"])
+	for _second: int in range(30):
+		_run(state, 10, 1)
+		for fish: Fish in state.tanks[0].fish:
+			fish.hunger = Care.MAX_HUNGER
+	assert_almost_eq(state.tanks[0].fish[0].hunger, Care.MAX_HUNGER, 0.0001)
+
+
+func test_a_pearl_is_dropped_sooner_or_later_and_the_queue_empties() -> void:
+	var state: GameState = _state_with(["guppy", "angel"])
+	_run(state, int(Care.PEARL_MAX_SECONDS * 10.0) + 50, 3)
+	var pearls: Array[PearlSpawn] = state.take_pearls()
+	assert_gte(pearls.size(), 1)
+	assert_gt(pearls[0].value, 0.0)
+	assert_true(state.tanks[0].fish.has(pearls[0].fish))
+	assert_eq(state.take_pearls().size(), 0)
+
+
+func test_empty_tanks_drop_no_pearls_and_do_not_get_dirty() -> void:
+	var state: GameState = GameState.new()
+	_run(state, 20000, 1)
+	assert_eq(state.take_pearls().size(), 0)
+	assert_eq(state.tanks[0].cleanliness, Care.MAX_CLEANLINESS)
+
+
+func test_pending_pearls_are_capped() -> void:
+	var state: GameState = _state_with(["guppy"])
+	for _index: int in range(GameState.MAX_PENDING_PEARLS + 5):
+		state.tanks[0].pearl_timer = 0.0
+		_run(state, 1, 4)
+	assert_lte(state.pending_pearls.size(), GameState.MAX_PENDING_PEARLS)

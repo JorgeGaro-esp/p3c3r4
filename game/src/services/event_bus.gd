@@ -11,6 +11,10 @@ signal production_changed(rate: float)
 signal fish_added(tank_index: int, fish: Fish)
 ## Se quitó un pez de la pecera [param tank_index].
 signal fish_removed(tank_index: int, fish: Fish)
+## Un pez soltó una perla que vale [param value] conchas.
+signal pearl_spawned(tank_index: int, fish: Fish, value: float)
+## El jugador recogió una perla de [param value] conchas.
+signal pearl_collected(value: float)
 ## Una especie se desbloqueó y ya está en la tienda.
 signal species_unlocked(species_id: String)
 ## El jugador hizo una compra importante (pide un guardado).

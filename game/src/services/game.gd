@@ -30,6 +30,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	for _step: int in range(_stepper.advance(delta)):
 		Simulation.step(state, FixedStepper.STEP_SECONDS, content, rng)
+	for spawn: PearlSpawn in state.take_pearls():
+		EventBus.pearl_spawned.emit(spawn.tank_index, spawn.fish, spawn.value)
 	_publish_changes()
 
 
@@ -80,6 +82,30 @@ func buy_fish(species_id: String) -> BuyResult:
 	_add_fish(0, species_id)
 	EventBus.purchase_made.emit()
 	return BuyResult.OK
+
+
+## Da de comer un copo a [param fish]. Devuelve falso si ya estaba lleno.
+func feed_fish(fish: Fish) -> bool:
+	if fish.hunger >= Care.MAX_HUNGER:
+		return false
+	fish.feed(Care.HUNGER_PER_FLAKE)
+	return true
+
+
+## Limpia una mancha de alga de la pecera [param tank_index]. Devuelve falso si
+## ya estaba impecable.
+func clean_spot(tank_index: int = 0) -> bool:
+	var tank: Tank = state.tanks[tank_index]
+	if tank.cleanliness >= Care.MAX_CLEANLINESS:
+		return false
+	tank.cleanliness = minf(tank.cleanliness + Care.SPOT_STEP, Care.MAX_CLEANLINESS)
+	return true
+
+
+## El jugador recoge una perla de [param value] conchas.
+func collect_pearl(value: float) -> void:
+	if state.wallet.add(value):
+		EventBus.pearl_collected.emit(value)
 
 
 ## Herramienta de desarrollo (F4): añade peces sin coste, hasta llenar la pecera.

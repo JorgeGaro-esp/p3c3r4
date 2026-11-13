@@ -3,8 +3,8 @@
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
 **Última actualización:** 2026-11-13
-**Fase actual:** Fase 5 · Tienda, especies y rarezas: código y 242 tests hechos. Fase 4 probada por Jorge (el guardado conserva las conchas). Pendiente de Jorge: elegir P02 y borrar los archivos `test_*` (ver abajo). Siguiente: **Fase 6 · Cuidados**.
-**Versión:** `0.6.0` (pendiente de etiquetar en Git; `v0.5.0` si Jorge ya la etiquetó). Etiquetas existentes: `v0.1.0`, `v0.2.0`. Falta commitear y etiquetar `v0.3.0`.
+**Fase actual:** Fase 6 · Cuidados: código y 276 tests hechos. Pendiente de Jorge: probar la Fase 5 y la 6, elegir P02 y borrar los `test_*` (ver abajo). Siguiente: **Fase 7 · Cría, variantes y venta**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
+**Versión:** `0.7.0` (pendiente de etiquetar en Git). Etiquetas existentes: `v0.1.0`, `v0.2.0`. Falta commitear y etiquetar `v0.3.0`.
 
 ## Progreso por fases
 
@@ -16,7 +16,7 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 | 3 | Núcleo de simulación y economía | Hecha en código; pendiente de prueba manual de Jorge |
 | 4 | Guardado | Hecha; guardar y recargar conchas probado por Jorge |
 | 5 | Tienda, especies y rarezas | Hecha en código; pendiente de prueba manual de Jorge |
-| 6 | Cuidados: hambre, limpieza y felicidad | Pendiente |
+| 6 | Cuidados: hambre, limpieza y felicidad | Hecha en código; pendiente de prueba manual de Jorge |
 | 7 | Cría, variantes de color y venta | Pendiente |
 | 8 | Equipamiento mejorable | Pendiente |
 | 9 | Decoración colocable | Pendiente |
@@ -43,7 +43,8 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 
 Jorge: borrar `game/src/presentation/tank/swimmer_def.gd` y su `.uid` (ya no se usan; no los borró Claude). Después abrir el proyecto en Godot (se generarán los `.uid` nuevos), F5, y comprobar: franja sobre la barra de tareas sin cubrirla, sin robar el foco, `[_]`/`[X]`, barra lateral (Tienda, Ajustes), cambios en Ajustes. Probar 125/150 % de escala y un segundo monitor si es posible. Elegir P02 (paneles que sustituyen la pecera, o ventana que crece hacia arriba). Luego `git add .`, commit y `git tag v0.3.0`.
 Jorge: borrar `game/content/species/test_*.tres` y `game/content/sprites/test_*.txt` (6 archivos y sus `.uid`; si no, aparecerían como especies extra). Probar: comprar peces en la tienda, ver desbloqueos, clic en un pez para su ficha (Esc la cierra) y cerrar/abrir para comprobar que se conserva la partida (las especies de prueba antiguas pasan a las del estanque). Elegir P02.
-Claude: Fase 6 (cuidados: hambre, limpieza y felicidad).
+Jorge (Fase 6): clic en el agua para echar comida; arrastrar sobre las manchas verdes para limpiar (aparecen con el tiempo); clic en las perlas `○` que caen. Para ver el efecto sin esperar: bajar `hunger` con el depurador no existe aún; esperar unos minutos basta.
+Claude: Fase 7 (cría, variantes de color y venta).
 
 ## Bloqueos y dudas abiertas
 

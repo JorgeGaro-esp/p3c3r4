@@ -38,6 +38,8 @@ const WAVE_BASE_SPEED: float = 0.4
 const MAX_TILT: float = 0.6
 const MIN_TILT_SPEED: float = 0.5
 const TILT_RESPONSE: float = 4.0
+## Segundos que se mantiene un destino fijado con [method seek].
+const SEEK_HOLD: float = 0.4
 
 ## Esquina superior izquierda del sprite, en celdas.
 var position: Vector2 = Vector2.ZERO
@@ -53,6 +55,8 @@ var speed: float = 6.0
 ## Amplitud máxima de la onda, en celdas.
 var amplitude: float = 0.15
 var frequency: float = 1.2
+## Multiplicador de velocidad (un pez triste nada más despacio).
+var speed_scale: float = 1.0
 
 var _rng: RandomNumberGenerator
 var _target: Vector2 = Vector2.ZERO
@@ -107,7 +111,7 @@ func step(delta: float) -> void:
 		direction = to_target / distance
 
 	var arrive: float = clampf(distance / SLOW_RADIUS, 0.25, 1.0)
-	var cruise: float = speed * _thrust(delta) * arrive
+	var cruise: float = speed * speed_scale * _thrust(delta) * arrive
 	var desired: Vector2 = Vector2(direction.x, direction.y * VERTICAL_RATIO) * cruise
 	velocity = velocity.move_toward(desired, speed * ACCEL_FACTOR * delta)
 	position += velocity * delta
@@ -120,6 +124,16 @@ func step(delta: float) -> void:
 	var speed_ratio: float = velocity.length() / maxf(speed, 0.001)
 	phase += delta * frequency * TAU * (WAVE_BASE_SPEED + speed_ratio)
 	_update_tilt(delta)
+
+
+## Dirige al pez hacia [param point] (esquina superior izquierda deseada) durante
+## un momento; hay que repetirlo cada fotograma mientras siga habiendo interés.
+func seek(point: Vector2) -> void:
+	_target = Vector2(
+		clampf(point.x, bounds.position.x, bounds.end.x),
+		clampf(point.y, bounds.position.y, bounds.end.y)
+	)
+	_retarget_in = SEEK_HOLD
 
 
 ## Desplazamiento vertical, en celdas, de la columna [param column] del sprite

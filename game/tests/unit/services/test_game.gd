@@ -106,3 +106,39 @@ func test_a_species_stays_unlocked_after_selling_the_fish_that_unlocked_it() -> 
 	Game.debug_remove_fish(500)
 	Game._publish_changes()
 	assert_true(Game.state.is_unlocked("pond_tetra"))
+
+
+func test_feeding_a_full_fish_changes_nothing() -> void:
+	var fish: Fish = Game.state.tanks[0].fish[0]
+	assert_false(Game.feed_fish(fish))
+	fish.hunger = 50.0
+	assert_true(Game.feed_fish(fish))
+	assert_almost_eq(fish.hunger, 50.0 + Care.HUNGER_PER_FLAKE, 0.0001)
+
+
+func test_cleaning_raises_cleanliness_one_step_and_stops_at_clean() -> void:
+	var tank: Tank = Game.state.tanks[0]
+	assert_false(Game.clean_spot())
+	tank.cleanliness = 50.0
+	assert_true(Game.clean_spot())
+	assert_almost_eq(tank.cleanliness, 50.0 + Care.SPOT_STEP, 0.0001)
+	tank.cleanliness = 95.0
+	Game.clean_spot()
+	assert_eq(tank.cleanliness, Care.MAX_CLEANLINESS)
+
+
+func test_collecting_a_pearl_adds_shells_and_announces_it() -> void:
+	watch_signals(EventBus)
+	var before: float = Game.state.wallet.shells
+	Game.collect_pearl(12.0)
+	assert_eq(Game.state.wallet.shells, before + 12.0)
+	assert_signal_emitted_with_parameters(EventBus, "pearl_collected", [12.0])
+
+
+func test_dropped_pearls_are_published_on_the_bus() -> void:
+	watch_signals(EventBus)
+	var fish: Fish = Game.state.tanks[0].fish[0]
+	Game.state.pending_pearls.append(PearlSpawn.new(0, fish, 5.0))
+	Game._process(0.0)
+	assert_signal_emitted(EventBus, "pearl_spawned")
+	assert_eq(Game.state.pending_pearls.size(), 0)

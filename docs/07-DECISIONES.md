@@ -89,6 +89,7 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 |---|---|---|
 | P01 | Altura de la franja y si es ajustable por el jugador | Resuelta en Fase 2: D32 |
 | P02 | Cómo se abren tienda y Pecedex dentro de la franja: panel lateral o ventana que crece hacia arriba | Prototipo hecho en Fase 2 con ambos modos (Ajustes → modo de paneles). **Pendiente de que Jorge elija** |
+| P11 | Pasada de estilo al terminar la Fase 16: acercar las animaciones y la estética al HTML del primer prototipo, más pequeñas mejoras estéticas | Jorge aportará la documentación y el HTML de referencia; no antes de la 1.0 funcional |
 | P03 | Lista definitiva de biomas y especies (el GDD trae una propuesta) | Fase 5 y Fase 10 |
 | P04 | Nombre de la moneda y de la moneda de prestigio | Fase 3 |
 | P05 | Qué conserva exactamente el prestigio | Fase 13 |
@@ -112,6 +113,12 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T48 | Los peces se detectan con `_input` en `TankView` (no `_unhandled_input`) y solo si `UiRoot` no consumió el clic | En Godot 4.6 el clic no llegaba a `_unhandled_input` |
 | T49 | La ficha del pez es una superposición sobre la pecera, no un panel que sustituye la pecera | El clic sobre un pez no debe hacer desaparecer la pecera en el modo A de P02 |
 | T50 | Producciones de partida a ~0,3× de la primera propuesta; un jugador óptimo desbloquea la koi hacia el minuto 27 | Simulación rápida en la sesión; el ajuste real es de la Fase 16 |
+
+| T51 | Hambre: 600 s de lleno a vacío; limpieza: −0,003 por pez y segundo; cada mancha limpiada da +10; felicidad = 55 % saciedad + 45 % limpieza (la comodidad entrará con la decoración) | Valores de partida; se ajustan en la Fase 16. Con todo a cero la producción es ×0,25, nunca 0 |
+| T52 | Las manchas de alga no son estado propio: su número sale de la limpieza (`Care.spots_for`) y sus posiciones son fijas por semilla | Menos estado que guardar y la pecera no «baila» al ensuciarse |
+| T53 | Las perlas las decide la simulación con el generador de la partida (cola `pending_pearls`) y las dibuja la vista; no se guardan | Determinismo; una perla sin recoger al cerrar no merece guardarse |
+| T54 | Perla = 30 s de producción del pez que la suelta (mínimo 1 concha); con más de 12 en pantalla la más antigua se recoge sola | Nada se pierde (pilar 1 del GDD) |
+| T55 | Orden del clic en el agua: limpiar mancha, recoger perla, abrir ficha de pez y, si no, echar comida | La mancha está «delante» del cristal; la comida es la acción por defecto |
 
 ## Cómo añadir decisiones
 

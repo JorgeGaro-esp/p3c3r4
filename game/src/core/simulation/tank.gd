@@ -9,6 +9,10 @@ const MAX_CAPACITY: int = 200
 var biome_id: String = "pond"
 var capacity: int = DEFAULT_CAPACITY
 var fish: Array[Fish] = []
+## Limpieza del agua de 0 (sucia) a 100 (impecable).
+var cleanliness: float = Care.MAX_CLEANLINESS
+## Segundos que faltan para la próxima perla (no se guarda).
+var pearl_timer: float = Care.PEARL_MAX_SECONDS
 
 
 func is_full() -> bool:
@@ -45,7 +49,9 @@ func to_dict() -> Dictionary:
 	var fish_data: Array = []
 	for item: Fish in fish:
 		fish_data.append(item.to_dict())
-	return {"biome_id": biome_id, "capacity": capacity, "fish": fish_data}
+	return {
+		"biome_id": biome_id, "capacity": capacity, "cleanliness": cleanliness, "fish": fish_data
+	}
 
 
 ## Lee una pecera de [param source]; null si no es un objeto. Los peces inválidos
@@ -59,6 +65,9 @@ static func from_dict(source: Variant, content: ContentDB, warnings: PackedStrin
 	tank.biome_id = SaveFields.read_string(data, "biome_id", "pond", warnings)
 	tank.capacity = SaveFields.read_int(
 		data, "capacity", DEFAULT_CAPACITY, 1, MAX_CAPACITY, warnings
+	)
+	tank.cleanliness = SaveFields.read_float(
+		data, "cleanliness", Care.MAX_CLEANLINESS, 0.0, Care.MAX_CLEANLINESS, warnings
 	)
 	var raw_fish: Variant = SaveFields.read_array(data, "fish", warnings)
 	if raw_fish == null:

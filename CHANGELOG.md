@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.7.0] - 2026-11-13 · Fase 6
+
+### Añadido
+- Hambre por pez (se vacía en 10 minutos) y limpieza por pecera (baja con el número de peces); la felicidad sale de ambas (`Care`).
+- Alimentar: clic en el agua suelta copos; los peces hambrientos nadan hacia el más cercano y se lo comen.
+- Manchas de alga en el cristal que aparecen al ensuciarse el agua y se limpian arrastrando el ratón.
+- Perlas: cada pez suelta una de vez en cuando; caen al fondo y dan conchas al hacer clic (si hay muchas, la más antigua se recoge sola).
+- Efecto visual de la felicidad: un pez triste nada más despacio y pierde saturación.
+- La ficha del pez muestra también la saciedad.
+- Guardado: se guardan la saciedad de cada pez y la limpieza de la pecera (las partidas antiguas empiezan limpias y saciadas).
+
 ## [0.6.0] - 2026-11-13 · Fase 5
 
 ### Añadido

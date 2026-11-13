@@ -32,6 +32,8 @@ TOAST_UNLOCKED,Nueva en la tienda: %s,New in the shop: %s
 FISH_CARD_TITLE,Ficha,Fish card
 FISH_PRODUCTION,Produce %s ¢/s,Produces %s ¢/s
 FISH_HAPPINESS,Felicidad %d %%,Happiness %d %%
+FISH_SATIETY,Saciedad %d %%,Fullness %d %%
+TOAST_PEARL,¡Perla! +%s ¢,Pearl! +%s ¢
 SPECIES_POND_GUPPY,Guppy,Guppy
 SPECIES_POND_GUPPY_DESC,Pequeño y nervioso. Cualquier estanque empieza con uno.,Small and jittery. Every pond starts with one.
 SPECIES_POND_MINNOW,Pececillo,Minnow

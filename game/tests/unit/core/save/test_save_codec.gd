@@ -148,3 +148,43 @@ func test_unlocked_species_round_trip_and_unknown_ones_are_ignored() -> void:
 	assert_true(result.is_ok(), result.reason)
 	assert_true(result.state.is_unlocked("pond_tetra"))
 	assert_false(result.state.is_unlocked("no_such_species"))
+
+
+func test_hunger_and_cleanliness_round_trip() -> void:
+	var state: GameState = _sample_state()
+	state.tanks[0].cleanliness = 42.5
+	state.tanks[0].fish[0].hunger = 17.0
+	var result: DecodeResult = SaveCodec.decode(SaveCodec.encode(state, "0.7.0", 1), _content)
+	assert_true(result.is_ok(), result.reason)
+	assert_eq(result.state.tanks[0].cleanliness, 42.5)
+	assert_eq(result.state.tanks[0].fish[0].hunger, 17.0)
+
+
+func test_older_saves_without_care_data_start_clean_and_fed() -> void:
+	var envelope: Dictionary = _envelope(SaveCodec.encode(_sample_state(), "0.6.0", 1))
+	var data: Dictionary = envelope["data"]
+	var tanks: Array = data["tanks"]
+	var tank: Dictionary = tanks[0]
+	tank.erase("cleanliness")
+	var fish_list: Array = tank["fish"]
+	var first: Dictionary = fish_list[0]
+	first.erase("hunger")
+	var result: DecodeResult = SaveCodec.decode(_reseal(envelope), _content)
+	assert_true(result.is_ok(), result.reason)
+	assert_eq(result.state.tanks[0].cleanliness, Care.MAX_CLEANLINESS)
+	assert_eq(result.state.tanks[0].fish[0].hunger, Care.MAX_HUNGER)
+
+
+func test_out_of_range_care_values_are_clamped() -> void:
+	var envelope: Dictionary = _envelope(SaveCodec.encode(_sample_state(), "0.7.0", 1))
+	var data: Dictionary = envelope["data"]
+	var tanks: Array = data["tanks"]
+	var tank: Dictionary = tanks[0]
+	tank["cleanliness"] = 9999.0
+	var fish_list: Array = tank["fish"]
+	var first: Dictionary = fish_list[0]
+	first["hunger"] = -50.0
+	var result: DecodeResult = SaveCodec.decode(_reseal(envelope), _content)
+	assert_true(result.is_ok(), result.reason)
+	assert_eq(result.state.tanks[0].cleanliness, Care.MAX_CLEANLINESS)
+	assert_eq(result.state.tanks[0].fish[0].hunger, 0.0)

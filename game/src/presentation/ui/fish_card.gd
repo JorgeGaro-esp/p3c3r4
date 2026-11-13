@@ -6,7 +6,7 @@ extends UiPanel
 signal close_requested
 
 const WIDTH: int = 34
-const HEIGHT: int = 7
+const HEIGHT: int = 8
 const MARGIN: int = 1
 
 var _fish: Fish = null
@@ -15,6 +15,7 @@ var _name: AsciiLabel = null
 var _rarity: AsciiLabel = null
 var _production: AsciiLabel = null
 var _happiness: AsciiLabel = null
+var _satiety: AsciiLabel = null
 var _bar: AsciiProgress = AsciiProgress.new()
 var _close: AsciiButton = null
 
@@ -26,6 +27,7 @@ func _init(root: UiRoot) -> void:
 	_rarity = _make_label("")
 	_production = _make_label("")
 	_happiness = _make_label("")
+	_satiety = _make_label("")
 	_add(_bar)
 	_close = _make_button("")
 	_close.activated.connect(func() -> void: close_requested.emit())
@@ -61,8 +63,9 @@ func layout(area: Rect2i) -> void:
 	_rarity.rect = Rect2i(left, top + 2, inner, 1)
 	_production.rect = Rect2i(left, top + 3, inner, 1)
 	_happiness.rect = Rect2i(left, top + 4, inner, 1)
-	_bar.rect = Rect2i(left, top + 5, mini(inner, 20), 1)
-	_close.rect = Rect2i(left + 21, top + 5, maxi(inner - 21, 1), 1)
+	_satiety.rect = Rect2i(left, top + 5, inner, 1)
+	_bar.rect = Rect2i(left, top + 6, mini(inner, 20), 1)
+	_close.rect = Rect2i(left + 21, top + 6, maxi(inner - 21, 1), 1)
 
 
 func refresh() -> void:
@@ -91,4 +94,5 @@ func _update_texts() -> void:
 		_text("FISH_PRODUCTION") % NumberFormat.compact(rate, TranslationServer.get_locale())
 	)
 	_happiness.text = _text("FISH_HAPPINESS") % roundi(_fish.happiness)
+	_satiety.text = _text("FISH_SATIETY") % roundi(_fish.hunger)
 	_bar.value = _fish.happiness / Economy.MAX_HAPPINESS

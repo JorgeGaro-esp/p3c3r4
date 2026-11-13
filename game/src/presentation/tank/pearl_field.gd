@@ -1,0 +1,75 @@
+class_name PearlField
+extends AsciiDrawable
+## Perlas que sueltan los peces: caen hasta el fondo y esperan a que el jugador
+## las recoja con un clic. Si hay demasiadas, la más antigua se recoge sola para
+## que nunca se pierda nada.
+
+const MAX_PEARLS: int = 12
+const FALL_SPEED: float = 2.0
+const SPARKLE_PERIOD: float = 0.5
+const COLOR: Color = Color(0.92, 0.95, 1.0)
+const GLYPHS: String = "○◦"
+## Margen del clic, en celdas, alrededor de la perla.
+const HIT_MARGIN: float = 0.9
+
+## Fila del fondo, donde las perlas se quedan.
+var floor_row: float = 10.0
+
+var _pearls: Array[Pearl] = []
+var _clock: float = 0.0
+
+
+## Añade una perla en [param cell]. Si ya había [constant MAX_PEARLS], devuelve el
+## valor de la más antigua (que se retira); si no, devuelve 0.
+func add(cell: Vector2, value: float) -> float:
+	var evicted: float = 0.0
+	if _pearls.size() >= MAX_PEARLS:
+		evicted = _pearls[0].value
+		_pearls.remove_at(0)
+	var pearl: Pearl = Pearl.new()
+	pearl.position = cell
+	pearl.value = value
+	_pearls.append(pearl)
+	return evicted
+
+
+func count() -> int:
+	return _pearls.size()
+
+
+## Índice de la perla en [param cell] (con un margen para que sea fácil acertar), o -1.
+func pearl_at(cell: Vector2i) -> int:
+	var point: Vector2 = Vector2(cell) + Vector2(0.5, 0.5)
+	for index: int in range(_pearls.size() - 1, -1, -1):
+		var center: Vector2 = _pearls[index].position + Vector2(0.5, 0.5)
+		if absf(point.x - center.x) <= HIT_MARGIN and absf(point.y - center.y) <= HIT_MARGIN:
+			return index
+	return -1
+
+
+func value_of(index: int) -> float:
+	return _pearls[index].value
+
+
+## Quita la perla [param index] y devuelve su valor.
+func take(index: int) -> float:
+	var value: float = _pearls[index].value
+	_pearls.remove_at(index)
+	return value
+
+
+func update(delta: float, _canvas: AsciiCanvas) -> void:
+	_clock += delta
+	for pearl: Pearl in _pearls:
+		pearl.position.y = minf(pearl.position.y + FALL_SPEED * delta, floor_row)
+
+
+func draw(canvas: AsciiCanvas) -> void:
+	var glyph: String = GLYPHS[int(_clock / SPARKLE_PERIOD) % GLYPHS.length()]
+	for pearl: Pearl in _pearls:
+		canvas.put_char(glyph, pearl.position, COLOR)
+
+
+class Pearl:
+	var position: Vector2 = Vector2.ZERO
+	var value: float = 0.0

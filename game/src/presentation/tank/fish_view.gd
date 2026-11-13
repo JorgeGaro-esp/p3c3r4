@@ -6,6 +6,9 @@ extends AsciiDrawable
 ## Al crearse precalcula las celdas de cada fotograma y sentido, de modo que
 ## dibujar un pez es solo recorrer listas (sin reservar memoria por fotograma).
 
+## Cada cuántos puntos de felicidad cambia el aspecto del pez.
+const MOOD_STEP: float = 5.0
+
 var motion: SwimMotion
 var width: int = 0
 var height: int = 0
@@ -15,6 +18,8 @@ var _frame_count: int = 1
 var _frame_duration: float = 0.4
 var _clock: float = 0.0
 var _frame_index: int = 0
+var _mood_level: int = -1
+var _desaturation: float = 0.0
 var _right: AsciiSprite
 var _left: AsciiSprite
 
@@ -56,6 +61,26 @@ func draw(canvas: AsciiCanvas) -> void:
 			canvas.put_char(character, cell, cells.colors[index])
 
 
+## Ajusta el aspecto a la felicidad [param happiness] (0 a 100): un pez triste nada
+## más despacio y pierde saturación de color (GDD §4.4). Solo trabaja cuando la
+## felicidad cambia de nivel.
+func set_mood(happiness: float) -> void:
+	var level: int = roundi(happiness / MOOD_STEP)
+	if level == _mood_level:
+		return
+	_mood_level = level
+	var value: float = float(level) * MOOD_STEP
+	motion.speed_scale = Care.speed_factor(value)
+	_desaturation = Care.desaturation(value)
+	for cells: FishCells in _cells:
+		cells.apply_desaturation(_desaturation)
+
+
+## Cuánto color perdió el pez ahora (0 a 0,8).
+func desaturation() -> float:
+	return _desaturation
+
+
 ## Posición actual, en celdas, del punto de anclaje [param anchor_name]
 ## (por ejemplo `eye`). Si el sprite no lo define, devuelve su centro.
 func anchor_cell(anchor_name: String) -> Vector2:
@@ -83,7 +108,9 @@ func _build_cells(sprite: AsciiSprite, palette: AsciiPalette) -> Array[FishCells
 				cells.columns.append(column)
 				cells.rows.append(row)
 				cells.chars.append(character)
-				cells.colors.append(palette.color_for(role))
+				var color: Color = palette.color_for(role)
+				cells.base_colors.append(color)
+				cells.colors.append(color)
 		result.append(cells)
 	return result
 
@@ -93,4 +120,12 @@ class FishCells:
 	var columns: PackedInt32Array = PackedInt32Array()
 	var rows: PackedInt32Array = PackedInt32Array()
 	var chars: PackedStringArray = PackedStringArray()
+	var base_colors: PackedColorArray = PackedColorArray()
 	var colors: PackedColorArray = PackedColorArray()
+
+	## Recalcula los colores apagando los de la paleta hacia su gris.
+	func apply_desaturation(amount: float) -> void:
+		for index: int in range(base_colors.size()):
+			var base: Color = base_colors[index]
+			var gray: float = base.get_luminance()
+			colors[index] = base.lerp(Color(gray, gray, gray, base.a), amount)

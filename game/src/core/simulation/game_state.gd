@@ -6,6 +6,8 @@ extends RefCounted
 
 const MAX_TANKS: int = 16
 const MAX_SIM_TIME: float = 1.0e12
+## Perlas sin publicar que se aceptan como máximo (por si nadie las recoge).
+const MAX_PENDING_PEARLS: int = 20
 
 var wallet: Wallet = Wallet.new()
 var tanks: Array[Tank] = [Tank.new()]
@@ -17,6 +19,8 @@ var rng_state: int = 0
 var production_rate: float = 0.0
 ## Verdadero cuando hay que recalcular [member production_rate].
 var production_dirty: bool = true
+## Perlas que la simulación ha soltado y `Game` aún no ha publicado.
+var pending_pearls: Array[PearlSpawn] = []
 ## Especies que ya se pueden comprar. Una vez desbloqueada, no se vuelve a bloquear.
 var unlocked: Dictionary[String, bool] = {}
 
@@ -36,6 +40,13 @@ func count_of(species_id: String) -> int:
 
 func is_unlocked(species_id: String) -> bool:
 	return unlocked.has(species_id)
+
+
+## Entrega y vacía la cola de perlas nuevas.
+func take_pearls() -> Array[PearlSpawn]:
+	var taken: Array[PearlSpawn] = pending_pearls
+	pending_pearls = []
+	return taken
 
 
 ## Total de peces en todas las peceras.
