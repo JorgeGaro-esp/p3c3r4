@@ -179,3 +179,38 @@ TAG_CAVE,una cueva,a cave
 TAG_WRECK,un naufragio,a wreck
 TAG_LOG,un tronco,a log
 UNLOCK_DECORATION_TAG,coloques %s en la pecera,place %s in the tank
+SHOP_TAB_BIOMES,Biomas,Biomes
+SHOP_BIOME_OPEN,Abierto,Open
+SHOP_BIOME_REQUIRES,Antes necesitas: %s,First you need: %s
+TOAST_BIOME_OPENED,¡Nueva pecera: %s!,New tank: %s!
+TOAST_WRONG_BIOME,Esa especie vive en otra pecera,That species lives in another tank
+BIOME_POND,Estanque,Pond
+BIOME_POND_DESC,Agua dulce y tranquila entre juncos. Donde empieza todo.,Calm fresh water among reeds. Where it all begins.
+BIOME_REEF,Arrecife,Reef
+BIOME_REEF_DESC,Coral y colores vivos. Peces tropicales que piden más cuidados.,Coral and bright colours. Tropical fish that ask for more care.
+SPECIES_REEF_CLOWNFISH,Pez payaso,Clownfish
+SPECIES_REEF_CLOWNFISH_DESC,Naranja con franjas blancas. Se esconde entre los tentáculos.,Orange with white bands. It hides among the tentacles.
+SPECIES_REEF_DAMSEL,Damisela azul,Blue damselfish
+SPECIES_REEF_DAMSEL_DESC,Pequeña y chispeante. Defiende su rincón con descaro.,Small and sparkling. It defends its corner boldly.
+SPECIES_REEF_BUTTERFLY,Pez mariposa,Butterflyfish
+SPECIES_REEF_BUTTERFLY_DESC,Delicado y amarillo. Picotea entre las grietas del coral.,Delicate and yellow. It pecks between the cracks in the coral.
+SPECIES_REEF_STARFISH,Estrella de mar,Starfish
+SPECIES_REEF_STARFISH_DESC,Camina despacio por el fondo. Necesita un coral cerca.,It walks slowly along the bottom. It needs coral nearby.
+SPECIES_REEF_TANG,Cirujano azul,Blue tang
+SPECIES_REEF_TANG_DESC,Un nadador elegante con una espina en la cola.,An elegant swimmer with a spine on its tail.
+SPECIES_REEF_SEAHORSE,Caballito de mar,Seahorse
+SPECIES_REEF_SEAHORSE_DESC,Flota en vertical y se agarra a las anémonas.,It floats upright and clings to anemones.
+SPECIES_REEF_PUFFER,Pez globo,Pufferfish
+SPECIES_REEF_PUFFER_DESC,Se hincha cuando se asusta. Mejor no molestarlo.,It puffs up when scared. Better not to bother it.
+SPECIES_REEF_RAY,Manta raya,Manta ray
+SPECIES_REEF_RAY_DESC,Planea como si volara. La reina del arrecife.,It glides as if flying. The queen of the reef.
+DECOR_BRAIN_CORAL,Coral cerebro,Brain coral
+DECOR_BRAIN_CORAL_DESC,Un coral redondo y rugoso. La estrella de mar lo busca.,A round and bumpy coral. Starfish look for it.
+DECOR_SEA_FAN,Abanico de mar,Sea fan
+DECOR_SEA_FAN_DESC,Un abanico de coral que se mece con la corriente.,A coral fan that sways with the current.
+DECOR_ANEMONE,Anémona,Anemone
+DECOR_ANEMONE_DESC,Sus tentáculos acogen al pez payaso y al caballito de mar.,Its tentacles shelter clownfish and seahorses.
+DECOR_STAGHORN,Coral cuerno de ciervo,Staghorn coral
+DECOR_STAGHORN_DESC,Ramas de coral que atraen variantes raras.,Coral branches that attract rare variants.
+TAG_CORAL,un coral cerebro,a brain coral
+TAG_ANEMONE,una anémona,an anemone

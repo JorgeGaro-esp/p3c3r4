@@ -72,6 +72,8 @@ var _looks: Dictionary[String, Look] = {}
 var _views: Dictionary[Fish, FishView] = {}
 var _owners: Dictionary[FishView, Fish] = {}
 var _fish: Array[FishView] = []
+var _backdrop: BackdropView = BackdropView.new()
+var _particles: ParticleField = ParticleField.new()
 var _surface: SurfaceView = SurfaceView.new()
 var _sand: SandView = SandView.new()
 var _weeds: SeaweedView = SeaweedView.new()
@@ -85,6 +87,7 @@ var _decor_back: DecorationField = DecorationField.new(false)
 var _decor_front: DecorationField = DecorationField.new(true)
 var _decorating: bool = false
 var _held_id: String = ""
+var _biome: BiomeDef = null
 var _aerator_clock: float = 0.0
 var _next_bubble_in: float = 1.0
 
@@ -93,6 +96,8 @@ func _ready() -> void:
 	canvas = get_node(canvas_path) as AsciiCanvas
 	assert(canvas != null, "TankView needs an AsciiCanvas")
 	_rng.seed = SEED
+	_backdrop.layer = LAYER_BACK - 1
+	_particles.layer = LAYER_FISH - 1
 	_surface.layer = LAYER_FRONT
 	_sand.layer = LAYER_BACK
 	_weeds.layer = LAYER_BACK + 1
@@ -105,6 +110,8 @@ func _ready() -> void:
 	_decor_back.layer = LAYER_BACK + 4
 	_decor_front.layer = LAYER_FISH + 4
 	for drawable: AsciiDrawable in [
+		_backdrop,
+		_particles,
 		_sand,
 		_weeds,
 		_eggs,
@@ -119,12 +126,14 @@ func _ready() -> void:
 	]:
 		canvas.add_drawable(drawable)
 	_load_looks()
+	_biome = Game.content.biomes.get_biome(Game.state.active().biome_id)
 	canvas.grid_changed.connect(_on_grid_changed)
 	_on_grid_changed()
 	EventBus.fish_added.connect(_on_fish_added)
 	EventBus.fish_removed.connect(_on_fish_removed)
 	EventBus.pearl_spawned.connect(_on_pearl_spawned)
-	for fish: Fish in Game.state.tanks[0].fish:
+	EventBus.active_tank_changed.connect(_on_active_tank_changed)
+	for fish: Fish in Game.state.active().fish:
 		_add_view(fish)
 
 
@@ -183,9 +192,9 @@ func clean_at(cell: Vector2i) -> bool:
 	if index < 0:
 		return false
 	_spots.mark_for_removal(index)
-	if not Game.clean_spot(0):
+	if not Game.clean_spot():
 		return false
-	_spots.set_count(Care.spots_for(Game.state.tanks[0].cleanliness))
+	_spots.set_count(Care.spots_for(Game.state.active().cleanliness))
 	return true
 
 
@@ -339,8 +348,8 @@ func _restage(old_view: FishView, fish: Fish) -> void:
 
 ## Estado de ánimo, manchas y búsqueda de comida de cada pez.
 func _update_care() -> void:
-	_spots.set_count(Care.spots_for(Game.state.tanks[0].cleanliness))
-	_eggs.set_eggs(Game.state.tanks[0].eggs, _current_area().size.x)
+	_spots.set_count(Care.spots_for(Game.state.active().cleanliness))
+	_eggs.set_eggs(Game.state.active().eggs, _current_area().size.x)
 	for view: FishView in _fish.duplicate():
 		var fish: Fish = _owners[view]
 		if view.stage != fish.stage():
@@ -353,7 +362,7 @@ func _update_care() -> void:
 
 ## Equipo dibujado, burbujas del aireador y perlas que recoge el imán.
 func _update_equipment(delta: float) -> void:
-	var tank: Tank = Game.state.tanks[0]
+	var tank: Tank = Game.state.active()
 	_equipment.set_equipment(tank.equipment, Game.content)
 	if tank.bonuses.magnet_delay > 0.0:
 		for value: float in _pearls.take_ripe(tank.bonuses.magnet_delay):
@@ -405,7 +414,7 @@ func _collect_pearl_at(cell: Vector2i) -> bool:
 
 
 func _on_pearl_spawned(tank_index: int, fish: Fish, value: float) -> void:
-	if tank_index != 0 or not _views.has(fish):
+	if tank_index != Game.state.active_tank or not _views.has(fish):
 		return
 	var view: FishView = _views[fish]
 	var start: Vector2 = view.motion.position + Vector2(float(view.width) * 0.5, float(view.height))
@@ -415,12 +424,12 @@ func _on_pearl_spawned(tank_index: int, fish: Fish, value: float) -> void:
 
 
 func _on_fish_added(tank_index: int, fish: Fish) -> void:
-	if tank_index == 0:
+	if tank_index == Game.state.active_tank and not _views.has(fish):
 		_add_view(fish)
 
 
 func _on_fish_removed(tank_index: int, fish: Fish) -> void:
-	if tank_index != 0 or not _views.has(fish):
+	if tank_index != Game.state.active_tank or not _views.has(fish):
 		return
 	var view: FishView = _views[fish]
 	_views.erase(fish)
@@ -429,12 +438,57 @@ func _on_fish_removed(tank_index: int, fish: Fish) -> void:
 	canvas.remove_drawable(view)
 
 
+## Cambio de pecera: se vacía lo que se veía y se dibuja la pecera nueva.
+func _on_active_tank_changed(_tank_index: int) -> void:
+	for value: float in _pearls.take_all():
+		Game.collect_pearl(value)
+	_food.clear()
+	_held_id = ""
+	_decor_front.clear_ghost()
+	for view: FishView in _fish.duplicate():
+		canvas.remove_drawable(view)
+	_views.clear()
+	_owners.clear()
+	_fish.clear()
+	_biome = Game.content.biomes.get_biome(Game.state.active().biome_id)
+	_on_grid_changed()
+	for fish: Fish in Game.state.active().fish:
+		_add_view(fish)
+
+
+## Número de partículas flotantes y de caracteres de fondo del bioma actual.
+func _ambience_count() -> int:
+	return _particles.count() + _backdrop.count()
+
+
 func _on_grid_changed() -> void:
 	var area: Rect2i = _current_area()
 	var sand_top: int = area.end.y - SAND_ROWS
-	_surface.configure(area.size.x, area.position.y)
-	_sand.configure(area.size.x, sand_top, SAND_ROWS)
-	_weeds.configure(area.size.x, sand_top, sand_top - area.position.y - SURFACE_ROWS - 2)
+	var offset: int = 0
+	var water: Rect2i = Rect2i(
+		area.position.x,
+		area.position.y + SURFACE_ROWS,
+		area.size.x,
+		area.size.y - SURFACE_ROWS - SAND_ROWS
+	)
+	if _biome != null:
+		offset = _biome.id.hash() & 0xFFFF
+		_surface.configure(
+			area.size.x, area.position.y, _biome.surface_pattern, _biome.surface_color
+		)
+		_sand.configure(
+			area.size.x, sand_top, SAND_ROWS, _biome.sand_grains, _biome.sand_color, offset
+		)
+		_bubbles.color = _biome.bubble_color
+	else:
+		_surface.configure(area.size.x, area.position.y)
+		_sand.configure(area.size.x, sand_top, SAND_ROWS)
+		_bubbles.color = AsciiColors.BUBBLE
+	_weeds.configure(
+		area.size.x, sand_top, sand_top - area.position.y - SURFACE_ROWS - 2, _biome, offset
+	)
+	_backdrop.configure(water, _biome, offset)
+	_particles.configure(water, _biome, offset)
 	_bubbles.surface_row = float(area.position.y + SURFACE_ROWS)
 	_food.floor_row = float(sand_top)
 	_pearls.floor_row = float(sand_top - 1)
@@ -546,7 +600,7 @@ func decoration_at(cell: Vector2i) -> PlacedDecoration:
 	var area: Rect2i = _current_area()
 	var sand_top: int = area.end.y - SAND_ROWS
 	var found: PlacedDecoration = null
-	for placed: PlacedDecoration in Game.state.tanks[0].decorations:
+	for placed: PlacedDecoration in Game.state.active().decorations:
 		var rect: Rect2i = placed.rect(area.size.x)
 		var top: int = sand_top - rect.position.y - rect.size.y
 		var world: Rect2i = Rect2i(area.position.x + rect.position.x, top, rect.size.x, rect.size.y)
@@ -649,7 +703,7 @@ func _announce_held() -> void:
 
 ## Pasa la decoración al dibujo y, en el modo decorar, coloca la vista previa.
 func _update_decoration() -> void:
-	var items: Array[PlacedDecoration] = Game.state.tanks[0].decorations
+	var items: Array[PlacedDecoration] = Game.state.active().decorations
 	_decor_back.set_items(items)
 	_decor_front.set_items(items)
 	if not _decorating:
@@ -667,7 +721,7 @@ func _update_decoration() -> void:
 	var spot: Vector2i = _spot_for(def, cell)
 	var area: Rect2i = _current_area()
 	var verdict: DecorationLayout.Result = DecorationLayout.check(
-		Game.state.tanks[0], def, spot.x, spot.y, area.size.x, _water_rows()
+		Game.state.active(), def, spot.x, spot.y, area.size.x, _water_rows()
 	)
 	var rect: Rect2i = PlacedDecoration.new(def, spot.x, spot.y).rect(area.size.x)
 	_decor_front.set_ghost(

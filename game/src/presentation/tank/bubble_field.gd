@@ -12,6 +12,7 @@ const WOBBLE_SPEED: float = 2.5
 
 ## Fila de la superficie: las burbujas desaparecen al llegar.
 var surface_row: float = 1.0
+var color: Color = AsciiColors.BUBBLE
 
 var _bubbles: Array[Bubble] = []
 var _clock: float = 0.0
@@ -54,9 +55,7 @@ func draw(canvas: AsciiCanvas) -> void:
 		var progress: float = (bubble.start_y - bubble.y) / travel
 		var size_index: int = clampi(int(progress * float(CHARACTERS.length())), 0, 3)
 		var wobble: float = sin(_clock * WOBBLE_SPEED + bubble.phase) * WOBBLE_AMPLITUDE
-		canvas.put_char(
-			CHARACTERS[size_index], Vector2(bubble.x + wobble, bubble.y), AsciiColors.BUBBLE
-		)
+		canvas.put_char(CHARACTERS[size_index], Vector2(bubble.x + wobble, bubble.y), color)
 
 
 ## Una burbuja: posición, desde dónde subió, velocidad y desfase del vaivén.

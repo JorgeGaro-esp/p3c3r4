@@ -11,7 +11,6 @@ signal message(text: String)
 ## El jugador quiere colocar decoración (pasa al modo decorar).
 signal decorate_requested
 
-const BIOME_ID: String = "pond"
 const MIN_LIST_WIDTH: int = 24
 const MAX_LIST_WIDTH: int = 44
 const DETAIL_GAP: int = 2
@@ -22,6 +21,7 @@ const DECORATE_BUTTON_WIDTH: int = 14
 var _ids: PackedStringArray = PackedStringArray()
 var _equipment_ids: PackedStringArray = PackedStringArray()
 var _decor_ids: PackedStringArray = PackedStringArray()
+var _biome_ids: PackedStringArray = PackedStringArray()
 var _tab: int = 0
 var _frame: AsciiFrame = AsciiFrame.new()
 var _tabs: AsciiTabs = AsciiTabs.new()
@@ -63,6 +63,8 @@ func _init(root: UiRoot) -> void:
 	EventBus.fish_added.connect(_on_fish_changed)
 	EventBus.fish_removed.connect(_on_fish_changed)
 	EventBus.species_unlocked.connect(_on_state_changed)
+	EventBus.active_tank_changed.connect(_on_state_changed)
+	EventBus.tank_unlocked.connect(_on_state_changed)
 	EventBus.equipment_changed.connect(_on_equipment_changed)
 	_tabs.tab_changed.connect(_on_tab_changed)
 	refresh()
@@ -98,7 +100,12 @@ func refresh() -> void:
 	_frame.title = _text("SHOP_TITLE")
 	_tabs.set_titles(
 		PackedStringArray(
-			[_text("SHOP_TAB_FISH"), _text("SHOP_TAB_EQUIPMENT"), _text("SHOP_TAB_DECOR")]
+			[
+				_text("SHOP_TAB_FISH"),
+				_text("SHOP_TAB_EQUIPMENT"),
+				_text("SHOP_TAB_DECOR"),
+				_text("SHOP_TAB_BIOMES")
+			]
 		)
 	)
 	_tabs.selected = _tab
@@ -133,12 +140,26 @@ func select_decoration(decoration_id: String) -> void:
 		_show_detail(index)
 
 
+## Ids de los biomas de la lista, en orden de pestaña.
+func biome_ids() -> PackedStringArray:
+	return _biome_ids
+
+
+## Selecciona el bioma [param biome_id] (para los tests).
+func select_biome(biome_id: String) -> void:
+	select_tab(3)
+	var index: int = _biome_ids.find(biome_id)
+	if index >= 0:
+		_list.model.select(index)
+		_show_detail(index)
+
+
 ## Ids de los equipos a la venta, en el orden de la lista.
 func equipment_ids() -> PackedStringArray:
 	return _equipment_ids
 
 
-## Cambia a la pestaña [param index] (0 peces, 1 equipo).
+## Cambia a la pestaña [param index] (0 peces, 1 equipo, 2 decoración, 3 biomas).
 func select_tab(index: int) -> void:
 	_tabs.select(index)
 
@@ -195,7 +216,7 @@ func _collect_ids() -> PackedStringArray:
 	var entries: Array[SpeciesDef] = []
 	for species_id: String in Game.content.species_ids():
 		var def: SpeciesDef = Game.content.get_species(species_id)
-		if def.biome_id == BIOME_ID:
+		if def.biome_id == Game.state.active().biome_id:
 			entries.append(def)
 	entries.sort_custom(
 		func(a: SpeciesDef, b: SpeciesDef) -> bool: return a.base_cost < b.base_cost
@@ -207,6 +228,9 @@ func _collect_ids() -> PackedStringArray:
 
 
 func _fill_list() -> void:
+	if _tab == 3:
+		_fill_biome_list()
+		return
 	if _tab == 1:
 		_fill_equipment_list()
 		return
@@ -238,7 +262,7 @@ func _fill_equipment_list() -> void:
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
 	var extras: PackedStringArray = PackedStringArray()
-	var tank: Tank = Game.state.tanks[0]
+	var tank: Tank = Game.state.active()
 	var locale: String = TranslationServer.get_locale()
 	for equipment_id: String in _equipment_ids:
 		var def: EquipmentDef = Game.content.get_equipment(equipment_id)
@@ -254,7 +278,7 @@ func _fill_equipment_list() -> void:
 
 
 func _fill_decoration_list() -> void:
-	_decor_ids = Game.content.decoration_ids()
+	_decor_ids = _decoration_for_active_biome()
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
 	var prices: PackedStringArray = PackedStringArray()
@@ -271,12 +295,84 @@ func _fill_decoration_list() -> void:
 	_show_detail(_list.selected_index())
 
 
+## Decoración que se vende en la pecera activa: la de todos los biomas y la del suyo.
+func _decoration_for_active_biome() -> PackedStringArray:
+	var ids: PackedStringArray = PackedStringArray()
+	var biome_id: String = Game.state.active().biome_id
+	for decoration_id: String in Game.content.decoration_ids():
+		var def: DecorationDef = Game.content.get_decoration(decoration_id)
+		if def.biome_id.is_empty() or def.biome_id == biome_id:
+			ids.append(decoration_id)
+	return ids
+
+
+func _fill_biome_list() -> void:
+	_biome_ids = Game.content.biomes.ids()
+	var previous: int = _list.selected_index()
+	var names: PackedStringArray = PackedStringArray()
+	var extras: PackedStringArray = PackedStringArray()
+	var locale: String = TranslationServer.get_locale()
+	for biome_id: String in _biome_ids:
+		var biome: BiomeDef = Game.content.biomes.get_biome(biome_id)
+		names.append(_text(biome.name_key))
+		if Game.state.tank_index_of(biome_id) >= 0:
+			extras.append(_text("SHOP_BIOME_OPEN"))
+		else:
+			extras.append("%s ¢" % NumberFormat.compact(biome.unlock_cost, locale))
+	_list.set_items(names, extras)
+	if previous >= 0:
+		_list.model.select(previous)
+	_show_detail(_list.selected_index())
+
+
+func _show_biome_detail(index: int) -> void:
+	if index < 0 or index >= _biome_ids.size():
+		_clear_detail()
+		return
+	var biome: BiomeDef = Game.content.biomes.get_biome(_biome_ids[index])
+	var locale: String = TranslationServer.get_locale()
+	var tank_index: int = Game.state.tank_index_of(biome.id)
+	var missing: bool = (
+		not biome.requires_biome_id.is_empty()
+		and Game.state.tank_index_of(biome.requires_biome_id) < 0
+	)
+	_name.text = _text(biome.name_key)
+	_description.text = _text(biome.description_key)
+	_rarity.text = ""
+	_owned.text = ""
+	_progress.value = 0.0
+	if tank_index >= 0:
+		_price.text = _text("SHOP_BIOME_OPEN")
+		_buy.is_enabled = false
+	elif missing:
+		var needed: BiomeDef = Game.content.biomes.get_biome(biome.requires_biome_id)
+		_price.text = _text("SHOP_BIOME_REQUIRES") % _text(needed.name_key)
+		_buy.is_enabled = false
+	else:
+		_price.text = _text("SHOP_PRICE") % NumberFormat.compact(biome.unlock_cost, locale)
+		_progress.value = clampf(Game.state.wallet.shells / maxf(biome.unlock_cost, 1.0), 0.0, 1.0)
+		_buy.is_enabled = true
+
+
+func _buy_biome() -> void:
+	var index: int = _list.selected_index()
+	if index < 0 or index >= _biome_ids.size():
+		return
+	var biome: BiomeDef = Game.content.biomes.get_biome(_biome_ids[index])
+	match Game.biomes.unlock(biome.id):
+		BiomeDirector.Result.NOT_ENOUGH_SHELLS:
+			message.emit(_text("TOAST_NOT_ENOUGH"))
+		_:
+			pass
+	_fill_list()
+
+
 func _show_decoration_detail(index: int) -> void:
 	if index < 0 or index >= _decor_ids.size():
 		_clear_detail()
 		return
 	var def: DecorationDef = Game.content.get_decoration(_decor_ids[index])
-	var tank: Tank = Game.state.tanks[0]
+	var tank: Tank = Game.state.active()
 	var locale: String = TranslationServer.get_locale()
 	var stock: int = Game.state.decoration_stock.get(def.id, 0)
 	var placed: int = Game.state.decoration_owned(def.id) - stock
@@ -310,7 +406,7 @@ func _show_equipment_detail(index: int) -> void:
 		_clear_detail()
 		return
 	var def: EquipmentDef = Game.content.get_equipment(_equipment_ids[index])
-	var tank: Tank = Game.state.tanks[0]
+	var tank: Tank = Game.state.active()
 	var level: int = tank.level_of(def.id)
 	var cost: float = Game.equipment_cost(def.id)
 	var locale: String = TranslationServer.get_locale()
@@ -334,7 +430,7 @@ func _buy_equipment() -> void:
 	var def: EquipmentDef = Game.content.get_equipment(_equipment_ids[index])
 	match Game.buy_equipment(def.id):
 		GameService.EquipResult.OK:
-			var level: int = Game.state.tanks[0].level_of(def.id)
+			var level: int = Game.state.active().level_of(def.id)
 			message.emit(_text("TOAST_EQ_BOUGHT") % [_text(def.name_key), level])
 		GameService.EquipResult.NOT_ENOUGH_SHELLS:
 			message.emit(_text("TOAST_NOT_ENOUGH"))
@@ -346,6 +442,9 @@ func _buy_equipment() -> void:
 
 
 func _show_detail(index: int) -> void:
+	if _tab == 3:
+		_show_biome_detail(index)
+		return
 	if _tab == 2:
 		_show_decoration_detail(index)
 		return
@@ -362,7 +461,7 @@ func _show_detail(index: int) -> void:
 	_rarity.color = RarityStyle.color(def.rarity)
 	_buy.is_enabled = unlocked
 	if unlocked:
-		var tank: Tank = Game.state.tanks[0]
+		var tank: Tank = Game.state.active()
 		_name.text = _text(def.name_key)
 		_price.text = _text("SHOP_PRICE") % NumberFormat.compact(Game.fish_cost(def.id), locale)
 		_description.text = _text(def.description_key)
@@ -410,6 +509,9 @@ func _unlock_hint(def: SpeciesDef) -> String:
 
 
 func _buy_selected() -> void:
+	if _tab == 3:
+		_buy_biome()
+		return
 	if _tab == 2:
 		_buy_decoration()
 		return
@@ -429,6 +531,8 @@ func _buy_selected() -> void:
 			message.emit(_text("TOAST_TANK_FULL"))
 		GameService.BuyResult.LOCKED:
 			message.emit(_text("TOAST_LOCKED"))
+		GameService.BuyResult.WRONG_BIOME:
+			message.emit(_text("TOAST_WRONG_BIOME"))
 		_:
 			pass
 	_fill_list()

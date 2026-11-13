@@ -27,6 +27,7 @@ var _sidebar: SidebarPanel
 var _shop: ShopPanel
 var _settings_panel: SettingsPanel
 var _card: FishCard
+var _tank_tabs: TankTabs
 var _open: Kind = Kind.NONE
 var _available_rows: int = UNLIMITED_ROWS
 
@@ -47,6 +48,9 @@ func _ready() -> void:
 	Platform.minimized_changed.connect(_on_minimized_changed)
 	EventBus.shells_changed.connect(_on_shells_changed)
 	EventBus.species_unlocked.connect(_on_species_unlocked)
+	EventBus.tank_unlocked.connect(_on_tank_unlocked)
+	EventBus.tank_unlocked.connect(func(_index: int) -> void: _apply_layout())
+	EventBus.active_tank_changed.connect(func(_index: int) -> void: _apply_layout())
 	EventBus.pearl_collected.connect(_on_pearl_collected)
 	EventBus.fish_sold.connect(_on_fish_sold)
 	EventBus.variant_discovered.connect(_on_variant_discovered)
@@ -60,7 +64,7 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	_sidebar.set_cleanliness(roundi(Game.state.tanks[0].cleanliness))
+	_sidebar.set_cleanliness(roundi(Game.state.active().cleanliness))
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -71,6 +75,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		Platform.request_quit()
 	elif key.keycode == KEY_D and not key.ctrl_pressed:
 		toggle_decorating()
+	elif key.keycode >= KEY_1 and key.keycode <= KEY_8 and not key.ctrl_pressed:
+		Game.biomes.set_active(key.keycode - KEY_1)
 
 
 ## Entra o sale del modo decorar (cierra los paneles al entrar).
@@ -163,11 +169,18 @@ func _on_species_unlocked(species_id: String) -> void:
 		_sidebar.show_toast(tr("TOAST_UNLOCKED") % tr(def.name_key))
 
 
+func _on_tank_unlocked(tank_index: int) -> void:
+	var biome: BiomeDef = Game.content.biomes.get_biome(Game.state.tanks[tank_index].biome_id)
+	if biome != null:
+		_sidebar.show_toast(tr("TOAST_BIOME_OPENED") % tr(biome.name_key))
+
+
 func _build_panels() -> void:
 	_sidebar = SidebarPanel.new(_ui)
 	_shop = ShopPanel.new(_ui)
 	_settings_panel = SettingsPanel.new(_ui)
 	_card = FishCard.new(_ui)
+	_tank_tabs = TankTabs.new(_ui)
 	_card.close_requested.connect(close_card)
 	_sidebar.set_active(true)
 	_sidebar.shop_pressed.connect(toggle_panel.bind(Kind.SHOP))
@@ -236,6 +249,11 @@ func _apply_layout() -> void:
 	_place_panel(_shop, Kind.SHOP, layout.panel_rect)
 	_place_panel(_settings_panel, Kind.SETTINGS, layout.panel_rect)
 	_place_card(layout.tank_rect)
+	_tank_tabs.layout(layout.tank_rect)
+	var covered: bool = (
+		layout.panel_rect.has_area() and layout.panel_rect.intersects(layout.tank_rect)
+	)
+	_tank_tabs.update_visibility(not covered)
 
 
 func _place_panel(panel: UiPanel, kind: Kind, area: Rect2i) -> void:

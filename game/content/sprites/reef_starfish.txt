@@ -1,0 +1,19 @@
+# reef_starfish · adulto
+[frame]
+ \|/
+-(*)-
+ /|\
+[colors]
+ bbb
+bbebb
+ bbb
+[frame]
+ `|'
+-(+)-
+ ,|.
+[colors]
+ bbb
+bbebb
+ bbb
+[anchor]
+eye=2,1

@@ -5,7 +5,7 @@ extends Node
 ## Las acciones del jugador entran por aquí y se validan aquí: la interfaz nunca
 ## modifica el estado directamente. Lo ocurrido se anuncia por [EventBus].
 
-enum BuyResult { OK, UNKNOWN_SPECIES, NOT_ENOUGH_SHELLS, TANK_FULL, LOCKED }
+enum BuyResult { OK, UNKNOWN_SPECIES, NOT_ENOUGH_SHELLS, TANK_FULL, LOCKED, WRONG_BIOME }
 enum EquipResult { OK, UNKNOWN, MAXED, NOT_ENOUGH_SHELLS }
 enum DecorResult { OK, UNKNOWN, NOT_ENOUGH_SHELLS, NO_STOCK, TOO_MANY, OUT_OF_BOUNDS, OVERLAP }
 
@@ -18,6 +18,8 @@ const START_FISH: PackedStringArray = ["pond_guppy", "pond_guppy"]
 
 var state: GameState = GameState.new()
 var content: ContentDB = ContentDB.new()
+## Pecera activa, apertura de biomas y sus costes.
+var biomes: BiomeDirector = BiomeDirector.new(self)
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 var _stepper: FixedStepper = FixedStepper.new()
@@ -30,8 +32,11 @@ func _ready() -> void:
 	var species_ok: bool = content.load_species_dir()
 	var equipment_ok: bool = content.load_equipment_dir()
 	var decorations_ok: bool = content.load_decorations_dir()
-	if not variants_ok or not species_ok or not equipment_ok or not decorations_ok:
-		for message: String in content.errors:
+	var biomes_ok: bool = content.biomes.load_dir()
+	var refs_ok: bool = BiomeCatalog.check_references(content)
+	var all_ok: bool = variants_ok and species_ok and equipment_ok and decorations_ok
+	if not all_ok or not biomes_ok or not refs_ok:
+		for message: String in content.errors + content.biomes.errors:
 			push_error("ContentDB: %s" % message)
 	start_new_game(DEFAULT_SEED)
 
@@ -40,7 +45,11 @@ func _process(delta: float) -> void:
 	for _step: int in range(_stepper.advance(delta)):
 		Simulation.step(state, FixedStepper.STEP_SECONDS, content, rng)
 	for spawn: PearlSpawn in state.take_pearls():
-		EventBus.pearl_spawned.emit(spawn.tank_index, spawn.fish, spawn.value)
+		if spawn.tank_index == state.active_tank:
+			EventBus.pearl_spawned.emit(spawn.tank_index, spawn.fish, spawn.value)
+		else:
+			# Una pecera que no se ve no puede ofrecer la perla: se cobra sola.
+			collect_pearl(spawn.value)
 	for hatching: HatchEvent in state.take_hatched():
 		EventBus.fish_added.emit(hatching.tank_index, hatching.fish)
 		_register_discovery(hatching.fish, true)
@@ -73,47 +82,49 @@ func set_paused(paused: bool) -> void:
 	_stepper.reset()
 
 
-## Coste del siguiente pez de [param species_id] en la pecera 0.
+## Coste del siguiente pez de [param species_id] en la pecera activa.
 func fish_cost(species_id: String) -> float:
 	var species: SpeciesDef = content.get_species(species_id)
 	if species == null:
 		return INF
-	return Economy.fish_cost(species.base_cost, state.tanks[0].count_of(species_id))
+	return Economy.fish_cost(species.base_cost, state.active().count_of(species_id))
 
 
-## Compra un pez para la pecera 0.
+## Compra un pez para la pecera activa.
 func buy_fish(species_id: String) -> BuyResult:
 	if not content.has_species(species_id):
 		return BuyResult.UNKNOWN_SPECIES
 	if not state.is_unlocked(species_id):
 		return BuyResult.LOCKED
-	if state.tanks[0].is_full():
+	if content.get_species(species_id).biome_id != state.active().biome_id:
+		return BuyResult.WRONG_BIOME
+	if state.active().is_full():
 		return BuyResult.TANK_FULL
 	if not state.wallet.spend(fish_cost(species_id)):
 		return BuyResult.NOT_ENOUGH_SHELLS
-	_add_fish(0, species_id)
+	_add_fish(state.active_tank, species_id)
 	EventBus.purchase_made.emit()
 	return BuyResult.OK
 
 
-## Coste de subir el equipo [param equipment_id] de la pecera 0 al nivel siguiente
+## Coste de subir el equipo [param equipment_id] de la pecera activa al nivel siguiente
 ## (INF si no existe o ya está al máximo).
 func equipment_cost(equipment_id: String) -> float:
 	var def: EquipmentDef = content.get_equipment(equipment_id)
 	if def == null:
 		return INF
-	var level: int = state.tanks[0].level_of(equipment_id)
+	var level: int = state.active().level_of(equipment_id)
 	if level >= def.max_level:
 		return INF
 	return Economy.equipment_cost(def.base_cost, level)
 
 
-## Sube un nivel el equipo [param equipment_id] de la pecera 0.
+## Sube un nivel el equipo [param equipment_id] de la pecera activa.
 func buy_equipment(equipment_id: String) -> EquipResult:
 	var def: EquipmentDef = content.get_equipment(equipment_id)
 	if def == null:
 		return EquipResult.UNKNOWN
-	var tank: Tank = state.tanks[0]
+	var tank: Tank = state.active()
 	var level: int = tank.level_of(equipment_id)
 	if level >= def.max_level:
 		return EquipResult.MAXED
@@ -121,7 +132,7 @@ func buy_equipment(equipment_id: String) -> EquipResult:
 		return EquipResult.NOT_ENOUGH_SHELLS
 	tank.set_level(equipment_id, level + 1, content)
 	tank.feeder_timer = 0.0
-	EventBus.equipment_changed.emit(0, equipment_id, level + 1)
+	EventBus.equipment_changed.emit(state.active_tank, equipment_id, level + 1)
 	EventBus.purchase_made.emit()
 	return EquipResult.OK
 
@@ -145,12 +156,12 @@ func buy_decoration(decoration_id: String) -> DecorResult:
 	if not state.wallet.spend(decoration_cost(decoration_id)):
 		return DecorResult.NOT_ENOUGH_SHELLS
 	state.decoration_stock[decoration_id] = owned + 1
-	EventBus.decoration_changed.emit(0)
+	EventBus.decoration_changed.emit(state.active_tank)
 	EventBus.purchase_made.emit()
 	return DecorResult.OK
 
 
-## Coloca un objeto del inventario en la pecera 0. [param tank_width] y
+## Coloca un objeto del inventario en la pecera activa. [param tank_width] y
 ## [param water_rows] son las celdas de la pecera que dibuja la vista.
 func place_decoration(
 	decoration_id: String, x_permille: int, lift: int, tank_width: int, water_rows: int
@@ -160,7 +171,7 @@ func place_decoration(
 		return DecorResult.UNKNOWN
 	if state.decoration_stock.get(decoration_id, 0) <= 0:
 		return DecorResult.NO_STOCK
-	var tank: Tank = state.tanks[0]
+	var tank: Tank = state.active()
 	var verdict: DecorationLayout.Result = DecorationLayout.check(
 		tank, def, x_permille, lift, tank_width, water_rows
 	)
@@ -174,9 +185,9 @@ func place_decoration(
 	return DecorResult.OK
 
 
-## Guarda en el inventario el objeto [param placed] de la pecera 0.
+## Guarda en el inventario el objeto [param placed] de la pecera activa.
 func remove_decoration(placed: PlacedDecoration) -> bool:
-	var tank: Tank = state.tanks[0]
+	var tank: Tank = state.active()
 	var index: int = tank.decorations.find(placed)
 	if index < 0:
 		return false
@@ -187,17 +198,17 @@ func remove_decoration(placed: PlacedDecoration) -> bool:
 	return true
 
 
-## Vende [param fish] de la pecera 0. Devuelve las conchas ganadas, o -1 si el pez
+## Vende [param fish] de la pecera activa. Devuelve las conchas ganadas, o -1 si el pez
 ## no está en ella.
 func sell_fish(fish: Fish) -> float:
-	var tank: Tank = state.tanks[0]
+	var tank: Tank = state.active()
 	if not tank.fish.has(fish):
 		return -1.0
 	var value: float = Selling.value_of(fish, content)
 	tank.remove_fish(fish)
 	state.wallet.add(value)
 	state.mark_production_dirty()
-	EventBus.fish_removed.emit(0, fish)
+	EventBus.fish_removed.emit(state.active_tank, fish)
 	EventBus.fish_sold.emit(value)
 	EventBus.purchase_made.emit()
 	return value
@@ -207,11 +218,11 @@ func sell_fish(fish: Fish) -> float:
 ## [method Selling.surplus]). Devuelve las conchas ganadas en total.
 func sell_surplus(species_id: String, variant_id: String) -> float:
 	var total: float = 0.0
-	for fish: Fish in Selling.surplus(state.tanks[0], species_id, variant_id):
+	for fish: Fish in Selling.surplus(state.active(), species_id, variant_id):
 		var value: float = Selling.value_of(fish, content)
-		state.tanks[0].remove_fish(fish)
+		state.active().remove_fish(fish)
 		state.wallet.add(value)
-		EventBus.fish_removed.emit(0, fish)
+		EventBus.fish_removed.emit(state.active_tank, fish)
 		total += value
 	if total > 0.0:
 		state.mark_production_dirty()
@@ -222,7 +233,9 @@ func sell_surplus(species_id: String, variant_id: String) -> float:
 
 ## Vende todos los peces de la pecera [param tank_index] y descarta sus huevos.
 ## Devuelve las conchas ganadas.
-func sell_all_fish(tank_index: int = 0) -> float:
+func sell_all_fish(tank_index: int = -1) -> float:
+	if tank_index < 0:
+		tank_index = state.active_tank
 	var tank: Tank = state.tanks[tank_index]
 	var total: float = 0.0
 	for fish: Fish in tank.fish.duplicate():
@@ -248,8 +261,8 @@ func feed_fish(fish: Fish) -> bool:
 
 ## Limpia una mancha de alga de la pecera [param tank_index]. Devuelve falso si
 ## ya estaba impecable.
-func clean_spot(tank_index: int = 0) -> bool:
-	var tank: Tank = state.tanks[tank_index]
+func clean_spot(tank_index: int = -1) -> bool:
+	var tank: Tank = state.active() if tank_index < 0 else state.tanks[tank_index]
 	if tank.cleanliness >= Care.MAX_CLEANLINESS:
 		return false
 	tank.cleanliness = minf(tank.cleanliness + Care.SPOT_STEP, Care.MAX_CLEANLINESS)
@@ -264,24 +277,27 @@ func collect_pearl(value: float) -> void:
 
 ## Herramienta de desarrollo (F4): añade peces sin coste, hasta llenar la pecera.
 func debug_add_fish(count: int) -> void:
-	var ids: PackedStringArray = content.species_ids()
+	var ids: PackedStringArray = PackedStringArray()
+	for species_id: String in content.species_ids():
+		if content.get_species(species_id).biome_id == state.active().biome_id:
+			ids.append(species_id)
 	if ids.is_empty():
 		return
 	for _index: int in range(count):
-		if state.tanks[0].is_full():
+		if state.active().is_full():
 			return
-		_add_fish(0, ids[state.tanks[0].fish.size() % ids.size()])
+		_add_fish(state.active_tank, ids[state.active().fish.size() % ids.size()])
 
 
 ## Herramienta de desarrollo (Mayús+F4): quita los últimos peces.
 func debug_remove_fish(count: int) -> void:
-	var tank: Tank = state.tanks[0]
+	var tank: Tank = state.active()
 	for _index: int in range(count):
 		if tank.fish.is_empty():
 			break
 		var last: Fish = tank.fish.back()
 		tank.remove_fish(last)
-		EventBus.fish_removed.emit(0, last)
+		EventBus.fish_removed.emit(state.active_tank, last)
 	state.mark_production_dirty()
 
 
@@ -301,6 +317,7 @@ func _replace_state(fresh: GameState) -> void:
 			EventBus.fish_added.emit(tank_index, fish)
 	_last_shells = -1.0
 	_last_rate = -1.0
+	EventBus.active_tank_changed.emit(state.active_tank)
 	_refresh_unlocks(false)
 	for tank: Tank in state.tanks:
 		for fish: Fish in tank.fish:
@@ -321,7 +338,7 @@ func _decor_result(verdict: DecorationLayout.Result) -> DecorResult:
 func _decorations_changed(tank: Tank) -> void:
 	tank.refresh_bonuses(content)
 	state.mark_production_dirty()
-	EventBus.decoration_changed.emit(0)
+	EventBus.decoration_changed.emit(state.active_tank)
 	EventBus.purchase_made.emit()
 
 

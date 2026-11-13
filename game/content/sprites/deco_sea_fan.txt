@@ -1,0 +1,17 @@
+# deco_sea_fan · decoración
+[frame]
+\\|//
+ \|/
+  |
+[colors]
+aaaaa
+ aaa
+  b
+[frame]
+\\|//
+ \|/
+  |
+[colors]
+aaaaa
+ aaa
+  b

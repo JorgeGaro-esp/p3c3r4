@@ -37,6 +37,15 @@ func count() -> int:
 	return _pearls.size()
 
 
+## Retira todas las perlas y devuelve su valor (al cambiar de pecera).
+func take_all() -> PackedFloat64Array:
+	var values: PackedFloat64Array = PackedFloat64Array()
+	for pearl: Pearl in _pearls:
+		values.append(pearl.value)
+	_pearls.clear()
+	return values
+
+
 ## Índice de la perla en [param cell] (con un margen para que sea fácil acertar), o -1.
 func pearl_at(cell: Vector2i) -> int:
 	var point: Vector2 = Vector2(cell) + Vector2(0.5, 0.5)

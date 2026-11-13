@@ -2,6 +2,21 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.11.0] - 2026-11-13 · Fase 10A
+
+### Añadido
+- Biomas (`BiomeDef`, `content/biomes/`, `BiomeCatalog`): cada uno define superficie, suelo, plantas, burbujas, fondo y partículas flotantes. Estanque (el de siempre) y **Arrecife** (coral, agua turquesa, motas que suben).
+- Varias peceras: `GameState.active_tank`; todas las acciones (comprar, equipar, decorar, vender, limpiar) van a la pecera activa. `Game.biomes` (`BiomeDirector`) cambia de pecera y abre biomas.
+- Pestaña «Biomas» en la tienda (Arrecife: 6000 ¢, pide tener el Estanque) y pestañas de pecera sobre la superficie del agua; teclas `1`–`8` para cambiar.
+- Arrecife completo: 8 especies (pez payaso, damisela, pez mariposa, estrella de mar, cirujano, caballito de mar, pez globo, manta raya) y 4 decoraciones propias (coral cerebro, abanico, anémona, coral cuerno de ciervo). El caballito pide una anémona y la estrella un coral.
+- Las peceras que no se ven se simulan con las mismas reglas (hambre, limpieza, cría, producción); sus perlas se cobran solas y al cambiar de pecera se cobran las perlas que quedaban sin recoger.
+- Guardado formato 6 (pecera activa) con migración 5→6; los biomas repetidos al cargar se descartan.
+
+### Cambiado
+- La tienda enseña solo las especies y la decoración del bioma de la pecera activa (`DecorationDef.biome_id`; vacío = todos).
+- Contenido: `ContentDB.biomes` y `BiomeCatalog.check_references` validan que especies y decoración apuntan a biomas que existen.
+- `test_pond_content` pasa a `test_biome_content` y comprueba cada bioma.
+
 ## [0.10.0] - 2026-11-13 · Fase 9
 
 ### Añadido

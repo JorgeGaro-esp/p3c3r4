@@ -37,6 +37,11 @@ func count() -> int:
 	return _flakes.size()
 
 
+## Quita todos los copos (al cambiar de pecera).
+func clear() -> void:
+	_flakes.clear()
+
+
 ## Posición del copo [param index].
 func position_of(index: int) -> Vector2:
 	return Vector2(_flakes[index].x, _flakes[index].y)

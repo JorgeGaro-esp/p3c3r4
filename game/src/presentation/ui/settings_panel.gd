@@ -101,7 +101,7 @@ func refresh() -> void:
 
 ## Texto y estado del botón de vender todo según el paso de la confirmación.
 func _update_sell_all() -> void:
-	var tank: Tank = Game.state.tanks[0]
+	var tank: Tank = Game.state.active()
 	var count: int = tank.fish.size()
 	_sell_all.is_enabled = count > 0 or not tank.eggs.is_empty()
 	if not _sell_all.is_enabled:

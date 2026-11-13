@@ -137,7 +137,7 @@ func _on_sell_surplus_pressed() -> void:
 func _surplus() -> Array[Fish]:
 	if _fish == null or _fish.variant_id != VariantDef.NORMAL_ID:
 		return []
-	return Selling.surplus(Game.state.tanks[0], _fish.species_id, _fish.variant_id)
+	return Selling.surplus(Game.state.active(), _fish.species_id, _fish.variant_id)
 
 
 func _update_texts() -> void:

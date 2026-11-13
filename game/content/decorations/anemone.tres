@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="DecorationDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/decoration_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "anemone"
+name_key = "DECOR_ANEMONE"
+description_key = "DECOR_ANEMONE_DESC"
+layer = 0
+anchor = 0
+bonus = 1
+amount = 0.06
+tag = "anemone"
+biome_id = "reef"
+base_cost = 4000.0
+sprite_path = "res://content/sprites/deco_anemone.txt"
+cells_wide = 7
+cells_high = 2
+palette_roles = PackedStringArray("a","b")
+palette_colors = PackedColorArray(1, 0.5, 0.3, 1, 1, 0.85, 0.4, 1)
+frame_duration = 0.4

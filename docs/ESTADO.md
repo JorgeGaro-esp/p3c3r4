@@ -3,8 +3,8 @@
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
 **Última actualización:** 2026-11-13
-**Fase actual:** Fase 9 · Decoración colocable: código y 405 tests hechos (Fases 7 y 8 sin commit aún). Pendiente de Jorge: probar Fases 5–9 en la ventana real. Siguiente: **Fase 10 · Biomas y varias peceras**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
-**Versión:** `0.10.0` (pendiente de commit; `0.8.0` y `0.9.0` tampoco tienen etiqueta aún). Etiquetas hasta `v0.7.0`.
+**Fase actual:** Fase 10A · Biomas y varias peceras (sistema + Arrecife): código y 453 tests hechos (Fases 7, 8 y 9 sin commit aún). Pendiente de Jorge: probar Fases 5–10A en la ventana real. Siguiente: **Fase 10B · Manglar y Abismo (16 especies)**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
+**Versión:** `0.11.0` (pendiente de commit; `0.8.0`, `0.9.0` y `0.10.0` tampoco tienen etiqueta aún). Etiquetas hasta `v0.7.0`.
 
 ## Progreso por fases
 
@@ -20,7 +20,7 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 | 7 | Cría, variantes de color y venta | Hecha en código; pendiente de prueba manual de Jorge |
 | 8 | Equipamiento mejorable | Hecha en código; pendiente de prueba manual de Jorge |
 | 9 | Decoración colocable | Hecha en código; pendiente de prueba manual de Jorge |
-| 10 | Biomas y varias peceras | Pendiente |
+| 10 | Biomas y varias peceras | 10A hecha en código (sistema + Arrecife); 10B (Manglar y Abismo) pendiente |
 | 11 | Pecedex y logros | Pendiente |
 | 12 | Día/noche y eventos aleatorios | Pendiente |
 | 13 | Prestigio y meta final | Pendiente |
@@ -31,6 +31,7 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 
 ## Hecho hasta ahora
 
+- 2026-11-13 (sesión 8): Fase 10A: `BiomeDef` y `BiomeCatalog`, pecera activa y `BiomeDirector`, pestañas de pecera, pestaña «Biomas» en la tienda, visuales por bioma (superficie, arena, plantas, fondo y partículas), Arrecife con 8 especies y 4 decoraciones, peceras ocultas con la misma simulación (test de igualdad), guardado formato 6. 453 tests.
 - 2026-11-13 (sesión 7): Fase 9: 20 objetos de decoración con arte, tienda con pestaña de decoración, modo decorar (`D`), bonificaciones con tope, la lota pide una cueva, guardado formato 5. 405 tests.
 - 2026-11-13 (sesión 6): botón «Vender todos los peces» en Ajustes (T68) y Fase 8: siete equipos con 5 niveles, pestaña «Equipo» en la tienda, dibujo animado en la pecera, imán de perlas, `TankBonuses`, guardado formato 4. Con filtro 5 y comedero 3 una pecera de 40 peces se mantiene sola (test). 368 tests.
 - 2026-11-13 (sesión 5): arreglo de las manchas del cristal (T56) y limpieza visible en el panel (T57). Fase 7: etapas de vida, huevos y eclosión, 5 variantes con paletas (prismática animada), venta desde la ficha con confirmación y venta de sobrantes, aviso de variante nueva y registro de combinaciones descubiertas (base del Pecedex). Guardado formato 3. 337 tests.
@@ -50,7 +51,8 @@ Jorge: borrar `game/content/species/test_*.tres` y `game/content/sprites/test_*.
 Jorge (Fase 6): clic en el agua para echar comida; arrastrar sobre las manchas verdes para limpiar (aparecen con el tiempo); clic en las perlas `○` que caen. Para ver el efecto sin esperar: bajar `hunger` con el depurador no existe aún; esperar unos minutos basta.
 Jorge (Fase 8): reimportar traducciones (`--headless --import`), ganar conchas, abrir Tienda → pestaña «Equipo» (flechas ←/→), comprar el filtro y el comedero y ver cómo aparecen en la pecera.
 Jorge (Fase 9): reimportar traducciones; Tienda → pestaña «Decoración» (←/→), comprar una cueva, botón [D]ecorar o tecla D, clic para colocar, clic derecho para guardar, rueda para cambiar de objeto; comprobar que la lota aparece en la tienda.
-Claude: Fase 10 (biomas y varias peceras).
+Jorge (Fase 10A): reimportar traducciones; ganar 6000 ¢ (o F4 para peces de prueba), Tienda → pestaña «Biomas» (flechas ←/→), comprar el Arrecife; aparecen las pestañas «Estanque | Arrecife» sobre el agua (también teclas 1 y 2).
+Claude: Fase 10B (Manglar y Abismo).
 
 ## Bloqueos y dudas abiertas
 

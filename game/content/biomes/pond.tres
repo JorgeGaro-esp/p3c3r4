@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="BiomeDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/biome_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "pond"
+name_key = "BIOME_POND"
+description_key = "BIOME_POND_DESC"
+order = 0
+unlock_cost = 0.0
+requires_biome_id = ""
+surface_pattern = "~^~^"
+surface_color = Color(0.2471, 0.6549, 1, 1)
+sand_grains = ".:,.'.·.,"
+sand_color = Color(0.7608, 0.651, 0.4196, 1)
+weed_chars = "()"
+weed_light = Color(0.1804, 0.8, 0.4431, 1)
+weed_dark = Color(0.1176, 0.5569, 0.3059, 1)
+weed_gap_scale = 1.0
+bubble_color = Color(0.6039, 0.8471, 1, 1)
+backdrop_char = ""
+backdrop_density = 0.0
+particle_chars = ""
+particle_count = 0
+particle_fall = 0.0

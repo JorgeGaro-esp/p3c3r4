@@ -7,7 +7,7 @@ extends RefCounted
 ## superior a la conocida no se migra: la rechaza [SaveCodec].
 
 ## Versión actual del formato. Sube en cada cambio incompatible.
-const CURRENT_FORMAT: int = 5
+const CURRENT_FORMAT: int = 6
 
 ## Especies de prueba de las fases 3 y 4 y la especie definitiva que las sustituye.
 const RENAMED_SPECIES: Dictionary[String, String] = {
@@ -33,6 +33,8 @@ static func migrate(data: Dictionary, from_version: int) -> Dictionary:
 				result = migrate_3_to_4(result)
 			4:
 				result = migrate_4_to_5(result)
+			5:
+				result = migrate_5_to_6(result)
 			_:
 				push_error("SaveMigrations: no hay migración desde la versión %d" % version)
 				return result
@@ -139,4 +141,12 @@ static func migrate_4_to_5(data: Dictionary) -> Dictionary:
 		var tank_data: Dictionary = tank
 		if not tank_data.has("decorations"):
 			tank_data["decorations"] = []
+	return result
+
+
+## Varias peceras: se guarda cuál es la activa. Las partidas antiguas tienen una sola.
+static func migrate_5_to_6(data: Dictionary) -> Dictionary:
+	var result: Dictionary = data.duplicate(true)
+	if not result.has("active_tank"):
+		result["active_tank"] = 0
 	return result

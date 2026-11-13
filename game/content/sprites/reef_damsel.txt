@@ -1,0 +1,19 @@
+# reef_damsel · adulto
+[frame]
+  ,.
+><{{{°>
+  '`
+[colors]
+  ff
+ttbbbeb
+  ff
+[frame]
+  .,
+<>{{{°>
+  `'
+[colors]
+  ff
+ttbbbeb
+  ff
+[anchor]
+eye=5,1

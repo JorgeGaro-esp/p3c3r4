@@ -1,0 +1,21 @@
+# deco_staghorn · decoración
+[frame]
+Y Y Y
+\ | /
+ \|/
+  |
+[colors]
+a a a
+a b a
+ aba
+  b
+[frame]
+V Y V
+\ | /
+ \|/
+  |
+[colors]
+a a a
+a b a
+ aba
+  b

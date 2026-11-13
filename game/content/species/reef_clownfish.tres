@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "reef_clownfish"
+name_key = "SPECIES_REEF_CLOWNFISH"
+description_key = "SPECIES_REEF_CLOWNFISH_DESC"
+biome_id = "reef"
+rarity = 0
+base_cost = 1500.0
+base_production = 6.5
+unlock_kind = 0
+unlock_amount = 0.0
+unlock_species_id = ""
+unlock_tag = ""
+sprite_path = "res://content/sprites/reef_clownfish.txt"
+palette_roles = PackedStringArray("b","t","d","f","e")
+palette_colors = PackedColorArray(1, 0.5, 0.1, 1, 1, 0.4, 0.05, 1, 1, 1, 1, 1, 1, 0.6, 0.2, 1, 0.05, 0.05, 0.05, 1)
+growth_seconds = 90.0
+breed_seconds = 130.0
+hatch_seconds = 25.0
+style = 1
+speed = 6.0
+amplitude = 0.2
+frequency = 1.4
+frame_duration = 0.4

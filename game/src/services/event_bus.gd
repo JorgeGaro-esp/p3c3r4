@@ -29,3 +29,7 @@ signal variant_discovered(species_id: String, variant_id: String)
 signal equipment_changed(tank_index: int, equipment_id: String, level: int)
 ## Cambió la decoración o el inventario de decoración de la pecera [param tank_index].
 signal decoration_changed(tank_index: int)
+## Se ha cambiado de pecera (índice en `GameState.tanks`).
+signal active_tank_changed(tank_index: int)
+## Se ha abierto la pecera de un bioma nuevo.
+signal tank_unlocked(tank_index: int)

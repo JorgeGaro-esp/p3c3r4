@@ -14,18 +14,29 @@ const MAX_GAP: int = 14
 
 var _weeds: Array[Weed] = []
 var _base_row: int = 0
+var _chars: String = "()"
+var _light: Color = AsciiColors.SEAWEED_LIGHT
+var _dark: Color = AsciiColors.SEAWEED_DARK
 var _clock: float = 0.0
 
 
 ## Rehace las algas. [param base_row] es la primera fila de arena y
 ## [param max_height] la altura máxima que cabe sin tocar la superficie.
-func configure(new_columns: int, base_row: int, max_height: int) -> void:
+func configure(
+	new_columns: int, base_row: int, max_height: int, look: BiomeDef = null, seed_offset: int = 0
+) -> void:
 	_base_row = base_row
 	_weeds.clear()
+	var gap_scale: float = 1.0
+	if look != null:
+		_chars = look.weed_chars
+		_light = look.weed_light
+		_dark = look.weed_dark
+		gap_scale = look.weed_gap_scale
 	if max_height < MIN_HEIGHT:
 		return
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	rng.seed = SEED
+	rng.seed = SEED + seed_offset
 	var column: int = rng.randi_range(2, MIN_GAP)
 	while column < new_columns - 1:
 		var weed: Weed = Weed.new()
@@ -34,7 +45,7 @@ func configure(new_columns: int, base_row: int, max_height: int) -> void:
 		weed.phase = rng.randf_range(0.0, TAU)
 		weed.is_dark = rng.randf() < 0.5
 		_weeds.append(weed)
-		column += rng.randi_range(MIN_GAP, MAX_GAP)
+		column += roundi(float(rng.randi_range(MIN_GAP, MAX_GAP)) * gap_scale)
 
 
 func update(delta: float, _canvas: AsciiCanvas) -> void:
@@ -50,10 +61,10 @@ func draw(canvas: AsciiCanvas) -> void:
 				* SWAY_AMPLITUDE
 				* reach
 			)
-			var color: Color = AsciiColors.SEAWEED_LIGHT
+			var color: Color = _light
 			if weed.is_dark != (segment % 2 == 1):
-				color = AsciiColors.SEAWEED_DARK
-			var character: String = "(" if segment % 2 == 0 else ")"
+				color = _dark
+			var character: String = _chars[segment % 2]
 			canvas.put_char(
 				character, Vector2(float(weed.column) + sway, float(_base_row - 1 - segment)), color
 			)

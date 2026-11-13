@@ -1,0 +1,13 @@
+# deco_anemone · decoración
+[frame]
+\|/|\|/
+(~~~~~)
+[colors]
+aabaaba
+aaaaaaa
+[frame]
+/|\|/|\
+(~~~~~)
+[colors]
+aabaaba
+aaaaaaa

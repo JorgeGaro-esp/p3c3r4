@@ -147,6 +147,16 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T81 | Modo decorar (tecla `D` o botón en la pestaña de decoración): vista previa verde/roja, clic = colocar o recoger, clic derecho = guardar, rueda o `C` = cambiar de objeto, `Esc` = salir. Recoger un objeto lo devuelve al inventario y lo lleva en la mano; si se cancela, queda guardado | Cómodo dentro de la franja sin abrir paneles que tapen la pecera |
 | T82 | Algunas especies piden una etiqueta de decoración (`UnlockKind.DECORATION_TAG`): la lota ahora requiere una cueva (`cave`) | Es la idea del GDD §8; las partidas que ya la tenían la conservan |
 | T83 | Guardado formato 5: peceras con `decorations`, estado con `decoration_stock`; migración 4→5 los crea vacíos | Seguridad al cargar: ids desconocidos descartados, cantidades limitadas |
+| T84 | Bioma = `BiomeDef` (recurso en `content/biomes/`) cargado por `BiomeCatalog`; una pecera pertenece a un bioma por su `biome_id`, y tener la pecera es tener el bioma desbloqueado (no hay lista aparte) | Una sola fuente de verdad; el prestigio (Fase 13) conservará las peceras abiertas |
+| T85 | Nueva partida con solo el Estanque; el Arrecife se abre en la tienda (pestaña «Biomas») por 6000 ¢ y pide el Estanque. Una pecera por bioma (los biomas repetidos al cargar se descartan) | Progresión clara; coste provisional hasta la Fase 16 |
+| T86 | Pecera activa (`GameState.active_tank`, guardada). Todas las órdenes de `Game` actúan sobre ella; las especies solo se compran en la pecera de su bioma (`WRONG_BIOME`) | Evita peces en el bioma equivocado |
+| T87 | Las peceras ocultas usan **exactamente** la misma simulación que la visible (no una versión aparte): la producción ya sumaba todas y los cuidados, la cría y las perlas ya iban por pecera | Garantiza por construcción que oculta = visible; un test lo comprueba (Fase 10.6) |
+| T88 | Perlas de una pecera oculta: se cobran solas al soltarse. Al salir de una pecera se cobran las perlas que quedaban sin recoger | Nada se pierde (pilar «no castigar»); evita acumular perlas que nadie ve |
+| T89 | Pestañas de pecera sobre la fila de la superficie (sin gastar altura), solo con 2 o más peceras y ocultas mientras un panel tapa la pecera; teclas `1`–`8` para cambiar | La franja es baja: no se puede perder una fila |
+| T90 | Cada bioma define su aspecto con datos: patrón y color de la superficie, granos de arena, caracteres de plantas, color de burbujas, relleno de fondo y partículas flotantes con caída propia | Un bioma nuevo no toca código; cumple «identidad visual clara» |
+| T91 | Decoración con `biome_id` opcional: vacío vale para todos; la tienda filtra por el bioma activo. Las etiquetas de desbloqueo cuentan en todas las peceras | Equipo y decoración específicos de bioma (10.5) sin duplicar los objetos universales |
+| T92 | Guardado formato 6: `active_tank`; migración 5→6 la pone a 0 | Seguridad al cargar: se limita al rango de peceras |
+| T93 | Entrega en dos partes: 10A (sistema + Arrecife) y 10B (Manglar y Abismo, 16 especies) | Decisión de Jorge: revisar el sistema antes de multiplicar el contenido |
 
 ## Cómo añadir decisiones
 

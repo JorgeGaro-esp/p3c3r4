@@ -1,0 +1,19 @@
+# reef_tang · adulto
+[frame]
+  .---.
+><(~~~°)>
+  '---'
+[colors]
+  fffff
+ttbbbbebb
+  fffff
+[frame]
+  .---.
+<>(---°)>
+  '---'
+[colors]
+  fffff
+ttbbbbebb
+  fffff
+[anchor]
+eye=6,1

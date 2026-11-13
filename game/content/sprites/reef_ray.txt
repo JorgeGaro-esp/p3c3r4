@@ -1,0 +1,19 @@
+# reef_ray · adulto
+[frame]
+   _,---,_
+~-<(_____°)>
+   '-...-'
+[colors]
+   fffffff
+ttbbbbbbbebb
+   fffffff
+[frame]
+   .-'''-.
+~-<(_____°)>
+   _,...,_
+[colors]
+   fffffff
+ttbbbbbbbebb
+   fffffff
+[anchor]
+eye=9,1

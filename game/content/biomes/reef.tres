@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="BiomeDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/biome_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "reef"
+name_key = "BIOME_REEF"
+description_key = "BIOME_REEF_DESC"
+order = 1
+unlock_cost = 6000.0
+requires_biome_id = "pond"
+surface_pattern = "~-~="
+surface_color = Color(0.2, 0.85, 0.85, 1)
+sand_grains = ".o.:*.,'.o"
+sand_color = Color(0.93, 0.85, 0.65, 1)
+weed_chars = "YV"
+weed_light = Color(1, 0.45, 0.55, 1)
+weed_dark = Color(0.85, 0.3, 0.7, 1)
+weed_gap_scale = 0.7
+bubble_color = Color(0.75, 0.95, 1, 1)
+backdrop_char = "."
+backdrop_color = Color(0.1, 0.28, 0.34, 1)
+backdrop_density = 0.025
+particle_chars = ".·"
+particle_color = Color(0.8, 0.95, 0.9, 1)
+particle_count = 14
+particle_fall = -0.5

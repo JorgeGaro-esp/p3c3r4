@@ -22,6 +22,8 @@ enum Bonus { COMFORT, PRODUCTION, RARE_VARIANT }
 @export var amount: float = 0.0
 ## Etiqueta que algunas especies piden para desbloquearse (por ejemplo `cave`).
 @export var tag: String = ""
+## Bioma en el que se vende ("" si vale para todos).
+@export var biome_id: String = ""
 @export var base_cost: float = 50.0
 @export var sprite_path: String = ""
 ## Tamaño en celdas; una prueba comprueba que coincide con el sprite.

@@ -1,0 +1,17 @@
+# deco_brain_coral · decoración
+[frame]
+ ,~~~,
+(@%@%@)
+ '---'
+[colors]
+ aaaaa
+abababa
+ bbbbb
+[frame]
+ ,~~~,
+(%@%@%)
+ '---'
+[colors]
+ aaaaa
+abababa
+ bbbbb

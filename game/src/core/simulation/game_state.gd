@@ -13,6 +13,8 @@ const MAX_STOCK: int = 99
 
 var wallet: Wallet = Wallet.new()
 var tanks: Array[Tank] = [Tank.new()]
+## Pecera que se ve y sobre la que actúa el jugador (índice en [member tanks]).
+var active_tank: int = 0
 var sim_time: float = 0.0
 var rng_seed: int = 0
 ## Estado interno del generador aleatorio, para continuar la secuencia al cargar.
@@ -32,6 +34,19 @@ var discovered: Dictionary[String, bool] = {}
 var decoration_stock: Dictionary[String, int] = {}
 ## Huevos que han eclosionado y `Game` aún no ha publicado.
 var pending_hatched: Array[HatchEvent] = []
+
+
+## La pecera activa.
+func active() -> Tank:
+	return tanks[clampi(active_tank, 0, tanks.size() - 1)]
+
+
+## Índice de la pecera del bioma [param biome_id], o -1 si aún no se ha abierto.
+func tank_index_of(biome_id: String) -> int:
+	for index: int in range(tanks.size()):
+		if tanks[index].biome_id == biome_id:
+			return index
+	return -1
 
 
 ## Cuántos objetos con la etiqueta [param tag] hay colocados en todas las peceras.
@@ -120,6 +135,7 @@ func to_dict() -> Dictionary:
 	return {
 		"wallet": wallet.to_dict(),
 		"tanks": tank_data,
+		"active_tank": active_tank,
 		"sim_time": sim_time,
 		# 64 bits no caben en un número JSON sin perder precisión: van como texto.
 		"rng_seed": str(rng_seed),
@@ -154,11 +170,18 @@ static func from_dict(
 			warnings.append("pecera descartada: demasiadas")
 			break
 		var tank: Tank = Tank.from_dict(entry, content, warnings)
-		if tank != null:
-			state.tanks.append(tank)
+		if tank == null:
+			continue
+		if state.tank_index_of(tank.biome_id) >= 0:
+			warnings.append("pecera descartada: bioma repetido '%s'" % tank.biome_id)
+			continue
+		state.tanks.append(tank)
 	if state.tanks.is_empty():
 		warnings.append("no hay ninguna pecera válida")
 		return null
+	state.active_tank = SaveFields.read_int(
+		data, "active_tank", 0, 0, state.tanks.size() - 1, warnings
+	)
 	state.sim_time = SaveFields.read_float(data, "sim_time", 0.0, 0.0, MAX_SIM_TIME, warnings)
 	state.rng_seed = SaveFields.read_big_int(data, "rng_seed", 0, warnings)
 	state.rng_state = SaveFields.read_big_int(data, "rng_state", 0, warnings)
