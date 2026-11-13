@@ -17,6 +17,8 @@ const UNLIMITED_ROWS: int = 1000
 @export var canvas_path: NodePath
 @export var tank_path: NodePath
 @export var ui_path: NodePath
+## Si es falso, la partida no se carga ni se guarda (los tests de integración).
+@export var uses_saves: bool = true
 
 var _canvas: AsciiCanvas
 var _tank: TankView
@@ -45,6 +47,9 @@ func _ready() -> void:
 	_on_shells_changed(Game.state.wallet.shells)
 	_on_production_changed(Game.state.production_rate)
 	_on_settings_changed()
+	EventBus.notice_requested.connect(_on_notice_requested)
+	if uses_saves:
+		_on_notice_requested(SaveService.start())
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -94,6 +99,11 @@ func _build_panels() -> void:
 	_settings_panel.close_requested.connect(close_panel)
 	_shop.message.connect(_sidebar.show_toast)
 	_settings_panel.message.connect(_sidebar.show_toast)
+
+
+func _on_notice_requested(key: String) -> void:
+	if not key.is_empty():
+		_sidebar.show_toast(tr(key))
 
 
 func _on_shells_changed(shells: float) -> void:

@@ -53,3 +53,7 @@ UI_SHELLS,Conchas %s,Shells %s
 SPECIES_TEST_GUPPY,Guppy de prueba,Test guppy
 SPECIES_TEST_MINNOW,Pececillo de prueba,Test minnow
 SPECIES_TEST_ANGELFISH,Pez ángel de prueba,Test angelfish
+TOAST_SAVE_RECOVERED,Partida recuperada de una copia,Save recovered from a backup
+TOAST_SAVE_CORRUPT,Partida dañada: empiezas una nueva,Save damaged: starting a new game
+TOAST_SAVE_NEWER,Partida de una versión más nueva,Save is from a newer version
+TOAST_SAVE_FAILED,No se pudo guardar la partida,Could not save the game

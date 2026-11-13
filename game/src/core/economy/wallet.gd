@@ -31,3 +31,21 @@ func spend(amount: float) -> bool:
 		return false
 	shells -= amount
 	return true
+
+
+func to_dict() -> Dictionary:
+	return {"shells": shells, "total_earned": total_earned}
+
+
+## Lee un monedero de [param source]; null si no es un objeto.
+static func from_dict(source: Variant, warnings: PackedStringArray) -> Wallet:
+	if typeof(source) != TYPE_DICTIONARY:
+		warnings.append("wallet: no es un objeto")
+		return null
+	var data: Dictionary = source
+	var wallet: Wallet = Wallet.new()
+	wallet.shells = SaveFields.read_float(data, "shells", 0.0, 0.0, MAX_SHELLS, warnings)
+	wallet.total_earned = maxf(
+		SaveFields.read_float(data, "total_earned", 0.0, 0.0, MAX_SHELLS, warnings), wallet.shells
+	)
+	return wallet

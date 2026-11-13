@@ -35,20 +35,22 @@ func _process(delta: float) -> void:
 
 ## Empieza una partida nueva con la semilla dada.
 func start_new_game(seed_value: int = DEFAULT_SEED) -> void:
-	for tank_index: int in range(state.tanks.size()):
-		for fish: Fish in state.tanks[tank_index].fish.duplicate():
-			EventBus.fish_removed.emit(tank_index, fish)
-	state = GameState.new()
-	state.rng_seed = seed_value
-	rng.seed = seed_value
-	state.wallet.add(START_SHELLS)
-	_stepper.reset()
+	var fresh: GameState = GameState.new()
+	fresh.rng_seed = seed_value
+	fresh.wallet.add(START_SHELLS)
 	for species_id: String in START_FISH:
 		if content.has_species(species_id):
-			_add_fish(0, species_id)
-	_last_shells = -1.0
-	_last_rate = -1.0
-	_publish_changes()
+			fresh.tanks[0].add_fish(Fish.new(species_id))
+	rng.seed = seed_value
+	_replace_state(fresh)
+
+
+## Sustituye la partida por una cargada de disco y continúa su secuencia aleatoria.
+func adopt_state(loaded: GameState) -> void:
+	rng.seed = loaded.rng_seed
+	if loaded.rng_state != 0:
+		rng.state = loaded.rng_state
+	_replace_state(loaded)
 
 
 ## Detiene o reanuda la simulación (ventana minimizada, D11).
@@ -74,6 +76,7 @@ func buy_fish(species_id: String) -> BuyResult:
 	if not state.wallet.spend(fish_cost(species_id)):
 		return BuyResult.NOT_ENOUGH_SHELLS
 	_add_fish(0, species_id)
+	EventBus.purchase_made.emit()
 	return BuyResult.OK
 
 
@@ -98,6 +101,23 @@ func debug_remove_fish(count: int) -> void:
 		tank.remove_fish(last)
 		EventBus.fish_removed.emit(0, last)
 	state.mark_production_dirty()
+
+
+## Cambia el estado y avisa a las vistas: primero quita los peces viejos y luego
+## anuncia los nuevos.
+func _replace_state(fresh: GameState) -> void:
+	for tank_index: int in range(state.tanks.size()):
+		for fish: Fish in state.tanks[tank_index].fish.duplicate():
+			EventBus.fish_removed.emit(tank_index, fish)
+	state = fresh
+	state.mark_production_dirty()
+	_stepper.reset()
+	for tank_index: int in range(state.tanks.size()):
+		for fish: Fish in state.tanks[tank_index].fish:
+			EventBus.fish_added.emit(tank_index, fish)
+	_last_shells = -1.0
+	_last_rate = -1.0
+	_publish_changes()
 
 
 func _add_fish(tank_index: int, species_id: String) -> void:

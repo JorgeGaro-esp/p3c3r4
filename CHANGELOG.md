@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.5.0] - 2026-11-13 · Fase 4
+
+### Añadido
+- Guardado en `user://saves/save.json` (JSON con `format_version`, suma SHA-256 y `data`), escritura atómica (temporal → comprobación → renombrar) y 3 copias rotativas.
+- Carga con validación de tipos y rangos; si el principal está dañado se recupera la copia más reciente válida y el archivo dañado se aparta (`corrupt_*`, máximo 5).
+- Migraciones por versión (`SaveMigrations`) con un ejemplo 0→1.
+- Autoguardado cada 60 s, al cerrar, al minimizar y tras comprar (con mínimo de 5 s entre guardados).
+- Avisos en la barra lateral: partida recuperada, dañada, de versión más nueva o error al guardar.
+- Autoload `SaveService`; `Game.adopt_state`; señales `purchase_made` y `notice_requested`.
+
+### Cambiado
+- La secuencia aleatoria (`rng_seed`, `rng_state`) se guarda como texto para no perder precisión.
+
 ## [0.4.0] - 2026-11-13 · Fase 3
 
 ### Añadido

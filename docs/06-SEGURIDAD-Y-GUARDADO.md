@@ -29,7 +29,7 @@ Hacer trampas editando la partida no se considera una amenaza: es un juego de un
   "saved_at_unix": 1794500000,
   "checksum": "sha256 del campo data serializado de forma canónica",
   "data": {
-    "wallet": { "coins": 12400.0, "pearls": 0, "lifetime_coins": 58000.0 },
+    "wallet": { "shells": 12400.0, "total_earned": 58000.0 },
     "tanks": [
       {
         "biome_id": "pond",
@@ -46,7 +46,8 @@ Hacer trampas editando la partida no se considera una amenaza: es un juego de un
     "achievements": {},
     "prestige": { "count": 0, "upgrades": {} },
     "stats": {},
-    "rng_state": 0,
+    "rng_seed": "42",
+    "rng_state": "0",
     "sim_time": 3600.0
   }
 }

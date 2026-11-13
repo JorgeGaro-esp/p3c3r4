@@ -98,6 +98,14 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | P09 | ¿Arranque automático con Windows como opción? | Resuelta en Fase 2: D33 |
 | P10 | Franja en varios monitores: en cuál se coloca | Resuelta en Fase 2: D34 |
 
+| T38 | El guardado solo es JSON; nunca `load()` ni `ResourceLoader` sobre `user://` | 06-SEGURIDAD: un archivo ajeno no puede ejecutar código |
+| T39 | Escritura atómica: `save.tmp` → releer y comparar → rotar copias → renombrar | Matar el proceso en cualquier punto deja el guardado anterior intacto |
+| T40 | La suma SHA-256 va sobre `data` canónico (pasado por JSON); detecta corrupción y ediciones torpes, no a un tramposo decidido | Es un juego de un jugador; la validación de rangos es la defensa real |
+| T41 | Un archivo de `format_version` mayor nunca se carga ni se sobrescribe; se bloquea el guardado | Evita destruir una partida de una versión futura |
+| T42 | Los archivos ilegibles se apartan (`corrupt_<unix>_<nombre>`), máximo 5 | No se pierden por si Jorge quiere inspeccionarlos |
+| T43 | `SaveService` no arranca solo: lo inicia `StripController`; los tests nunca tocan `user://saves` | Proteger la partida real del jugador |
+| T44 | `rng_seed` y `rng_state` se guardan como cadenas | JSON usa decimales de 64 bits y perdería enteros grandes |
+
 ## Cómo añadir decisiones
 
 Añadir una fila con el siguiente identificador libre, la fecha si no es del 2026-11-12 y el motivo. No borrar decisiones antiguas: si una cambia, marcarla como "sustituida por Dxx".

@@ -26,6 +26,7 @@ func before_each() -> void:
 	await wait_frames(1)
 	var scene: PackedScene = load(MAIN_SCENE)
 	_main = scene.instantiate()
+	(_main.get_node("StripController") as StripController).uses_saves = false
 	add_child(_main)
 	_canvas = _main.get_node("AsciiCanvas") as AsciiCanvas
 	_ui = _main.get_node("UiRoot") as UiRoot

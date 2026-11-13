@@ -3,8 +3,8 @@
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
 **Última actualización:** 2026-11-13
-**Fase actual:** Fase 3 · Núcleo de simulación y economía: código y tests hechos. Pendientes de Jorge: probar la Fase 2 en ventana real y elegir P02. Siguiente: **Fase 4 · Guardado**.
-**Versión:** `0.4.0` (pendiente de etiquetar en Git). Etiquetas existentes: `v0.1.0`, `v0.2.0`. Falta commitear y etiquetar `v0.3.0`.
+**Fase actual:** Fase 4 · Guardado: código y 221 tests hechos (en sandbox). Pendientes de Jorge: probar la Fase 2 en ventana real y elegir P02. Siguiente: **Fase 5 · Contenido y tienda real**.
+**Versión:** `0.5.0` (pendiente de etiquetar en Git). Etiquetas existentes: `v0.1.0`, `v0.2.0`. Falta commitear y etiquetar `v0.3.0`.
 
 ## Progreso por fases
 
