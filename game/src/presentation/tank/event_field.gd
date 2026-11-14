@@ -110,7 +110,7 @@ func _text() -> String:
 
 
 func _sparkle(canvas: AsciiCanvas, cell: Vector2) -> void:
-	if int(_clock * 3.0) % 2 == 0:
+	if MotionScale.is_reduced() or int(_clock * 3.0) % 2 == 0:
 		canvas.put_char("✦", cell, SPARK_COLOR)
 	else:
 		canvas.put_char("+", cell, SPARK_COLOR)

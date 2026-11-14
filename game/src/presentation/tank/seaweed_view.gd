@@ -62,6 +62,7 @@ func draw(canvas: AsciiCanvas) -> void:
 			var ripple: float = sin(_clock * SWAY_SPEED + weed.phase + float(segment) * SWAY_SPREAD)
 			var swell: float = sin(_clock * SWELL_SPEED + weed.phase * 0.5)
 			var sway: float = (ripple * SWAY_AMPLITUDE + swell * SWELL_AMPLITUDE) * reach * reach
+			sway *= MotionScale.factor()
 			var color: Color = _light
 			if weed.is_dark != (segment % 2 == 1):
 				color = _dark

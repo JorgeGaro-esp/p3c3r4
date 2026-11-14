@@ -188,7 +188,7 @@ func body_offset(column: int, width: int) -> float:
 	var along: float = float(column) / float(width - 1)
 	var from_head: float = along if facing < 0 else 1.0 - along
 	var envelope: float = from_head * from_head
-	return sin(phase - from_head * WAVE_NUMBER) * amplitude * envelope
+	return sin(phase - from_head * WAVE_NUMBER) * amplitude * envelope * MotionScale.factor()
 
 
 ## Desplazamiento vertical, en celdas, de la columna [param column] por la

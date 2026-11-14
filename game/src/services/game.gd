@@ -71,6 +71,7 @@ func _process(delta: float) -> void:
 			collect_pearl(spawn.value)
 	for hatching: HatchEvent in state.take_hatched():
 		EventBus.fish_added.emit(hatching.tank_index, hatching.fish)
+		EventBus.egg_hatched.emit(hatching.tank_index)
 		state.stats.add(GameStats.EGGS_HATCHED)
 		_register_discovery(hatching.fish, true)
 	_achievement_timer += delta

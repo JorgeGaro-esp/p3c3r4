@@ -18,9 +18,11 @@ var data: SettingsData = SettingsData.new()
 var storage_path: String = DEFAULT_PATH
 
 var _save_timer: Timer = Timer.new()
+var _system_language: String = "en"
 
 
 func _ready() -> void:
+	_system_language = TranslationServer.get_locale().substr(0, 2)
 	_save_timer.one_shot = true
 	_save_timer.wait_time = SAVE_DELAY_SECONDS
 	_save_timer.timeout.connect(save_now)
@@ -113,6 +115,76 @@ func set_crt_level(level: int) -> void:
 		_commit()
 
 
+## Volumen general en porcentaje (0–100).
+func set_master_volume(percent: int) -> void:
+	var value: int = clampi(percent, 0, SettingsData.MAX_VOLUME)
+	if value != data.master_volume:
+		data.master_volume = value
+		_commit()
+
+
+## Volumen de la música en porcentaje (0–100).
+func set_music_volume(percent: int) -> void:
+	var value: int = clampi(percent, 0, SettingsData.MAX_VOLUME)
+	if value != data.music_volume:
+		data.music_volume = value
+		_commit()
+
+
+func set_muted(value: bool) -> void:
+	if value != data.muted:
+		data.muted = value
+		_commit()
+
+
+func set_reduce_motion(enabled: bool) -> void:
+	if enabled != data.reduce_motion:
+		data.reduce_motion = enabled
+		_commit()
+
+
+## Tamaño del texto (0 pequeño, 1 normal, 2 grande); se limita al rango.
+func set_text_size(size: int) -> void:
+	var value: int = clampi(size, 0, SettingsData.TEXT_SIZE_SCALES.size() - 1)
+	if value != data.text_size:
+		data.text_size = value
+		_commit()
+
+
+func set_language(language: SettingsData.Language) -> void:
+	if language != data.language:
+		data.language = language
+		_commit()
+
+
+## Activa o apaga el tutorial; al activarlo vuelve a empezar desde el primer paso.
+func set_tutorial_enabled(enabled: bool) -> void:
+	if enabled == data.tutorial_enabled:
+		return
+	data.tutorial_enabled = enabled
+	if enabled:
+		data.tutorial_step = 0
+	_commit()
+
+
+## Paso del tutorial (se limita a [0, Tutorial.DONE]).
+func set_tutorial_step(step: int) -> void:
+	var value: int = clampi(step, 0, Tutorial.DONE)
+	if value != data.tutorial_step:
+		data.tutorial_step = value
+		_commit()
+
+
+## Código de idioma que se usa ahora (`es` o `en`).
+func effective_language() -> String:
+	match data.language:
+		SettingsData.Language.SPANISH:
+			return "es"
+		SettingsData.Language.ENGLISH:
+			return "en"
+	return _system_language
+
+
 func _commit() -> void:
 	_apply_engine_settings()
 	changed.emit()
@@ -121,6 +193,9 @@ func _commit() -> void:
 
 func _apply_engine_settings() -> void:
 	Engine.max_fps = data.fps_limit
+	var language: String = effective_language()
+	if TranslationServer.get_locale().substr(0, 2) != language:
+		TranslationServer.set_locale(language)
 
 
 func _read_file(path: String) -> SettingsData:

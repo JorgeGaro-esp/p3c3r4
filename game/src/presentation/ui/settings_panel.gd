@@ -12,16 +12,21 @@ signal message(text: String)
 enum SellStep { IDLE, ASKED, SURE }
 
 const LABEL_X: int = 3
-const LABEL_WIDTH: int = 32
-const VALUE_WIDTH: int = 28
+const LABEL_WIDTH: int = 28
+const VALUE_WIDTH: int = 22
+## Ancho de una columna de ajustes; con sitio para dos se reparten en dos columnas.
+const COLUMN_WIDTH: int = LABEL_WIDTH + ARROW_WIDTH + 1 + VALUE_WIDTH + 2 + ARROW_WIDTH + 2
 const ARROW_WIDTH: int = 3
 const FIRST_ROW: int = 2
 const CLOSE_BUTTON_WIDTH: int = 16
-const SELL_ALL_WIDTH: int = 32
+const SELL_ALL_WIDTH: int = 30
+const DELETE_WIDTH: int = 30
 
 var _frame: AsciiFrame = AsciiFrame.new()
 var _close: AsciiButton = null
 var _sell_all: AsciiButton = null
+var _delete: AsciiButton = null
+var _delete_step: SellStep = SellStep.IDLE
 var _sell_step: SellStep = SellStep.IDLE
 var _rows: Array[Row] = []
 var _strip: Row = null
@@ -31,6 +36,12 @@ var _fps: Row = null
 var _autostart: Row = null
 var _mode: Row = null
 var _crt: Row = null
+var _volume: Row = null
+var _music: Row = null
+var _motion: Row = null
+var _text_size: Row = null
+var _language: Row = null
+var _tutorial: Row = null
 
 
 func _init(root: UiRoot) -> void:
@@ -45,8 +56,16 @@ func _init(root: UiRoot) -> void:
 	_autostart = _make_toggle("SETTINGS_AUTOSTART", _on_autostart_toggled)
 	_mode = _make_stepper("SETTINGS_PANEL_MODE", _on_mode_toggled, _on_mode_toggled)
 	_crt = _make_stepper("SETTINGS_CRT", _on_crt_less, _on_crt_more)
+	_volume = _make_stepper("SETTINGS_VOLUME", _on_volume_less, _on_volume_more)
+	_music = _make_stepper("SETTINGS_MUSIC", _on_music_less, _on_music_more)
+	_motion = _make_toggle("SETTINGS_REDUCE_MOTION", _on_motion_toggled)
+	_text_size = _make_stepper("SETTINGS_TEXT_SIZE", _on_text_less, _on_text_more)
+	_language = _make_stepper("SETTINGS_LANGUAGE", _on_language_less, _on_language_more)
+	_tutorial = _make_toggle("SETTINGS_TUTORIAL", _on_tutorial_toggled)
 	_close = _make_button(_text("UI_CLOSE_PANEL"))
 	_close.activated.connect(func() -> void: close_requested.emit())
+	_delete = _make_button("")
+	_delete.activated.connect(_on_delete_pressed)
 	_sell_all = _make_button("")
 	_sell_all.activated.connect(_on_sell_all_pressed)
 	EventBus.fish_removed.connect(func(_tank_index: int, _fish: Fish) -> void: _update_sell_all())
@@ -58,33 +77,41 @@ func set_active(value: bool) -> void:
 	super(value)
 	if not value:
 		_sell_step = SellStep.IDLE
+		_delete_step = SellStep.IDLE
+		_update_delete()
 
 
 func layout(area: Rect2i) -> void:
 	_frame.rect = area
-	var value_x: int = area.position.x + LABEL_X + LABEL_WIDTH
+	# Con sitio para dos columnas se reparten las filas; si no, van en una.
+	var two_columns: bool = area.size.x >= LABEL_X + 2 * COLUMN_WIDTH
+	var per_column: int = ceili(float(_rows.size()) / 2.0) if two_columns else _rows.size()
 	# Con la franja más baja las filas se pegan al marco para que quepan todas.
-	var first_row: int = FIRST_ROW if area.size.y >= _rows.size() + FIRST_ROW + 3 else 1
+	var first_row: int = FIRST_ROW if area.size.y >= per_column + FIRST_ROW + 3 else 1
 	for index: int in range(_rows.size()):
-		var row: Row = _rows[index]
-		var y: int = area.position.y + first_row + index
-		row.title.rect = Rect2i(area.position.x + LABEL_X, y, LABEL_WIDTH - 1, 1)
-		if row.toggle != null:
-			row.toggle.rect = Rect2i(value_x, y, ARROW_WIDTH + 3, 1)
-		else:
-			row.less.rect = Rect2i(value_x, y, ARROW_WIDTH, 1)
-			row.value.rect = Rect2i(value_x + ARROW_WIDTH + 1, y, VALUE_WIDTH, 1)
-			row.more.rect = Rect2i(value_x + ARROW_WIDTH + VALUE_WIDTH + 2, y, ARROW_WIDTH, 1)
-	_close.rect = Rect2i(
-		area.position.x + LABEL_X, area.position.y + area.size.y - 2, CLOSE_BUTTON_WIDTH, 1
-	)
-	_sell_all.rect = Rect2i(
-		area.position.x + LABEL_X + CLOSE_BUTTON_WIDTH + 2,
-		area.position.y + area.size.y - 2,
-		SELL_ALL_WIDTH,
-		1
-	)
+		var column: int = index / per_column
+		var left: int = area.position.x + LABEL_X + column * COLUMN_WIDTH
+		var y: int = area.position.y + first_row + index % per_column
+		_place_row(_rows[index], left, y)
+	var bottom: int = area.position.y + area.size.y - 2
+	var x: int = area.position.x + LABEL_X
+	_close.rect = Rect2i(x, bottom, CLOSE_BUTTON_WIDTH, 1)
+	x += CLOSE_BUTTON_WIDTH + 2
+	_sell_all.rect = Rect2i(x, bottom, SELL_ALL_WIDTH, 1)
+	x += SELL_ALL_WIDTH + 2
+	_delete.rect = Rect2i(x, bottom, DELETE_WIDTH, 1)
 	refresh()
+
+
+func _place_row(row: Row, left: int, y: int) -> void:
+	var value_x: int = left + LABEL_WIDTH
+	row.title.rect = Rect2i(left, y, LABEL_WIDTH - 1, 1)
+	if row.toggle != null:
+		row.toggle.rect = Rect2i(value_x, y, ARROW_WIDTH + 3, 1)
+		return
+	row.less.rect = Rect2i(value_x, y, ARROW_WIDTH, 1)
+	row.value.rect = Rect2i(value_x + ARROW_WIDTH + 1, y, VALUE_WIDTH, 1)
+	row.more.rect = Rect2i(value_x + ARROW_WIDTH + VALUE_WIDTH + 2, y, ARROW_WIDTH, 1)
 
 
 func refresh() -> void:
@@ -103,7 +130,53 @@ func refresh() -> void:
 	_crt.value.text = _text("SETTINGS_CRT_%d" % data.crt_level)
 	_crt.less.is_enabled = data.crt_level > 0
 	_crt.more.is_enabled = data.crt_level < SettingsData.CRT_LEVELS - 1
+	var volume_text: String = "%d %%" % data.master_volume
+	if data.muted:
+		volume_text = _text("SETTINGS_MUTED")
+	_volume.value.text = volume_text
+	_volume.less.is_enabled = data.master_volume > 0
+	_volume.more.is_enabled = data.master_volume < SettingsData.MAX_VOLUME
+	_music.value.text = "%d %%" % data.music_volume
+	_music.less.is_enabled = data.music_volume > 0
+	_music.more.is_enabled = data.music_volume < SettingsData.MAX_VOLUME
+	_motion.toggle.label = _toggle_text(data.reduce_motion)
+	_text_size.value.text = _text("SETTINGS_TEXT_SIZE_%d" % data.text_size)
+	_text_size.less.is_enabled = data.text_size > 0
+	_text_size.more.is_enabled = data.text_size < SettingsData.TEXT_SIZE_SCALES.size() - 1
+	_language.value.text = _text("SETTINGS_LANGUAGE_%d" % data.language)
+	_language.less.is_enabled = data.language > 0
+	_language.more.is_enabled = data.language < SettingsData.Language.size() - 1
+	_tutorial.toggle.label = _toggle_text(data.tutorial_enabled)
 	_update_sell_all()
+	_update_delete()
+
+
+## Texto del botón de borrar la partida según el paso de la confirmación.
+func _update_delete() -> void:
+	match _delete_step:
+		SellStep.ASKED:
+			_delete.label = _text("SETTINGS_DELETE_ASK")
+		SellStep.SURE:
+			_delete.label = _text("SETTINGS_DELETE_SURE")
+		_:
+			_delete.label = _text("SETTINGS_DELETE")
+
+
+## Borrar la partida exige tres pulsaciones (pedir, confirmar y borrar). Se guarda
+## ya la partida nueva; la anterior queda como la última copia de seguridad.
+func _on_delete_pressed() -> void:
+	match _delete_step:
+		SellStep.IDLE:
+			_delete_step = SellStep.ASKED
+		SellStep.ASKED:
+			_delete_step = SellStep.SURE
+		_:
+			_delete_step = SellStep.IDLE
+			Game.start_new_game()
+			SaveService.save_now()
+			Settings.set_tutorial_step(0)
+			message.emit(_text("SETTINGS_DELETED"))
+	_update_delete()
 
 
 ## Texto y estado del botón de vender todo según el paso de la confirmación.
@@ -222,6 +295,48 @@ func _on_crt_less() -> void:
 
 func _on_crt_more() -> void:
 	Settings.set_crt_level(Settings.data.crt_level + 1)
+
+
+func _on_volume_less() -> void:
+	Settings.set_muted(false)
+	Settings.set_master_volume(Settings.data.master_volume - SettingsData.VOLUME_STEP)
+
+
+func _on_volume_more() -> void:
+	Settings.set_muted(false)
+	Settings.set_master_volume(Settings.data.master_volume + SettingsData.VOLUME_STEP)
+
+
+func _on_music_less() -> void:
+	Settings.set_music_volume(Settings.data.music_volume - SettingsData.VOLUME_STEP)
+
+
+func _on_music_more() -> void:
+	Settings.set_music_volume(Settings.data.music_volume + SettingsData.VOLUME_STEP)
+
+
+func _on_motion_toggled() -> void:
+	Settings.set_reduce_motion(not Settings.data.reduce_motion)
+
+
+func _on_text_less() -> void:
+	Settings.set_text_size(Settings.data.text_size - 1)
+
+
+func _on_text_more() -> void:
+	Settings.set_text_size(Settings.data.text_size + 1)
+
+
+func _on_language_less() -> void:
+	Settings.set_language((Settings.data.language - 1) as SettingsData.Language)
+
+
+func _on_language_more() -> void:
+	Settings.set_language((Settings.data.language + 1) as SettingsData.Language)
+
+
+func _on_tutorial_toggled() -> void:
+	Settings.set_tutorial_enabled(not Settings.data.tutorial_enabled)
 
 
 func _on_mode_toggled() -> void:

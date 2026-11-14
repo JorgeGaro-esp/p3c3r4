@@ -35,6 +35,8 @@ func apply_level() -> void:
 	var params: Dictionary = LEVELS[level]
 	for key: String in params:
 		_material.set_shader_parameter(key, params[key])
+	if Settings.data.reduce_motion:
+		_material.set_shader_parameter("flicker", 0.0)
 
 
 ## El material con los parámetros del sombreador.

@@ -37,6 +37,7 @@ func draw(canvas: AsciiCanvas) -> void:
 	for column: int in range(-1, _columns):
 		var index: int = posmod(column - whole, _pattern.length())
 		var bob: float = sin(_clock * BOB_SPEED + float(column) * BOB_SPREAD) * BOB_AMPLITUDE
+		bob *= MotionScale.factor()
 		canvas.put_char(
 			_pattern[index], Vector2(float(column) + fraction, float(_top_row) + bob), _color
 		)

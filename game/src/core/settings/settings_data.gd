@@ -10,6 +10,9 @@ extends RefCounted
 ## momento conviven las dos formas para que Jorge elija con el prototipo.
 enum PanelMode { REPLACE, GROW_UP }
 
+## Idioma: el del sistema, español o inglés.
+enum Language { AUTO, SPANISH, ENGLISH }
+
 const FORMAT_VERSION: int = 1
 ## Altura de la franja en filas de texto (P01: ajustable, 12 por defecto).
 const DEFAULT_STRIP_ROWS: int = 12
@@ -23,6 +26,14 @@ const DEFAULT_FPS: int = 30
 ## Efecto CRT: 0 apagado, 1 suave, 2 completo.
 const CRT_LEVELS: int = 3
 const DEFAULT_CRT_LEVEL: int = 2
+## Volumen en porcentaje (P06): general y música, de 10 en 10. Por defecto, bajo.
+const DEFAULT_MASTER_VOLUME: int = 30
+const DEFAULT_MUSIC_VOLUME: int = 100
+const VOLUME_STEP: int = 10
+const MAX_VOLUME: int = 100
+## Tamaño del texto: pequeño, normal y grande (multiplican el tamaño de la fuente).
+const TEXT_SIZE_SCALES: Array[float] = [0.85, 1.0, 1.25]
+const DEFAULT_TEXT_SIZE: int = 1
 ## Límite de tamaño del archivo de ajustes antes de leerlo, en bytes.
 const MAX_FILE_BYTES: int = 65536
 
@@ -34,6 +45,17 @@ var fps_limit: int = DEFAULT_FPS
 var launch_with_windows: bool = false
 var panel_mode: PanelMode = PanelMode.REPLACE
 var crt_level: int = DEFAULT_CRT_LEVEL
+var master_volume: int = DEFAULT_MASTER_VOLUME
+var music_volume: int = DEFAULT_MUSIC_VOLUME
+## Silencio total (tecla M); no cambia los volúmenes elegidos.
+var muted: bool = false
+## Menos ondulación y sin parpadeos (accesibilidad).
+var reduce_motion: bool = false
+var text_size: int = DEFAULT_TEXT_SIZE
+var language: Language = Language.AUTO
+## Tutorial: activado y paso por el que va ([constant Tutorial.DONE] = terminado).
+var tutorial_enabled: bool = true
+var tutorial_step: int = 0
 
 
 ## Convierte el texto de un archivo en ajustes. Nunca falla: ante un texto
@@ -69,6 +91,17 @@ static func from_dict(raw: Variant) -> SettingsData:
 	var mode: int = _read_int(source, "panel_mode", PanelMode.REPLACE, 0, PanelMode.size() - 1)
 	result.panel_mode = mode as PanelMode
 	result.crt_level = _read_int(source, "crt_level", DEFAULT_CRT_LEVEL, 0, CRT_LEVELS - 1)
+	result.master_volume = _read_int(source, "master_volume", DEFAULT_MASTER_VOLUME, 0, MAX_VOLUME)
+	result.music_volume = _read_int(source, "music_volume", DEFAULT_MUSIC_VOLUME, 0, MAX_VOLUME)
+	result.muted = _read_bool(source, "muted", false)
+	result.reduce_motion = _read_bool(source, "reduce_motion", false)
+	result.text_size = _read_int(
+		source, "text_size", DEFAULT_TEXT_SIZE, 0, TEXT_SIZE_SCALES.size() - 1
+	)
+	var lang: int = _read_int(source, "language", Language.AUTO, 0, Language.size() - 1)
+	result.language = lang as Language
+	result.tutorial_enabled = _read_bool(source, "tutorial_enabled", true)
+	result.tutorial_step = _read_int(source, "tutorial_step", 0, 0, Tutorial.DONE)
 	return result
 
 
@@ -92,6 +125,14 @@ func to_dict() -> Dictionary:
 		"launch_with_windows": launch_with_windows,
 		"panel_mode": int(panel_mode),
 		"crt_level": crt_level,
+		"master_volume": master_volume,
+		"music_volume": music_volume,
+		"muted": muted,
+		"reduce_motion": reduce_motion,
+		"text_size": text_size,
+		"language": int(language),
+		"tutorial_enabled": tutorial_enabled,
+		"tutorial_step": tutorial_step,
 	}
 
 

@@ -3,8 +3,8 @@
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
 **Última actualización:** 2026-11-14
-**Fase actual:** Fase 13 · Prestigio y meta final: código y 649 tests hechos (Fases 7–13 sin commit aún). Pendiente de Jorge: probar la pestaña Marea (F9 da conchas, F8 completa la colección para ver el final), además del tinte (F6) y los eventos (F7) de la Fase 12. Siguiente: **Fase 14 · Audio**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
-**Versión:** `0.17.0` (pendiente de commit; `0.8.0` a `0.16.0` tampoco tienen etiqueta aún). Etiquetas hasta `v0.7.0`.
+**Fase actual:** Fase 15 · Accesibilidad, idioma y tutorial: código y 676 tests hechos (Fases 7–15 sin commit aún). Pendiente de Jorge: probar el audio (Fase 14), la pestaña Marea (13), el tinte (F6), los eventos (F7) y los ajustes nuevos (lista abajo). Falta de la Fase 15: revisión del inglés y de textos cortados a ojo en pantalla. Siguiente: **Fase 16 · Balance y versión 1.0**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
+**Versión:** `0.19.0` (pendiente de commit; `0.8.0` a `0.16.0` tampoco tienen etiqueta aún). Etiquetas hasta `v0.7.0`.
 
 ## Progreso por fases
 
@@ -24,8 +24,8 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 | 11 | Enciclopedia y logros | hecha (11A estadísticas y Enciclopedia; 11B 60 logros con bonus de producción) |
 | 12 | Día/noche y eventos aleatorios | Hecha en código; pendiente de prueba manual de Jorge |
 | 13 | Prestigio y meta final | Hecha en código; pendiente de prueba manual de Jorge |
-| 14 | Audio | Pendiente |
-| 15 | Efecto CRT, accesibilidad e inglés | Pendiente |
+| 14 | Audio | Hecha en código; pendiente de prueba manual de Jorge |
+| 15 | CRT, accesibilidad e inglés | Hecha en código; pendiente de prueba manual y revisión visual del inglés |
 | 16 | Balance, pruebas y versión 1.0 | Pendiente |
 | 17 | (Futuro) Versión web y publicación | Sin planificar en detalle |
 
@@ -63,7 +63,9 @@ Jorge (Fase 11B): reimportar traducciones; pulsar L: lista de 60 logros con `[ ]
 Jorge (Fase 11C): reimportar; mirar cómo giran los peces (se aplanan y se abren), que caracol/cangrejo/estrella van pegados a la arena, y probar Ajustes → «Efecto CRT» (Apagado/Suave/Completo).
 Jorge (Fase 12): reimportar; pulsar F3 para ver la ayuda de depuración; F6 adelanta el reloj 1 h (ver amanecer, atardecer y noche, y el aviso); F7 lanza un evento; probar el pez dorado (clic), el visitante (clic), la botella (clic), la lluvia de comida, la corriente cálida y la plaga de algas (limpiar las manchas).
 Jorge (Fase 13): reimportar; en cmd con `Godot --path .`: pulsa F3 (ayuda), F9 (+5 M de conchas), abre Tienda → pestaña «Marea», pulsa «Reiniciar» dos veces y compra mejoras con las perlas negras; F8 completa la colección y lanza el final (Esc o clic para salir); el Trofeo aparece en Decoración (modo D).
-Claude: Fase 14 (audio).
+Jorge (Fase 14): reimportar (`--headless --import`); en cmd con `Godot --path .`: debe sonar música suave y agua; clics de interfaz, comida al pulsar el agua, compra/venta, perla, eclosión, logro, eventos (F7) y Gran marea (F9 + Marea); F6 hasta la noche para oír el cambio de música; **M** silencia y reactiva; Ajustes → «Volumen» y «Volumen de la música».
+Jorge (Fase 15): reimportar; al arrancar debe verse el cuadro «Tutorial 1/5» arriba a la derecha (Esc lo salta); echar comida, cobrar una perla, comprar un pez y pulsar un pez lo avanzan; Ajustes (dos columnas): Reducir movimiento, Tamaño del texto, Idioma (cambia a inglés y revisa que no se corte ningún texto en paneles, tienda, fichas y logros), Tutorial y Borrar partida (tres pulsaciones).
+Claude: Fase 16.
 
 ## Bloqueos y dudas abiertas
 

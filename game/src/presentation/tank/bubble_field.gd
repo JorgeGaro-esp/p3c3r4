@@ -59,7 +59,7 @@ func draw(canvas: AsciiCanvas) -> void:
 		var progress: float = (bubble.start_y - bubble.y) / travel
 		var size_index: int = clampi(int(progress * float(CHARACTERS.length())), 0, 3)
 		var sway: float = WOBBLE_AMPLITUDE * (1.0 + (WOBBLE_GROWTH - 1.0) * progress)
-		var wobble: float = sin(_clock * WOBBLE_SPEED + bubble.phase) * sway
+		var wobble: float = sin(_clock * WOBBLE_SPEED + bubble.phase) * sway * MotionScale.factor()
 		var tint: Color = color
 		tint.a = clampf((bubble.y - surface_row) / FADE_ROWS, 0.0, 1.0)
 		canvas.put_char(CHARACTERS[size_index], Vector2(bubble.x + wobble, bubble.y), tint)

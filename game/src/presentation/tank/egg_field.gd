@@ -34,7 +34,9 @@ func draw(canvas: AsciiCanvas) -> void:
 	var span: float = float(maxi(width - 2, 1))
 	for egg: Egg in _eggs:
 		var wiggling: bool = (
-			egg.remaining < WIGGLE_SECONDS and fmod(_clock, WIGGLE_PERIOD * 2.0) < WIGGLE_PERIOD
+			not MotionScale.is_reduced()
+			and egg.remaining < WIGGLE_SECONDS
+			and fmod(_clock, WIGGLE_PERIOD * 2.0) < WIGGLE_PERIOD
 		)
 		var glyph: String = WIGGLE if wiggling else EGG
 		canvas.put_char(glyph, Vector2(1.0 + floorf(egg.position_x * span), floor_row), COLOR)

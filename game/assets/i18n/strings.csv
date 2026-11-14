@@ -385,6 +385,9 @@ SETTINGS_CRT,Efecto CRT,CRT effect
 SETTINGS_CRT_0,Apagado,Off
 SETTINGS_CRT_1,Suave,Soft
 SETTINGS_CRT_2,Completo,Full
+SETTINGS_VOLUME,Volumen (M = silencio),Volume (M = mute)
+SETTINGS_MUSIC,Volumen de la música,Music volume
+SETTINGS_MUTED,Silencio,Muted
 EVENT_RARE_VISITOR,Visitante raro,Rare visitor
 EVENT_RARE_VISITOR_MSG,¡Un %s visita la pecera! Pulsa sobre él,A %s is visiting the tank! Click it
 EVENT_FOOD_RAIN,Lluvia de comida,Food rain
@@ -439,6 +442,8 @@ TOAST_PRESTIGE,¡Gran marea! +%d perlas negras,Great Tide! +%d black pearls
 TOAST_PRESTIGE_UPGRADE,Mejora: %s,Upgrade: %s
 TOAST_PRESTIGE_NOT_ENOUGH,Te faltan perlas negras,Not enough black pearls
 TOAST_PRESTIGE_NOT_YET,Aún no ganas ni una perla negra,You don't earn a black pearl yet
+TOAST_MUTED,Sonido apagado (M para volver),Sound off (M to turn on)
+TOAST_UNMUTED,Sonido activado,Sound on
 TOAST_FINAL,¡Enciclopedia completa!,Encyclopedia complete!
 DECOR_TIDE_TROPHY,Trofeo de la Gran marea,Great Tide Trophy
 DECOR_TIDE_TROPHY_DESC,El premio por completar la Enciclopedia.,The prize for completing the Encyclopedia.
@@ -449,3 +454,24 @@ FINAL_LINE_3,"Pero el mar es grande, y la marea vuelve.","But the sea is vast, a
 FINAL_LINE_4,Gracias por cuidar de todos ellos.,Thank you for looking after them all.
 FINAL_CLOSE,Seguirás nadando en el modo infinito.,You will keep swimming in endless mode.
 FINAL_HINT,Esc o clic para seguir,Esc or click to continue
+SETTINGS_REDUCE_MOTION,Reducir movimiento,Reduce motion
+SETTINGS_TEXT_SIZE,Tamaño del texto,Text size
+SETTINGS_TEXT_SIZE_0,Pequeño,Small
+SETTINGS_TEXT_SIZE_1,Normal,Normal
+SETTINGS_TEXT_SIZE_2,Grande,Large
+SETTINGS_LANGUAGE,Idioma,Language
+SETTINGS_LANGUAGE_0,Del sistema,System default
+SETTINGS_LANGUAGE_1,Español,Español
+SETTINGS_LANGUAGE_2,English,English
+SETTINGS_TUTORIAL,Tutorial,Tutorial
+SETTINGS_DELETE,Borrar partida,Delete game
+SETTINGS_DELETE_ASK,¿Borrar TODA la partida?,Delete the WHOLE game?
+SETTINGS_DELETE_SURE,¡Pulsa otra vez para BORRAR!,Press again to DELETE!
+SETTINGS_DELETED,Partida nueva empezada,New game started
+TUTORIAL_TITLE,Tutorial %d/%d,Tutorial %d/%d
+TUTORIAL_SKIP,Esc: saltar el tutorial,Esc: skip the tutorial
+TUTORIAL_0,Haz clic en el agua para echar comida. Los peces bien alimentados producen más conchas.,Click the water to drop food. Well-fed fish make more shells.
+TUTORIAL_1,"Cuando un pez suelte una perla (◦), haz clic en ella para cobrarla.","When a fish drops a pearl (◦), click it to collect it."
+TUTORIAL_2,Abre la Tienda y compra un pez nuevo con tus conchas.,Open the Shop and buy a new fish with your shells.
+TUTORIAL_3,"Haz clic en un pez para ver su ficha: producción, felicidad y venta.","Click a fish to see its card: output, happiness and selling."
+TUTORIAL_4,"Atajos: D decora, L logros, 1-8 cambia de pecera, M silencia. ¡A coleccionar!","Shortcuts: D decorate, L achievements, 1-8 switch tank, M mute. Happy collecting!"

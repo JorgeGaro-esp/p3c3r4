@@ -87,7 +87,9 @@ func _draw_fish(canvas: AsciiCanvas) -> void:
 
 func _draw_title(canvas: AsciiCanvas) -> void:
 	var y: int = rect.position.y + 1
-	var sparkle: String = "*" if floori(_time / SPARKLE_SECONDS) % 2 == 0 else "·"
+	var sparkle: String = "*"
+	if not MotionScale.is_reduced() and floori(_time / SPARKLE_SECONDS) % 2 == 1:
+		sparkle = "·"
 	var text: String = "%s  %s  %s" % [sparkle, title, sparkle]
 	var alpha: float = clampf(_time / FIRST_DELAY, 0.0, 1.0)
 	canvas.put_string(

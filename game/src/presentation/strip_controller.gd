@@ -29,6 +29,9 @@ var _settings_panel: SettingsPanel
 var _final: FinalPanel
 var _card: FishCard
 var _tank_tabs: TankTabs
+var _hint: TutorialHint
+var _language: String = ""
+var _last_step_time: float = 0.0
 var _open: Kind = Kind.NONE
 var _available_rows: int = UNLIMITED_ROWS
 
@@ -39,10 +42,16 @@ func _ready() -> void:
 	_ui = get_node(ui_path) as UiRoot
 	assert(_canvas != null and _tank != null and _ui != null, "StripController needs its nodes")
 	_build_panels()
+	_language = Settings.effective_language()
 	_canvas.grid_changed.connect(_apply_layout)
 	_ui.escape_pressed.connect(_on_escape)
 	_tank.fish_clicked.connect(_on_fish_clicked)
 	_tank.decor_message.connect(_sidebar.show_toast)
+	EventBus.food_dropped.connect(_tutorial_action.bind(Tutorial.Action.FEED))
+	EventBus.pearl_collected.connect(
+		func(_value: float) -> void: _tutorial_action(Tutorial.Action.PEARL)
+	)
+	EventBus.purchase_made.connect(_tutorial_action.bind(Tutorial.Action.BUY))
 	_ui.pointer_pressed.connect(Platform.enable_keyboard_focus)
 	Settings.changed.connect(_on_settings_changed)
 	Platform.display_changed.connect(_apply_window)
@@ -69,7 +78,8 @@ func _ready() -> void:
 		_on_notice_requested(SaveService.start())
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_tick_tutorial(delta)
 	_sidebar.set_cleanliness(roundi(Game.state.active().cleanliness))
 	_sidebar.set_clock(Game.daylight.hour(), Game.daylight.phase())
 
@@ -82,10 +92,17 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		Platform.request_quit()
 	elif key.keycode == KEY_D and not key.ctrl_pressed:
 		toggle_decorating()
+	elif key.keycode == KEY_M and not key.ctrl_pressed:
+		_on_mute_pressed()
 	elif key.keycode == KEY_L and not key.ctrl_pressed:
 		open_achievements()
 	elif key.keycode >= KEY_1 and key.keycode <= KEY_8 and not key.ctrl_pressed:
 		Game.biomes.set_active(key.keycode - KEY_1)
+
+
+func _on_mute_pressed() -> void:
+	var muted: bool = Audio.toggle_mute()
+	_sidebar.show_toast(tr("TOAST_MUTED" if muted else "TOAST_UNMUTED"))
 
 
 ## Entra o sale del modo decorar (cierra los paneles al entrar).
@@ -163,6 +180,7 @@ func card_fish() -> Fish:
 
 func _on_fish_clicked(fish: Fish) -> void:
 	show_card(fish)
+	_tutorial_action(Tutorial.Action.CARD)
 
 
 func _on_escape() -> void:
@@ -170,6 +188,8 @@ func _on_escape() -> void:
 		_tank.set_decorating(false)
 	elif _card.fish() != null:
 		close_card()
+	elif _open == Kind.NONE and _hint.step() >= 0:
+		Settings.set_tutorial_step(Tutorial.DONE)
 	else:
 		close_panel()
 
@@ -258,6 +278,7 @@ func _build_panels() -> void:
 	_final = FinalPanel.new(_ui)
 	_card = FishCard.new(_ui)
 	_tank_tabs = TankTabs.new(_ui)
+	_hint = TutorialHint.new(_ui)
 	_card.close_requested.connect(close_card)
 	_sidebar.set_active(true)
 	_sidebar.shop_pressed.connect(toggle_panel.bind(Kind.SHOP))
@@ -289,6 +310,10 @@ func _on_production_changed(rate: float) -> void:
 
 
 func _on_settings_changed() -> void:
+	if Settings.effective_language() != _language:
+		get_tree().reload_current_scene.call_deferred()
+		return
+	_update_tutorial()
 	Platform.set_always_on_top(Settings.data.always_on_top)
 	_apply_window()
 	_apply_layout()
@@ -300,7 +325,8 @@ func _apply_window() -> void:
 	var data: SettingsData = Settings.data
 	var screen: int = Platform.target_screen(data.screen_index)
 	var scale: float = StripLayout.scale_from_dpi(Platform.screen_dpi(screen))
-	var font_px: int = StripLayout.scaled_font_px(BASE_FONT_PX, scale)
+	var base_px: int = roundi(float(BASE_FONT_PX) * SettingsData.TEXT_SIZE_SCALES[data.text_size])
+	var font_px: int = StripLayout.scaled_font_px(base_px, scale)
 	if font_px != _canvas.font_size:
 		_canvas.set_font_size(font_px)
 	var usable: Rect2i = Platform.usable_rect(screen)
@@ -330,6 +356,7 @@ func _apply_layout() -> void:
 	_place_panel(_settings_panel, Kind.SETTINGS, layout.panel_rect)
 	_place_panel(_final, Kind.FINAL, layout.panel_rect)
 	_place_card(layout.tank_rect)
+	_place_hint(layout.tank_rect)
 	_tank_tabs.layout(layout.tank_rect)
 	var covered: bool = (
 		layout.panel_rect.has_area() and layout.panel_rect.intersects(layout.tank_rect)
@@ -348,6 +375,40 @@ func _place_card(tank_area: Rect2i) -> void:
 	_card.set_active(_card.fish() != null and area.has_area())
 	if _card.is_active:
 		_card.layout(area)
+
+
+func _place_hint(tank_area: Rect2i) -> void:
+	var area: Rect2i = TutorialHint.fit_in(tank_area)
+	_hint.set_active(_hint.step() >= 0 and area.has_area())
+	if _hint.is_active:
+		_hint.layout(area)
+
+
+## El último aviso (atajos) se da por visto tras unos segundos.
+func _tick_tutorial(delta: float) -> void:
+	if _hint.step() != Tutorial.STEPS.size() - 1:
+		return
+	_last_step_time += delta
+	if _last_step_time >= Tutorial.LAST_STEP_SECONDS:
+		_tutorial_action(Tutorial.Action.SHORTCUTS)
+
+
+## Enseña el paso del tutorial que toca (o lo esconde si está apagado o terminado).
+func _update_tutorial() -> void:
+	var step: int = -1
+	if Settings.data.tutorial_enabled and Tutorial.is_active_step(Settings.data.tutorial_step):
+		step = Settings.data.tutorial_step
+	if step != _hint.step():
+		_last_step_time = 0.0
+		_hint.show_step(step)
+	else:
+		_hint.refresh()
+
+
+## El jugador hizo algo: si cumple el paso actual del tutorial, se pasa al siguiente.
+func _tutorial_action(action: Tutorial.Action) -> void:
+	if Settings.data.tutorial_enabled and Tutorial.completes(Settings.data.tutorial_step, action):
+		Settings.set_tutorial_step(Settings.data.tutorial_step + 1)
 
 
 func _on_minimized_changed(is_minimized: bool) -> void:

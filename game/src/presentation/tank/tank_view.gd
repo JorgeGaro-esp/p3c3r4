@@ -205,6 +205,7 @@ func clean_at(cell: Vector2i) -> bool:
 ## Echa comida desde la celda [param cell] (lo mismo que hace un clic en el agua).
 func drop_food(cell: Vector2i) -> void:
 	_food.drop(Vector2(cell) + Vector2(0.5, 0.0), _rng)
+	EventBus.food_dropped.emit()
 
 
 func food_count() -> int:

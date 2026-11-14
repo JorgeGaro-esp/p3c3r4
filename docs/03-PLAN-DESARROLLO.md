@@ -312,7 +312,7 @@
 
 ---
 
-## Fase 14 · Audio
+## Fase 14 · Audio (hecha, ver T134–T136)
 
 **Tareas**
 
@@ -327,7 +327,7 @@
 
 ---
 
-## Fase 15 · Efecto CRT, accesibilidad e inglés
+## Fase 15 · Efecto CRT, accesibilidad e inglés (hecha salvo revisión visual del inglés, ver T137–T140)
 
 **Tareas**
 

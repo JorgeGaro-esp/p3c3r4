@@ -49,3 +49,9 @@ signal prestiged(pearls: int)
 signal prestige_upgrade_bought(upgrade_id: String, level: int)
 ## Se completó la Enciclopedia: empieza la secuencia final y el modo infinito.
 signal final_reached
+## Un huevo de la pecera [param tank_index] ha eclosionado.
+signal egg_hatched(tank_index: int)
+## El jugador echó comida al agua.
+signal food_dropped
+## El jugador pulsó un botón o elemento de la interfaz.
+signal ui_clicked

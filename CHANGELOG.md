@@ -2,7 +2,29 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
-## [0.17.0] - 2026-11-14 · Fase 13 (prestigio y meta final)
+## [0.19.0] - 2026-11-14 · Fase 15 (accesibilidad, idioma y tutorial)
+
+### Añadido
+- **Reducir movimiento** (Ajustes): la ondulación de peces, algas, superficie y burbujas baja a un tercio (`MotionScale`) y se apagan los parpadeos (destello del CRT, chispa del pez dorado, balanceo de huevos, brillo del título final).
+- **Tamaño del texto** (pequeño 85 %, normal, grande 125 %): escala la fuente de toda la rejilla. La franja crece o encoge en altura porque su alto son filas de texto.
+- **Idioma** (Ajustes): del sistema, español o inglés; al cambiarlo se recarga la escena (la partida sigue en memoria).
+- **Borrar partida** con triple pulsación (pedir, confirmar, borrar): empieza una partida nueva y la guarda; la anterior queda como la última copia de seguridad. Reinicia también el tutorial.
+- **Tutorial por avisos** (`Tutorial`, `TutorialHint`): cinco cuadros arriba a la derecha de la pecera que avanzan al echar comida, cobrar una perla, comprar, abrir la ficha de un pez y, por último, mostrar los atajos. Esc lo salta; se puede apagar o repetir en Ajustes. El progreso se guarda en `settings.json`, no en la partida.
+- Ajustes nuevos en `settings.json`: `reduce_motion`, `text_size`, `language`, `tutorial_enabled`, `tutorial_step`.
+
+### Cambiado
+- El panel de Ajustes reparte sus filas en **dos columnas** cuando cabe, y tiene el botón de borrar partida junto a «Vender todo».
+
+ - 2026-11-14 · Fase 14 (audio)
+
+### Añadido
+- **`AudioService`** (autoload `Audio`): crea los canales Música, Ambiente y Efectos bajo Master, escucha `EventBus` y reproduce efectos con nombres lógicos. En un mismo fotograma solo suena el de mayor prioridad (una venta no suena también como compra).
+- **Todo el sonido está generado por código**: `tools/generate_audio.py` (Python + numpy/scipy) escribe los WAV de `game/assets/audio/`: 11 efectos (clic, comida, compra, venta, perla, eclosión, evento, premio de evento, logro, Gran marea, final), un ambiente de agua con burbujas y dos temas de música en bucle sin costuras. No hay muestras ni melodías de terceros, así que no hay licencias que anotar.
+- **Música «lofi chiptune» original**: tema de día (72 bpm, onda de pulso, arpegios con eco, bajo de triángulo, percusión suave y crepitar de vinilo) y tema de noche (más lento, grave y sin percusión) que se funden según la franja del día. Solo comparte el ánimo de los niveles acuáticos de 16 bits; la melodía es propia.
+- **Ajustes**: «Volumen» general (30 % por defecto, de 10 en 10) y «Volumen de la música»; tecla **M** silencia y reactiva todo (con aviso). Guardado en `settings.json` (`master_volume`, `music_volume`, `muted`).
+- Señales nuevas `egg_hatched`, `food_dropped` y `ui_clicked` en `EventBus`.
+
+ - 2026-11-14 · Fase 13 (prestigio y meta final)
 
 ### Añadido
 - **La Gran marea (prestigio)**: reinicia conchas, peces y equipamiento a cambio de **perlas negras** = ⌊√(conchas ganadas en el ciclo ÷ 100 000)⌋ (`Prestige`, `PrestigeState`, `PrestigeDirector` en `Game.prestige`). Se conservan Enciclopedia, logros, estadísticas, especies desbloqueadas, peceras abiertas, decoración (colocada y guardada), mejoras y perlas negras (P05). Pide doble confirmación y guarda tras hacerla.

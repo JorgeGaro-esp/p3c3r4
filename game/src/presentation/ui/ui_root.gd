@@ -85,6 +85,8 @@ func _on_mouse_button(button: InputEventMouseButton) -> void:
 		if target.focus_on_click:
 			_set_focus(target)
 		handled = target.handle_click(cell, button.double_click)
+		if handled:
+			EventBus.ui_clicked.emit()
 	if handled:
 		get_viewport().set_input_as_handled()
 

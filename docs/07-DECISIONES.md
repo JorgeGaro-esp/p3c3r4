@@ -93,7 +93,7 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | P03 | Lista definitiva de biomas y especies (el GDD trae una propuesta) | Fase 5 y Fase 10 |
 | P04 | Nombre de la moneda y de la moneda de prestigio | Fase 3 |
 | P05 | Qué conserva exactamente el prestigio | Resuelta en la Fase 13 (T128) |
-| P06 | Estilo concreto de la música y origen de los sonidos | Fase 14 |
+| P06 | Estilo concreto de la música y origen de los sonidos | Resuelta en la Fase 14 (T134–T136) |
 | P07 | Título definitivo | Antes de cualquier publicación |
 | P08 | Fuente definitiva | Resuelta en Fase 1: T17 |
 | P09 | ¿Arranque automático con Windows como opción? | Resuelta en Fase 2: D33 |
@@ -196,6 +196,13 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T130 | Mejoras: producción, arranque rápido, suerte de variantes y valor de perlas (los cuatro efectos que Jorge eligió); coste en perlas negras = `base × crecimiento^nivel` con tope de nivel por mejora | Datos en `content/prestige/`; el balance fino queda para la Fase 16 |
 | T131 | El final se dispara al tener las 160 combinaciones especie × variante (mismo criterio que el logro `collection_100`); regala el Trofeo de la Gran marea y no bloquea nada: sigue el modo infinito con prestigio ilimitado | GDD §13 y D12/D13; respuesta de Jorge («secuencia ASCII + decoración dorada») |
 | T132 | `PrestigeDirector` (`Game.prestige`) agrupa reinicio, compra de mejoras y detección del final; el reinicio construye un `GameState` nuevo (`Prestige.next_run`) y lo adopta con `adopt_state` | `GameService` ya llegaba al máximo de métodos públicos; reutiliza el camino de carga |
+| T134 | Sonidos y música **generados por código** con `tools/generate_audio.py` y guardados como WAV (22 050 Hz, mono, 16 bits); se regeneran y reimportan si se cambia el script | Respuesta de Jorge; cero licencias y repositorio ligero (~6 MB) |
+| T135 | Música original en estilo lofi chiptune inspirada solo en el ánimo de «Aquatic Ambience» (lento, soñador, eco, arpegios); no se copia ninguna melodía ni armonía de esa pieza (con derechos de autor). Dos temas, día y noche, con fundido de potencia constante entre franjas | Petición de Jorge + respeto de derechos de autor |
+| T136 | Volumen inicial 30 % (general); solo dos controles en Ajustes (general y música) para no desbordar el panel con la franja baja; los efectos y el ambiente siguen al general; **M** silencia todo con un interruptor aparte que no pierde los volúmenes elegidos. Un efecto por fotograma (el de mayor prioridad) | Respuesta de Jorge; evitar el ruido de varias notificaciones a la vez |
+| T137 | «Reducir movimiento» multiplica por 0,3 la ondulación (`MotionScale`) y apaga parpadeos, pero los peces siguen nadando a su velocidad | Respuesta de Jorge («sin parpadeos y menos ondulación») |
+| T138 | El tamaño del texto escala la fuente base (0,85 / 1 / 1,25) para toda la rejilla; la altura en píxeles de la franja cambia porque se mide en filas | Mantener una sola rejilla; escalar solo la interfaz obligaría a dos rejillas |
+| T139 | El idioma se guarda en ajustes y al cambiarlo se recarga la escena principal (los textos se escriben al crear los paneles); el estado vive en el autoload `Game` y no se pierde | Evita reescribir cada texto de cada panel |
+| T140 | El tutorial son cuadros que avanzan con acciones reales y su progreso vive en los ajustes del usuario, no en la partida; borrar la partida lo reinicia | No repetir el tutorial tras prestigio ni cargas |
 | T133 | Los símbolos del reloj son `▲ ○ ▼ ●` (de la tabla de `AsciiCharset`) | `☀ ☾ ◐` no están en la fuente y se veían como `*` |
 
 ## Cómo añadir decisiones
