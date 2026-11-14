@@ -16,6 +16,8 @@ const RARE_PER_LEVEL: float = 0.4
 const MAGNET_BASE_SECONDS: float = 24.0
 ## Máximo de la comodidad (fracción de felicidad que falta para el 100).
 const MAX_COMFORT: float = 0.9
+## Parte de la penalización nocturna que quita cada punto de fuerza de la lámpara.
+const LAMP_NIGHT_SHIELD: float = 0.8
 ## Máximo de producción extra que dan las decoraciones.
 const MAX_PRODUCTION_BONUS: float = 0.5
 
@@ -39,6 +41,8 @@ var rare_multiplier: float = 1.0
 var magnet_delay: float = 0.0
 ## Multiplica la producción de la pecera (decoración).
 var production_multiplier: float = 1.0
+## Fracción (0 a 1) de la penalización nocturna que quita la lámpara.
+var night_shield: float = 0.0
 
 
 ## Calcula las bonificaciones de [param levels] (id de equipo → nivel).
@@ -68,6 +72,7 @@ func _apply(def: EquipmentDef, level: int) -> void:
 			comfort = minf(comfort + strength, MAX_COMFORT)
 		EquipmentDef.Effect.LAMP:
 			growth_speed += strength
+			night_shield = minf(night_shield + strength * LAMP_NIGHT_SHIELD, 1.0)
 		EquipmentDef.Effect.AERATOR:
 			capacity_bonus += roundi(strength)
 		EquipmentDef.Effect.INCUBATOR:

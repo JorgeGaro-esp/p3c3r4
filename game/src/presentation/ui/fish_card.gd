@@ -149,6 +149,10 @@ func _update_texts() -> void:
 	var rate: float = Economy.fish_rate(def.base_production, _fish.happiness)
 	_name.text = _text(def.name_key)
 	_rarity.text = "%s %s" % [def.rarity_symbol(), _text(RarityStyle.name_key(def.rarity))]
+	if def.activity == SpeciesDef.Activity.DIURNAL:
+		_rarity.text += " · " + _text("ACTIVITY_DIURNAL")
+	elif def.activity == SpeciesDef.Activity.NOCTURNAL:
+		_rarity.text += " · " + _text("ACTIVITY_NOCTURNAL")
 	_rarity.color = RarityStyle.color(def.rarity)
 	_production.text = (
 		_text("FISH_PRODUCTION") % NumberFormat.compact(rate, TranslationServer.get_locale())

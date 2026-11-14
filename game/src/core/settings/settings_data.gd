@@ -20,6 +20,9 @@ const PRIMARY_SCREEN: int = -1
 const MAX_SCREEN_INDEX: int = 15
 const FPS_CHOICES: Array[int] = [15, 30, 60]
 const DEFAULT_FPS: int = 30
+## Efecto CRT: 0 apagado, 1 suave, 2 completo.
+const CRT_LEVELS: int = 3
+const DEFAULT_CRT_LEVEL: int = 2
 ## Límite de tamaño del archivo de ajustes antes de leerlo, en bytes.
 const MAX_FILE_BYTES: int = 65536
 
@@ -30,6 +33,7 @@ var fps_limit: int = DEFAULT_FPS
 ## Arrancar con Windows (P09): desactivado por defecto.
 var launch_with_windows: bool = false
 var panel_mode: PanelMode = PanelMode.REPLACE
+var crt_level: int = DEFAULT_CRT_LEVEL
 
 
 ## Convierte el texto de un archivo en ajustes. Nunca falla: ante un texto
@@ -64,6 +68,7 @@ static func from_dict(raw: Variant) -> SettingsData:
 	result.launch_with_windows = _read_bool(source, "launch_with_windows", false)
 	var mode: int = _read_int(source, "panel_mode", PanelMode.REPLACE, 0, PanelMode.size() - 1)
 	result.panel_mode = mode as PanelMode
+	result.crt_level = _read_int(source, "crt_level", DEFAULT_CRT_LEVEL, 0, CRT_LEVELS - 1)
 	return result
 
 
@@ -86,6 +91,7 @@ func to_dict() -> Dictionary:
 		"fps_limit": fps_limit,
 		"launch_with_windows": launch_with_windows,
 		"panel_mode": int(panel_mode),
+		"crt_level": crt_level,
 	}
 
 

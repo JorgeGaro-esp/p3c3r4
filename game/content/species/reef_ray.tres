@@ -9,6 +9,7 @@ name_key = "SPECIES_REEF_RAY"
 description_key = "SPECIES_REEF_RAY_DESC"
 biome_id = "reef"
 rarity = 4
+activity = 2
 base_cost = 220000.0
 base_production = 800.0
 unlock_kind = 1

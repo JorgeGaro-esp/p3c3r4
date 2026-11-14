@@ -9,6 +9,7 @@ name_key = "SPECIES_MANGROVE_CRAB"
 description_key = "SPECIES_MANGROVE_CRAB_DESC"
 biome_id = "mangrove"
 rarity = 0
+activity = 2
 base_cost = 20000.0
 base_production = 84.0
 unlock_kind = 0

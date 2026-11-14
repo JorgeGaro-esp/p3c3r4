@@ -7,7 +7,7 @@ extends RefCounted
 ## superior a la conocida no se migra: la rechaza [SaveCodec].
 
 ## Versión actual del formato. Sube en cada cambio incompatible.
-const CURRENT_FORMAT: int = 8
+const CURRENT_FORMAT: int = 9
 
 ## Especies de prueba de las fases 3 y 4 y la especie definitiva que las sustituye.
 const RENAMED_SPECIES: Dictionary[String, String] = {
@@ -39,6 +39,8 @@ static func migrate(data: Dictionary, from_version: int) -> Dictionary:
 				result = migrate_6_to_7(result)
 			7:
 				result = migrate_7_to_8(result)
+			8:
+				result = migrate_8_to_9(result)
 			_:
 				push_error("SaveMigrations: no hay migración desde la versión %d" % version)
 				return result
@@ -170,4 +172,13 @@ static func migrate_7_to_8(data: Dictionary) -> Dictionary:
 	var result: Dictionary = data.duplicate(true)
 	if not result.has("achievements"):
 		result["achievements"] = {}
+	return result
+
+
+## Fase 13: aparece el prestigio. Las partidas antiguas empiezan sin perlas negras y
+## su ciclo actual cuenta desde el principio.
+static func migrate_8_to_9(data: Dictionary) -> Dictionary:
+	var result: Dictionary = data.duplicate(true)
+	if not result.has("prestige"):
+		result["prestige"] = {}
 	return result

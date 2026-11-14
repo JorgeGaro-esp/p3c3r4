@@ -30,6 +30,7 @@ var _on_top: Row = null
 var _fps: Row = null
 var _autostart: Row = null
 var _mode: Row = null
+var _crt: Row = null
 
 
 func _init(root: UiRoot) -> void:
@@ -43,6 +44,7 @@ func _init(root: UiRoot) -> void:
 	_fps = _make_stepper("SETTINGS_FPS", _on_fps_less, _on_fps_more)
 	_autostart = _make_toggle("SETTINGS_AUTOSTART", _on_autostart_toggled)
 	_mode = _make_stepper("SETTINGS_PANEL_MODE", _on_mode_toggled, _on_mode_toggled)
+	_crt = _make_stepper("SETTINGS_CRT", _on_crt_less, _on_crt_more)
 	_close = _make_button(_text("UI_CLOSE_PANEL"))
 	_close.activated.connect(func() -> void: close_requested.emit())
 	_sell_all = _make_button("")
@@ -61,9 +63,11 @@ func set_active(value: bool) -> void:
 func layout(area: Rect2i) -> void:
 	_frame.rect = area
 	var value_x: int = area.position.x + LABEL_X + LABEL_WIDTH
+	# Con la franja más baja las filas se pegan al marco para que quepan todas.
+	var first_row: int = FIRST_ROW if area.size.y >= _rows.size() + FIRST_ROW + 3 else 1
 	for index: int in range(_rows.size()):
 		var row: Row = _rows[index]
-		var y: int = area.position.y + FIRST_ROW + index
+		var y: int = area.position.y + first_row + index
 		row.title.rect = Rect2i(area.position.x + LABEL_X, y, LABEL_WIDTH - 1, 1)
 		if row.toggle != null:
 			row.toggle.rect = Rect2i(value_x, y, ARROW_WIDTH + 3, 1)
@@ -96,6 +100,9 @@ func refresh() -> void:
 	_autostart.toggle.label = _toggle_text(data.launch_with_windows)
 	var is_grow: bool = data.panel_mode == SettingsData.PanelMode.GROW_UP
 	_mode.value.text = _text("SETTINGS_PANEL_GROW" if is_grow else "SETTINGS_PANEL_REPLACE")
+	_crt.value.text = _text("SETTINGS_CRT_%d" % data.crt_level)
+	_crt.less.is_enabled = data.crt_level > 0
+	_crt.more.is_enabled = data.crt_level < SettingsData.CRT_LEVELS - 1
 	_update_sell_all()
 
 
@@ -207,6 +214,14 @@ func _on_autostart_toggled() -> void:
 	if not OS.has_feature("editor"):
 		key = "SETTINGS_AUTOSTART_FAILED"
 	message.emit(_text(key))
+
+
+func _on_crt_less() -> void:
+	Settings.set_crt_level(Settings.data.crt_level - 1)
+
+
+func _on_crt_more() -> void:
+	Settings.set_crt_level(Settings.data.crt_level + 1)
 
 
 func _on_mode_toggled() -> void:

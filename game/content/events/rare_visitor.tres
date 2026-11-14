@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EventDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/event_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "rare_visitor"
+name_key = "EVENT_RARE_VISITOR"
+message_key = "EVENT_RARE_VISITOR_MSG"
+kind = 0
+weight = 2.0
+min_fish = 1
+duration = 45.0
+reward_seconds = 120.0
+reward_min = 60.0

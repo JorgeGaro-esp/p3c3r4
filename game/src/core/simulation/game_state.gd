@@ -2,7 +2,6 @@ class_name GameState
 extends RefCounted
 ## Estado completo de la partida: la raíz del modelo (02-ARQUITECTURA §3.1).
 ##
-## Más sistemas colgarán de aquí en fases posteriores (Enciclopedia, logros, prestigio).
 
 const MAX_TANKS: int = 16
 const MAX_SIM_TIME: float = 1.0e12
@@ -10,6 +9,8 @@ const MAX_SIM_TIME: float = 1.0e12
 const MAX_PENDING_PEARLS: int = 20
 ## Cantidad máxima de un mismo objeto de decoración en el inventario.
 const MAX_STOCK: int = 99
+## Cambio de oscuridad que merece recalcular la producción.
+const DARKNESS_EPSILON: float = 0.01
 
 var wallet: Wallet = Wallet.new()
 var tanks: Array[Tank] = [Tank.new()]
@@ -38,6 +39,12 @@ var stats: GameStats = GameStats.new()
 var achievements: Dictionary[String, bool] = {}
 ## Huevos que han eclosionado y `Game` aún no ha publicado.
 var pending_hatched: Array[HatchEvent] = []
+## Perlas negras, mejoras permanentes y final de la Gran marea. Se guardan.
+var prestige: PrestigeState = PrestigeState.new()
+## Eventos en curso (no se guardan).
+var events: EventState = EventState.new()
+## Oscuridad del día de 0 a 1 (no se guarda; la pone el reloj, ver [DaylightDirector]).
+var darkness: float = 0.0
 
 
 ## La pecera activa.
@@ -118,6 +125,15 @@ func discover(species_id: String, variant_id: String) -> bool:
 	return true
 
 
+## Cambia la oscuridad del día. Si cambia lo bastante, recalcula la producción.
+func set_darkness(value: float) -> void:
+	var clamped: float = clampf(value, 0.0, 1.0)
+	if absf(clamped - darkness) < DARKNESS_EPSILON:
+		return
+	darkness = clamped
+	production_dirty = true
+
+
 ## Entrega y vacía la cola de eclosiones.
 func take_hatched() -> Array[HatchEvent]:
 	var taken: Array[HatchEvent] = pending_hatched
@@ -157,6 +173,7 @@ func to_dict() -> Dictionary:
 		"decoration_stock": decoration_stock.duplicate(),
 		"stats": stats.to_dict(),
 		"achievements": achievements.duplicate(),
+		"prestige": prestige.to_dict(),
 	}
 
 
@@ -204,6 +221,10 @@ static func from_dict(
 	_read_stock(state, data, content, warnings)
 	state.stats = GameStats.from_dict(data.get("stats"), warnings)
 	_read_achievements(state, data, content, warnings)
+	state.prestige = PrestigeState.from_dict(data.get("prestige"), content, warnings)
+	state.prestige.run_start_earned = minf(
+		state.prestige.run_start_earned, state.wallet.total_earned
+	)
 	return state
 
 

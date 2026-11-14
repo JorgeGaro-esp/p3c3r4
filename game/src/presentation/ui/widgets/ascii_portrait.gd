@@ -160,6 +160,8 @@ func _draw_sprite(canvas: AsciiCanvas, origin: Vector2) -> void:
 	var color_lines: PackedStringArray = shown.colors[frame]
 	var top: float = float(rect.position.y)
 	var bottom: float = float(rect.end.y - _caption_rows() - 1)
+	var squash: float = _motion.turn_scale()
+	var half: float = float(shown.width - 1) * 0.5
 	for row: int in range(lines.size()):
 		for column: int in range(lines[row].length()):
 			var character: String = lines[row][column]
@@ -178,7 +180,10 @@ func _draw_sprite(canvas: AsciiCanvas, origin: Vector2) -> void:
 				_motion.body_offset(column, shown.width) + _motion.tilt_offset(column, shown.width)
 			)
 			var y: float = clampf(origin.y + float(row) + wave, top, bottom)
-			canvas.put_char(character, Vector2(origin.x + float(column), y), color)
+			var across: float = half + (float(column) - half) * squash
+			if squash < FishView.EDGE_ON_SCALE:
+				character = FishView.EDGE_CHARACTER
+			canvas.put_char(character, Vector2(origin.x + across, y), color)
 
 
 func _draw_caption(canvas: AsciiCanvas) -> void:

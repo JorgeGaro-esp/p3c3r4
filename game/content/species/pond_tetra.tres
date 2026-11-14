@@ -9,6 +9,7 @@ name_key = "SPECIES_POND_TETRA"
 description_key = "SPECIES_POND_TETRA_DESC"
 biome_id = "pond"
 rarity = 1
+activity = 2
 base_cost = 60.0
 base_production = 0.35
 unlock_kind = 1

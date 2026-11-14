@@ -9,6 +9,7 @@ name_key = "SPECIES_REEF_BUTTERFLY"
 description_key = "SPECIES_REEF_BUTTERFLY_DESC"
 biome_id = "reef"
 rarity = 1
+activity = 1
 base_cost = 6000.0
 base_production = 24.0
 unlock_kind = 3

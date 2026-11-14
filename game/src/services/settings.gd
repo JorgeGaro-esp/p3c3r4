@@ -105,6 +105,14 @@ func set_panel_mode(mode: SettingsData.PanelMode) -> void:
 		_commit()
 
 
+## Nivel del efecto CRT (0 apagado, 1 suave, 2 completo); se limita al rango.
+func set_crt_level(level: int) -> void:
+	var value: int = clampi(level, 0, SettingsData.CRT_LEVELS - 1)
+	if value != data.crt_level:
+		data.crt_level = value
+		_commit()
+
+
 func _commit() -> void:
 	_apply_engine_settings()
 	changed.emit()

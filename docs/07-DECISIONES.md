@@ -92,7 +92,7 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | P11 | Pasada de estilo al terminar la Fase 16: acercar las animaciones y la estética al HTML del primer prototipo, más pequeñas mejoras estéticas | Jorge aportará la documentación y el HTML de referencia; no antes de la 1.0 funcional |
 | P03 | Lista definitiva de biomas y especies (el GDD trae una propuesta) | Fase 5 y Fase 10 |
 | P04 | Nombre de la moneda y de la moneda de prestigio | Fase 3 |
-| P05 | Qué conserva exactamente el prestigio | Fase 13 |
+| P05 | Qué conserva exactamente el prestigio | Resuelta en la Fase 13 (T128) |
 | P06 | Estilo concreto de la música y origen de los sonidos | Fase 14 |
 | P07 | Título definitivo | Antes de cualquier publicación |
 | P08 | Fuente definitiva | Resuelta en Fase 1: T17 |
@@ -175,6 +175,28 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T109 | Los logros se comprueban cada 0,5 s y al cargar. Al cargar se conceden en silencio (retroactivo); la producción se recalcula hasta que no salga ninguno nuevo | Una partida antigua no inunda de avisos; un logro de producción puede cumplirse gracias al bonus de otro |
 | T110 | Guardado formato 8: `achievements` (id → `true`). Lo desconocido se descarta; los contadores antiguos ya eran retroactivos o empezaban a cero (T103) | 06-SEGURIDAD: nada del archivo se usa como nombre libre |
 | T111 | Logros y Estadísticas son pestañas de la tienda (5 y 6); tecla `L` para Logros. `AchievementText` formatea y `ShopPanel` solo muestra | Decisión de Jorge (T99); mantiene `ShopPanel` y `ContentDB` por debajo de los límites del linter |
+| T112 | El pez solo avanza en el sentido en que mira; para ir al otro lado frena, gira y arranca (`velocity.x * facing >= 0` siempre) | Decisión de Jorge: nadar hacia atrás no tenía sentido |
+| T113 | Giro de canto: `turn_scale` baja de 1 a 0 y vuelve a 1 en 0,45 s; el sentido cambia en el punto más plano y a ese ancho se dibuja una línea `|` | Decisión de Jorge (referencia: Paper Mario); es de presentación, no cambia la simulación |
+| T114 | Los estilos `CRAWL` se anclan al suelo (`position.y = bounds.end.y`), sin onda ni inclinación, con pasos y paradas | Antes aparecían a media agua y descendían despacio: «flotaban» |
+| T115 | Efecto CRT con sombreador sobre toda la ventana (`hint_screen_texture`), tres niveles guardados en ajustes; el 2 (completo) es el valor por defecto. Sin curvatura de pantalla | Decisión de Jorge (CRT completo); la curvatura recortaría la franja baja. La Fase 15 solo afinará y añadirá accesibilidad |
+| T116 | `AsciiToast` mantiene una cola corta en vez de pisar el aviso visible | Con los logros pueden coincidir varios avisos |
+| T117 | Cuando algo no sale como Jorge espera y no está claro el motivo, se le hace una pregunta concreta antes de probar soluciones a ciegas | Petición de Jorge (ahorra tokens) |
+| T118 | El día se divide en amanecer (6–8), día (8–18), atardecer (18–21) y noche (21–6) con una «oscuridad» de 0 a 1 que varía con `smoothstep` en los tramos de transición | GDD §12: cuatro franjas con transición suave |
+| T119 | Las especies tienen `activity` (neutra, diurna, nocturna). Efecto de ±15 % en la producción según la oscuridad (respuesta de Jorge: «suave»); se compensa a lo largo de un día. Nocturnas: peces de hábitos nocturnos (lota, tetra, raya, caballito, bagre, cangrejo, camarón, barracuda); diurnas: los de colores y de superficie (carpa, koi, escalar, piscardo, payaso, mariposa, damisela, cirujano, globo). El guppy inicial y el Abismo son neutros | GDD §12; evita castigar a quien juega a una sola hora |
+| T120 | La lámpara solo quita la parte negativa del efecto nocturno (`night_shield` = 0,8 × fuerza, tope 1) y aclara el tinte hasta un 50 % | «Efecto suave, la lámpara compensa» (D11); no resta el bonus, así no hay decisión absurda |
+| T121 | El reloj es inyectable (`DayClock`; `FixedDayClock` en tests). `P3C3R4_HOUR` fuerza la hora al arrancar y F6 la adelanta 1 h | Probar sin tocar el reloj de Windows; tests deterministas |
+| T122 | Anti-abuso de la hora: cambiar el reloj del sistema no genera tiempo de juego ni conchas; solo mueve la franja, con un límite de ±15 % en la producción de una especie y casi neutro con peces mixtos | Criterio de aceptación de la Fase 12 |
+| T123 | Los eventos no se guardan; el planificador usa su propio generador (semilla de la partida + sal) y espera entre 240 y 480 s con el juego abierto (reintento a los 30 s si no hay evento posible). Solo un evento clicable a la vez | Respuesta de Jorge (cada 4–8 min); no altera las secuencias de perlas y crías; D11 |
+| T124 | Recompensas: visitante, pez dorado y botella pagan `max(mínimo, producción × segundos)`; la botella da una decoración al azar (conchas si el inventario está lleno); la plaga de algas paga solo si el jugador limpia al menos 3 manchas hasta dejarla ≥ 90 % (si el filtro la limpia sola, termina sin premio ni castigo) | Los eventos deben valer la pena al empezar y al final de la partida |
+| T125 | El *Visitante raro* es un pez raro o mejor del bioma activo con aspecto prismático/dorado que da conchas; no cuenta para la Enciclopedia ni para los logros | Respuesta de Jorge («Conchas y aviso»); mantiene las 32 especies y los 60 logros |
+| T126 | El tinte es un rectángulo translúcido sobre la zona de la pecera (capa 22) y la corriente cálida añade un velo anaranjado | La interfaz queda por encima sin tinte; barato de dibujar |
+| T127 | Barra lateral: conchas y producción en la misma fila, reloj debajo con color por hora (`ClockPalette`, gradiente cálido→frío), botones a la izquierda y fila en blanco si hay ≥ 10 filas | Petición de Jorge; el reloj se lee de un vistazo sin añadir texto |
+| T128 | P05 resuelta (respuesta de Jorge): el reinicio conserva Enciclopedia, logros, decoración y peceras abiertas; reinicia conchas, peces, huevos y equipamiento. Siguen siendo suyos las estadísticas, las especies ya desbloqueadas, las mejoras y las perlas negras | Es la propuesta del GDD §13; el ciclo nuevo empieza rápido pero con la colección intacta |
+| T129 | Perlas negras = ⌊√(conchas ganadas en el ciclo ÷ 10⁵)⌋; el ciclo se mide con `Wallet.total_earned` menos `PrestigeState.run_start_earned` (el total de por vida no se reinicia, así logros y desbloqueos no se ven afectados) | Respuesta de Jorge (raíz cuadrada); crece despacio, conviene esperar |
+| T130 | Mejoras: producción, arranque rápido, suerte de variantes y valor de perlas (los cuatro efectos que Jorge eligió); coste en perlas negras = `base × crecimiento^nivel` con tope de nivel por mejora | Datos en `content/prestige/`; el balance fino queda para la Fase 16 |
+| T131 | El final se dispara al tener las 160 combinaciones especie × variante (mismo criterio que el logro `collection_100`); regala el Trofeo de la Gran marea y no bloquea nada: sigue el modo infinito con prestigio ilimitado | GDD §13 y D12/D13; respuesta de Jorge («secuencia ASCII + decoración dorada») |
+| T132 | `PrestigeDirector` (`Game.prestige`) agrupa reinicio, compra de mejoras y detección del final; el reinicio construye un `GameState` nuevo (`Prestige.next_run`) y lo adopta con `adopt_state` | `GameService` ya llegaba al máximo de métodos públicos; reutiliza el camino de carga |
+| T133 | Los símbolos del reloj son `▲ ○ ▼ ●` (de la tabla de `AsciiCharset`) | `☀ ☾ ◐` no están en la fuente y se veían como `*` |
 
 ## Cómo añadir decisiones
 

@@ -12,6 +12,10 @@ const MOOD_STEP: float = 5.0
 const ANIMATED_STEP: float = 0.1
 ## Desfase de tono entre columnas contiguas de una variante prismática.
 const PRISM_SPREAD: float = 0.08
+## Por debajo de este ancho (0 a 1) el pez está «de canto»: se dibuja como una
+## línea vertical, el instante plano del giro.
+const EDGE_ON_SCALE: float = 0.2
+const EDGE_CHARACTER: String = "|"
 
 var motion: SwimMotion
 var width: int = 0
@@ -70,13 +74,16 @@ func draw(canvas: AsciiCanvas) -> void:
 	var facing_index: int = 0 if motion.facing > 0 else 1
 	var cells: FishCells = _cells[facing_index * _frame_count + _frame_index]
 	var origin: Vector2 = motion.position
+	var squash: float = motion.turn_scale()
+	var half: float = float(width - 1) * 0.5
+	var edge_on: bool = squash < EDGE_ON_SCALE
 	for index: int in range(cells.chars.size()):
 		var column: int = cells.columns[index]
 		var wave: float = motion.body_offset(column, width) + motion.tilt_offset(column, width)
-		var cell: Vector2 = Vector2(
-			origin.x + float(column), origin.y + float(cells.rows[index]) + wave
-		)
-		var character: String = cells.chars[index]
+		# Al girar, las columnas se acercan al centro del cuerpo.
+		var across: float = half + (float(column) - half) * squash
+		var cell: Vector2 = Vector2(origin.x + across, origin.y + float(cells.rows[index]) + wave)
+		var character: String = EDGE_CHARACTER if edge_on else cells.chars[index]
 		if character == AsciiSprite.OPAQUE_MARKER:
 			canvas.fill_cell(cell, Color.BLACK)
 		else:

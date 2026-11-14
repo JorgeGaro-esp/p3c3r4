@@ -9,6 +9,7 @@ name_key = "SPECIES_REEF_TANG"
 description_key = "SPECIES_REEF_TANG_DESC"
 biome_id = "reef"
 rarity = 2
+activity = 1
 base_cost = 20000.0
 base_production = 78.0
 unlock_kind = 3

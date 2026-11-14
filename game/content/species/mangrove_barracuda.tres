@@ -9,6 +9,7 @@ name_key = "SPECIES_MANGROVE_BARRACUDA"
 description_key = "SPECIES_MANGROVE_BARRACUDA_DESC"
 biome_id = "mangrove"
 rarity = 3
+activity = 2
 base_cost = 560000.0
 base_production = 2080.0
 unlock_kind = 3

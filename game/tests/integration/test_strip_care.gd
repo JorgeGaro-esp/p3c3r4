@@ -79,7 +79,8 @@ func test_a_hungry_fish_eats_food_dropped_next_to_it() -> void:
 	_canvas.process_mode = Node.PROCESS_MODE_DISABLED
 	_tank.drop_food(Vector2i(floori(position.x) + 2, floori(position.y)))
 	_canvas.process_mode = Node.PROCESS_MODE_INHERIT
-	await wait_seconds(1.5)
+	# El pez solo nada hacia delante: si el copo queda detrás, antes se da la vuelta.
+	await wait_seconds(2.5)
 	assert_gt(fish.hunger, 20.0, "el pez se comió algún copo")
 
 

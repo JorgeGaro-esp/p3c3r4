@@ -9,6 +9,7 @@ name_key = "SPECIES_POND_MINNOW"
 description_key = "SPECIES_POND_MINNOW_DESC"
 biome_id = "pond"
 rarity = 0
+activity = 1
 base_cost = 25.0
 base_production = 0.15
 unlock_kind = 0

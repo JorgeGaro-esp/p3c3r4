@@ -9,6 +9,7 @@ name_key = "SPECIES_POND_GOLDFISH"
 description_key = "SPECIES_POND_GOLDFISH_DESC"
 biome_id = "pond"
 rarity = 2
+activity = 1
 base_cost = 1200.0
 base_production = 5.5
 unlock_kind = 3

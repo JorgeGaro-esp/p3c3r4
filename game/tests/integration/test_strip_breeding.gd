@@ -28,6 +28,9 @@ func before_each() -> void:
 	_controller = _main.get_node("StripController") as StripController
 	_tank = _main.get_node("TankView") as TankView
 	Game.start_new_game(Game.DEFAULT_SEED)
+	# Sin avisos de logros que se cuelen delante del aviso que se mira en cada test.
+	for achievement_id: String in Game.content.achievements.ids():
+		Game.state.achievements[achievement_id] = true
 	await wait_frames(3)
 
 

@@ -100,3 +100,11 @@ func test_next_fps_steps_and_stops_at_the_ends() -> void:
 	assert_eq(SettingsData.next_fps(30, -1), 15)
 	assert_eq(SettingsData.next_fps(15, -1), 15)
 	assert_eq(SettingsData.next_fps(24, 1), SettingsData.DEFAULT_FPS)
+
+
+func test_crt_level_defaults_to_full_and_is_validated() -> void:
+	assert_eq(SettingsData.new().crt_level, 2)
+	assert_eq(SettingsData.from_dict({"crt_level": 1}).crt_level, 1)
+	assert_eq(SettingsData.from_dict({"crt_level": 99}).crt_level, 2)
+	assert_eq(SettingsData.from_dict({"crt_level": "x"}).crt_level, 2)
+	assert_eq(SettingsData.from_dict({"crt_level": -4}).crt_level, 0)

@@ -10,6 +10,8 @@ signal close_requested
 signal message(text: String)
 ## El jugador quiere colocar decoración (pasa al modo decorar).
 signal decorate_requested
+## El jugador quiere volver a ver la secuencia final.
+signal final_requested
 
 const MIN_LIST_WIDTH: int = 24
 const MAX_LIST_WIDTH: int = 44
@@ -22,6 +24,11 @@ const DEX_TAB: int = 4
 ## Posición de las pestañas de Logros y de Estadísticas.
 const ACHIEVEMENTS_TAB: int = 5
 const STATS_TAB: int = 6
+## Posición de la pestaña de la Gran marea (prestigio).
+const PRESTIGE_TAB: int = 7
+## Filas especiales de la pestaña de la Gran marea (el resto son mejoras).
+const RESET_ENTRY: String = "@reset"
+const FINAL_ENTRY: String = "@final"
 ## Ancho del retrato del pez en la Enciclopedia y ancho mínimo del detalle para verlo.
 const PORTRAIT_WIDTH: int = 20
 const MIN_DETAIL_FOR_PORTRAIT: int = 44
@@ -32,6 +39,9 @@ var _decor_ids: PackedStringArray = PackedStringArray()
 var _biome_ids: PackedStringArray = PackedStringArray()
 var _dex_ids: PackedStringArray = PackedStringArray()
 var _achievement_ids: PackedStringArray = PackedStringArray()
+var _prestige_ids: PackedStringArray = PackedStringArray()
+## Verdadero tras el primer pulsado de «Reiniciar»: el segundo lo confirma.
+var _reset_armed: bool = false
 var _stat_rows: Array[PackedStringArray] = []
 var _tab: int = 0
 var _frame: AsciiFrame = AsciiFrame.new()
@@ -67,7 +77,7 @@ func _init(root: UiRoot) -> void:
 	_buy = _make_button("")
 	_close = _make_button("")
 	_decorate = _make_button("", "D")
-	_list.selection_changed.connect(_show_detail)
+	_list.selection_changed.connect(_on_selection_changed)
 	_list.chosen.connect(func(_index: int) -> void: _buy_selected())
 	_buy.activated.connect(_buy_selected)
 	_close.activated.connect(func() -> void: close_requested.emit())
@@ -109,7 +119,7 @@ func layout(area: Rect2i) -> void:
 	_close.rect = Rect2i(detail_x + BUY_BUTTON_WIDTH + 1, top + height - 2, CLOSE_BUTTON_WIDTH, 1)
 	var decorate_x: int = detail_x + BUY_BUTTON_WIDTH + CLOSE_BUTTON_WIDTH + 2
 	_decorate.rect = Rect2i(decorate_x, top + height - 2, DECORATE_BUTTON_WIDTH, 1)
-	if _tab >= DEX_TAB:
+	if _tab >= DEX_TAB and _tab != PRESTIGE_TAB:
 		_layout_dex(detail_x, top, owned_row, full_width)
 	else:
 		_portrait.is_shown = false
@@ -148,7 +158,8 @@ func refresh() -> void:
 				_text("SHOP_TAB_BIOMES"),
 				_text("SHOP_TAB_DEX"),
 				_text("SHOP_TAB_ACHIEVEMENTS"),
-				_text("SHOP_TAB_STATS")
+				_text("SHOP_TAB_STATS"),
+				_text("SHOP_TAB_PRESTIGE")
 			]
 		)
 	)
@@ -285,8 +296,15 @@ func _on_decoration_changed(_tank_index: int) -> void:
 		_fill_list()
 
 
+func _on_selection_changed(index: int) -> void:
+	_reset_armed = false
+	_show_detail(index)
+
+
 func _on_tab_changed(index: int) -> void:
 	_tab = index
+	_reset_armed = false
+	_buy.label = "[ %s ]" % _text("UI_BUY")
 	_decorate.is_shown = is_active and _tab == 2
 	if _area.size != Vector2i.ZERO:
 		layout(_area)
@@ -314,24 +332,26 @@ func _collect_ids() -> PackedStringArray:
 
 
 func _fill_list() -> void:
-	if _tab == ACHIEVEMENTS_TAB:
-		_fill_achievement_list()
-		return
-	if _tab == STATS_TAB:
-		_fill_stats_list()
-		return
-	if _tab == DEX_TAB:
-		_fill_dex_list()
-		return
-	if _tab == 3:
-		_fill_biome_list()
-		return
-	if _tab == 1:
-		_fill_equipment_list()
-		return
-	if _tab == 2:
-		_fill_decoration_list()
-		return
+	match _tab:
+		PRESTIGE_TAB:
+			_fill_prestige_list()
+		ACHIEVEMENTS_TAB:
+			_fill_achievement_list()
+		STATS_TAB:
+			_fill_stats_list()
+		DEX_TAB:
+			_fill_dex_list()
+		3:
+			_fill_biome_list()
+		1:
+			_fill_equipment_list()
+		2:
+			_fill_decoration_list()
+		_:
+			_fill_fish_list()
+
+
+func _fill_fish_list() -> void:
 	_ids = _collect_ids()
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
@@ -394,7 +414,7 @@ func _fill_decoration_list() -> void:
 func _decoration_for_active_biome() -> PackedStringArray:
 	var ids: PackedStringArray = PackedStringArray()
 	var biome_id: String = Game.state.active().biome_id
-	for decoration_id: String in Game.content.decoration_ids():
+	for decoration_id: String in DecorationShelf.sellable_ids(Game.content):
 		var def: DecorationDef = Game.content.get_decoration(decoration_id)
 		if def.biome_id.is_empty() or def.biome_id == biome_id:
 			ids.append(decoration_id)
@@ -677,6 +697,8 @@ func _buy_equipment() -> void:
 
 func _show_detail(index: int) -> void:
 	match _tab:
+		PRESTIGE_TAB:
+			_show_prestige_detail(index)
 		ACHIEVEMENTS_TAB:
 			_show_achievement_detail(index)
 		STATS_TAB:
@@ -752,6 +774,9 @@ func _unlock_hint(def: SpeciesDef) -> String:
 
 
 func _buy_selected() -> void:
+	if _tab == PRESTIGE_TAB:
+		_buy_prestige()
+		return
 	if _tab >= DEX_TAB:
 		return
 	if _tab == 3:
@@ -780,4 +805,117 @@ func _buy_selected() -> void:
 			message.emit(_text("TOAST_WRONG_BIOME"))
 		_:
 			pass
+	_fill_list()
+
+
+func _fill_prestige_list() -> void:
+	_prestige_ids = PackedStringArray([RESET_ENTRY])
+	_prestige_ids.append_array(Game.content.prestige.ids())
+	if Game.state.prestige.final_reached:
+		_prestige_ids.append(FINAL_ENTRY)
+	var previous: int = _list.selected_index()
+	var names: PackedStringArray = PackedStringArray()
+	var extras: PackedStringArray = PackedStringArray()
+	for entry: String in _prestige_ids:
+		if entry == RESET_ENTRY:
+			names.append(_text("PRESTIGE_ROW_RESET"))
+			extras.append("+%d %s" % [Game.prestige.pending_pearls(), PrestigeText.PEARL_SYMBOL])
+		elif entry == FINAL_ENTRY:
+			names.append(_text("PRESTIGE_ROW_FINAL"))
+			extras.append("")
+		else:
+			var def: PrestigeUpgradeDef = Game.content.prestige.get_upgrade(entry)
+			names.append(_text(def.name_key))
+			var level: int = Game.state.prestige.level_of(entry)
+			extras.append("%d/%d" % [level, def.max_level])
+	_list.set_items(names, extras)
+	if previous >= 0:
+		_list.model.select(previous)
+	_show_detail(_list.selected_index())
+
+
+func _show_prestige_detail(index: int) -> void:
+	_rarity.color = AsciiColors.TEXT
+	_owned.text = ""
+	_progress.value = 0.0
+	_buy.is_enabled = false
+	if index < 0 or index >= _prestige_ids.size():
+		_name.text = ""
+		_price.text = PrestigeText.held_line(Game.state)
+		_rarity.text = ""
+		_description.text = ""
+		return
+	var entry: String = _prestige_ids[index]
+	var locale: String = TranslationServer.get_locale()
+	if entry == RESET_ENTRY:
+		_show_reset_detail(locale)
+	elif entry == FINAL_ENTRY:
+		_name.text = _text("PRESTIGE_ROW_FINAL")
+		_price.text = PrestigeText.held_line(Game.state)
+		_rarity.text = ""
+		_description.text = _text("PRESTIGE_FINAL_DESC")
+		_buy.label = "[ %s ]" % _text("PRESTIGE_BUTTON_FINAL")
+		_buy.is_enabled = true
+	else:
+		var def: PrestigeUpgradeDef = Game.content.prestige.get_upgrade(entry)
+		var level: int = Game.state.prestige.level_of(entry)
+		_name.text = _text(def.name_key)
+		_price.text = PrestigeText.cost_line(def, Game.state)
+		_rarity.text = PrestigeText.level_line(def, level, locale)
+		_description.text = _text(def.description_key)
+		_progress.value = float(level) / float(def.max_level)
+		_buy.label = "[ %s ]" % _text("UI_BUY")
+		_buy.is_enabled = Prestige.can_buy(Game.state, def)
+
+
+func _show_reset_detail(locale: String) -> void:
+	var can_reset: bool = Game.prestige.can_reset()
+	_name.text = _text("PRESTIGE_ROW_RESET")
+	_price.text = PrestigeText.held_line(Game.state)
+	_rarity.text = PrestigeText.gain_line(Game.state)
+	_rarity.color = AsciiColors.AMBER if can_reset else AsciiColors.TEXT_DIM
+	_description.text = _text("PRESTIGE_RESET_DESC")
+	if Game.state.prestige.final_reached:
+		_description.text += " " + _text("PRESTIGE_INFINITE")
+	var run: float = Prestige.run_earned(Game.state)
+	_owned.text = _text("PRESTIGE_RUN_EARNED") % NumberFormat.compact(run, locale)
+	var root: float = sqrt(run / Prestige.SHELLS_PER_PEARL_SQUARED)
+	_progress.value = root - floorf(root)
+	var key: String = "PRESTIGE_BUTTON_CONFIRM" if _reset_armed else "PRESTIGE_BUTTON_RESET"
+	_buy.label = "[ %s ]" % _text(key)
+	_buy.is_enabled = can_reset
+
+
+func _buy_prestige() -> void:
+	var index: int = _list.selected_index()
+	if index < 0 or index >= _prestige_ids.size():
+		return
+	var entry: String = _prestige_ids[index]
+	if entry == RESET_ENTRY:
+		_reset_prestige()
+		return
+	if entry == FINAL_ENTRY:
+		final_requested.emit()
+		return
+	var def: PrestigeUpgradeDef = Game.content.prestige.get_upgrade(entry)
+	if Game.prestige.buy_upgrade(entry):
+		message.emit(_text("TOAST_PRESTIGE_UPGRADE") % _text(def.name_key))
+	else:
+		message.emit(_text("TOAST_PRESTIGE_NOT_ENOUGH"))
+	_fill_list()
+
+
+## Primer pulsado: pide confirmación. Segundo pulsado: hace la Gran marea.
+func _reset_prestige() -> void:
+	if not Game.prestige.can_reset():
+		message.emit(_text("TOAST_PRESTIGE_NOT_YET"))
+		return
+	if not _reset_armed:
+		_reset_armed = true
+		_show_detail(_list.selected_index())
+		return
+	_reset_armed = false
+	var gained: int = Game.prestige.reset()
+	if gained >= 0:
+		message.emit(_text("TOAST_PRESTIGE") % gained)
 	_fill_list()

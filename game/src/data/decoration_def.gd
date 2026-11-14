@@ -25,6 +25,8 @@ enum Bonus { COMFORT, PRODUCTION, RARE_VARIANT }
 ## Bioma en el que se vende ("" si vale para todos).
 @export var biome_id: String = ""
 @export var base_cost: float = 50.0
+## Si es verdadero es un premio: no se vende en la tienda ni sale en las botellas.
+@export var is_reward: bool = false
 @export var sprite_path: String = ""
 ## Tamaño en celdas; una prueba comprueba que coincide con el sprite.
 @export var cells_wide: int = 1

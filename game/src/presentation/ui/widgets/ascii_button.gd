@@ -5,6 +5,8 @@ extends AsciiWidget
 ## en ámbar.
 
 var label: String = ""
+## Alineación del texto dentro del botón (centrado por defecto).
+var align: AsciiLabel.Align = AsciiLabel.Align.CENTER
 
 
 func _init() -> void:
@@ -22,7 +24,10 @@ func draw(canvas: AsciiCanvas) -> void:
 		color = Color.BLACK
 	elif is_hovered:
 		color = AsciiColors.AMBER
-	canvas.put_string(UiText.center(label, rect.size.x), Vector2(rect.position), color)
+	var text: String = UiText.center(label, rect.size.x)
+	if align == AsciiLabel.Align.LEFT:
+		text = UiText.fit(label, rect.size.x)
+	canvas.put_string(text, Vector2(rect.position), color)
 
 
 func handle_key(event: InputEventKey) -> bool:

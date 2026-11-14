@@ -2,6 +2,48 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.17.0] - 2026-11-14 · Fase 13 (prestigio y meta final)
+
+### Añadido
+- **La Gran marea (prestigio)**: reinicia conchas, peces y equipamiento a cambio de **perlas negras** = ⌊√(conchas ganadas en el ciclo ÷ 100 000)⌋ (`Prestige`, `PrestigeState`, `PrestigeDirector` en `Game.prestige`). Se conservan Enciclopedia, logros, estadísticas, especies desbloqueadas, peceras abiertas, decoración (colocada y guardada), mejoras y perlas negras (P05). Pide doble confirmación y guarda tras hacerla.
+- **Cuatro mejoras permanentes** como datos (`content/prestige/*.tres`, `PrestigeUpgradeDef`, `PrestigeCatalog`): *Corriente profunda* (+10 % de producción por nivel), *Provisiones* (conchas de arranque ×3 por nivel), *Ojo de perlero* (+20 % de peso de variantes raras por nivel) y *Perlas gordas* (+25 % de valor de las perlas recogibles por nivel).
+- Pestaña **Marea** en la tienda: fila de la Gran marea (perlas que daría, progreso hacia la siguiente, botón con confirmación) y una fila por mejora (nivel, efecto, coste, compra).
+- **Meta final**: al completar la Enciclopedia (todas las especies con todas sus variantes) se abre una **secuencia final en ASCII** (`FinalSequence`, `FinalPanel`: olas, peces que cruzan y texto que se escribe solo), se regala el **Trofeo de la Gran marea** (decoración dorada, `DecorationDef.is_reward`, no se vende ni sale en botellas) y el juego sigue en **modo infinito**. La fila «El final» de la pestaña Marea permite volver a verla.
+- Guardado **formato 9** (`prestige`), con migración desde el 8.
+- Herramientas de desarrollo: **F8** completa la colección, **F9** da 5 M de conchas.
+
+### Cambiado
+- F6 adelanta el reloj **1 h** (antes 3 h). El reloj de la barra cambia de color según la hora (`ClockPalette`): cálido al amanecer, claro a mediodía, anaranjado al atardecer y azul frío de noche.
+- Barra lateral: la producción por segundo va junto a las conchas, el reloj debajo y más aire entre grupos; los botones (Tienda, Enciclopedia, Logros, Ajustes) van alineados a la izquierda.
+- Los símbolos del reloj pasan a caracteres permitidos por la guía de arte (`▲ ○ ▼ ●`); `☀ ☾ ◐` no están en la fuente y salían como `*`.
+
+## [0.16.0] - 2026-11-14 · Fase 12 (día/noche y eventos aleatorios)
+
+### Añadido
+- **Día y noche**: cuatro franjas según la hora del sistema (amanecer 6–8, día 8–18, atardecer 18–21, noche 21–6) con una oscuridad que cambia poco a poco (`DayCycle`, `DayClock`, `DaylightDirector` en `Game.daylight`). La pecera se tiñe de azul oscuro de noche y de un velo cálido al amanecer y al atardecer (`DaylightView`); la barra lateral queda sin tinte. Aviso al cambiar de franja.
+- **Especies diurnas y nocturnas** (`SpeciesDef.activity`): las nocturnas producen hasta +15 % de noche y −15 % de día; las diurnas, al revés; 8 nocturnas y 9 diurnas, el resto neutras (el guppy inicial es neutro). Se ve en la ficha del pez.
+- **Lámpara**: además de acelerar el crecimiento, quita la penalización nocturna (nivel 5 = toda) y aclara el tinte; nunca quita el bonus. `TankBonuses.night_shield`.
+- **Seis eventos aleatorios** como datos (`content/events/*.tres`, `EventDef`, `EventCatalog`): *Visitante raro* (un pez raro del bioma, con aspecto llamativo, que da conchas al pulsarlo), *Lluvia de comida* (todos los peces quedan saciados y caen copos), *Pez dorado fugaz* (conchas rápidas), *Corriente cálida* (producción ×2 durante 60 s), *Botella a la deriva* (regala un objeto de decoración) y *Plaga de algas* (la pecera se ensucia; limpiar a mano da conchas).
+- `EventPlanner` (espera de 4 a 8 min con el juego abierto, pesos, elegibilidad), `EventEffects`, `EventState`, `EventDirector` (`Game.events`) con generador aleatorio propio; nuevas señales `phase_changed`, `event_started`, `event_finished`, `event_rewarded`.
+- Herramientas de desarrollo: **F6** adelanta el reloj 1 h, **F7** lanza un evento; la variable de entorno `P3C3R4_HOUR` (por ejemplo `set P3C3R4_HOUR=23`) fuerza la hora al arrancar.
+- **Barra lateral rediseñada**: conchas con la producción por segundo a su lado, reloj del juego debajo (☀/☾/◐ y hora) que cambia de color a lo largo del día (cálido al amanecer, claro a mediodía, anaranjado al atardecer, frío de noche; `ClockPalette`), y los botones Tienda, Enciclopedia, Logros y Ajustes alineados a la izquierda con más aire entre grupos.
+
+### Notas
+- Los eventos no se guardan ni hay progreso con el juego cerrado (D11). Ningún evento quita nada de forma permanente.
+- Cambiar la hora del sistema solo mueve la franja y el ajuste de ±15 %; no avanza el tiempo de juego ni da conchas.
+
+## [0.15.0] - 2026-11-14 · Fase 11C (pulido de movimiento y efecto CRT)
+
+### Cambiado
+- **Los peces solo nadan hacia delante.** Si el destino queda detrás, frenan, se dan la vuelta y arrancan en el otro sentido (`SwimMotion`): se acabó el nado hacia atrás. Con comida detrás se giran aunque esté muy cerca.
+- **Giro «Paper Mario»**: al darse la vuelta el pez se estrecha hasta una línea (`|`) y se abre mirando al otro lado (0,45 s). Lo usan la pecera y el retrato de la Enciclopedia (`turn_scale`, `is_turning`).
+- **Bichos de fondo** (caracol, cangrejo, saltarín del fango, estrella de mar): nacen y se quedan apoyados en la arena (antes se colocaban a media agua y bajaban despacio), sin ondulación ni inclinación, y avanzan a pasos con paradas.
+- Burbujas: el vaivén crece al subir y se desvanecen al llegar a la superficie. Algas: balanceo más amplio con un oleaje lento añadido y más movimiento en las puntas.
+- Los avisos (toasts) ya no se tapan unos a otros: esperan su turno (hasta 4).
+
+### Añadido
+- **Efecto CRT** (`CrtOverlay`, `crt.gdshader`): brillo de los caracteres, líneas de barrido, viñeta, ligero desajuste de color en los bordes y parpadeo suave. Tres niveles en Ajustes → «Efecto CRT»: Apagado, Suave (brillo + líneas) y Completo (por defecto). Se guarda en `settings.json` (`crt_level`).
+
 ## [0.14.0] - 2026-11-13 · Fase 11B
 
 ### Añadido

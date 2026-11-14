@@ -5,7 +5,10 @@ extends AsciiDrawable
 
 const SEED: int = 777
 const SWAY_SPEED: float = 1.6
-const SWAY_AMPLITUDE: float = 0.4
+const SWAY_AMPLITUDE: float = 0.65
+## Segundo vaivén, más lento y más amplio, que hace la marea menos repetitiva.
+const SWELL_SPEED: float = 0.55
+const SWELL_AMPLITUDE: float = 0.35
 const SWAY_SPREAD: float = 0.7
 const MIN_HEIGHT: int = 3
 const MAX_HEIGHT: int = 5
@@ -56,11 +59,9 @@ func draw(canvas: AsciiCanvas) -> void:
 	for weed: Weed in _weeds:
 		for segment: int in range(weed.height):
 			var reach: float = float(segment + 1) / float(weed.height)
-			var sway: float = (
-				sin(_clock * SWAY_SPEED + weed.phase + float(segment) * SWAY_SPREAD)
-				* SWAY_AMPLITUDE
-				* reach
-			)
+			var ripple: float = sin(_clock * SWAY_SPEED + weed.phase + float(segment) * SWAY_SPREAD)
+			var swell: float = sin(_clock * SWELL_SPEED + weed.phase * 0.5)
+			var sway: float = (ripple * SWAY_AMPLITUDE + swell * SWELL_AMPLITUDE) * reach * reach
 			var color: Color = _light
 			if weed.is_dark != (segment % 2 == 1):
 				color = _dark

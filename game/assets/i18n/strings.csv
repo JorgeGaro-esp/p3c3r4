@@ -4,6 +4,7 @@ UI_SHOP,[T]ienda,[S]hop
 UI_SHOP_KEY,T,S
 UI_DEX,[E]nciclopedia,[E]ncyclopedia
 UI_DEX_KEY,E,E
+UI_ACHIEVEMENTS,[L]ogros,[L] Achievements
 UI_SETTINGS,[A]justes,[O]ptions
 UI_SETTINGS_KEY,A,O
 UI_MINIMIZE,[_],[_]
@@ -380,3 +381,71 @@ STAT_BIOMES,Biomas abiertos,Biomes opened
 STAT_ACHIEVEMENTS,Logros,Achievements
 STAT_BONUS,Bonus de logros,Achievement bonus
 STAT_HOURS,%s h,%s h
+SETTINGS_CRT,Efecto CRT,CRT effect
+SETTINGS_CRT_0,Apagado,Off
+SETTINGS_CRT_1,Suave,Soft
+SETTINGS_CRT_2,Completo,Full
+EVENT_RARE_VISITOR,Visitante raro,Rare visitor
+EVENT_RARE_VISITOR_MSG,¡Un %s visita la pecera! Pulsa sobre él,A %s is visiting the tank! Click it
+EVENT_FOOD_RAIN,Lluvia de comida,Food rain
+EVENT_FOOD_RAIN_MSG,Llueve comida: todos los peces están saciados,It is raining food: every fish is full
+EVENT_GOLDEN_FISH,Pez dorado fugaz,Fleeting golden fish
+EVENT_GOLDEN_FISH_MSG,¡Un pez dorado! Atrápalo antes de que se vaya,A golden fish! Catch it before it leaves
+EVENT_WARM_CURRENT,Corriente cálida,Warm current
+EVENT_WARM_CURRENT_MSG,Corriente cálida: producción x2 un rato,Warm current: production x2 for a while
+EVENT_DRIFTING_BOTTLE,Botella a la deriva,Drifting bottle
+EVENT_DRIFTING_BOTTLE_MSG,Una botella flota por la pecera: ¡recógela!,A bottle floats through the tank: grab it!
+EVENT_ALGAE_BLOOM,Plaga de algas,Algae bloom
+EVENT_ALGAE_BLOOM_MSG,Plaga de algas: limpia las manchas para cobrar,Algae bloom: clean the spots to get paid
+TOAST_EVENT_SHELLS,¡+%s conchas!,+%s shells!
+TOAST_EVENT_DECOR,¡La botella traía un objeto: %s!,The bottle held an item: %s!
+TOAST_EVENT_CLEAN,¡Pecera limpia! +%s conchas,Tank clean! +%s shells
+PHASE_DAWN,Amanece en la pecera,Dawn breaks over the tank
+PHASE_DAY,Es de día,It is daytime
+PHASE_DUSK,Atardece,Dusk falls
+PHASE_NIGHT,Cae la noche,Night falls
+ACTIVITY_DIURNAL,Diurno,Diurnal
+ACTIVITY_NOCTURNAL,Nocturno,Nocturnal
+SHOP_TAB_PRESTIGE,Marea,Tide
+PRESTIGE_ROW_RESET,Gran marea,Great Tide
+PRESTIGE_ROW_FINAL,El final,The ending
+PRESTIGE_HELD,Perlas negras: %s · Ciclos: %d,Black pearls: %s · Cycles: %d
+PRESTIGE_GAIN_NOW,Ahora ganarías %d perlas negras,You would gain %d black pearls now
+PRESTIGE_GAIN_NONE,Aún no has ganado lo bastante para una perla negra,You haven't earned enough for a black pearl yet
+PRESTIGE_RUN_EARNED,Conchas de este ciclo: %s,Shells this cycle: %s
+PRESTIGE_RESET_DESC,"Reinicia conchas, peces y equipamiento a cambio de perlas negras: la raíz cuadrada de lo ganado en este ciclo. Conservas la Enciclopedia, los logros, la decoración, las peceras abiertas y las mejoras.","Resets shells, fish and equipment in exchange for black pearls: the square root of what you earned this cycle. You keep the Encyclopedia, achievements, decorations, open tanks and upgrades."
+PRESTIGE_BUTTON_RESET,Reiniciar,Reset
+PRESTIGE_BUTTON_CONFIRM,¿Seguro?,Sure?
+PRESTIGE_BUTTON_FINAL,Ver final,Watch ending
+PRESTIGE_COST,Coste: %d perlas negras,Cost: %d black pearls
+PRESTIGE_LEVEL,Nivel %d/%d · %s,Level %d/%d · %s
+PRESTIGE_MAXED,Nivel máximo,Max level
+PRESTIGE_INFINITE,Modo infinito: la Gran marea no tiene límite.,Endless mode: the Great Tide has no limit.
+PRESTIGE_FINAL_DESC,Has completado la Enciclopedia. Pulsa el botón para volver a ver la secuencia final.,You completed the Encyclopedia. Press the button to watch the ending again.
+PRESTIGE_PRODUCTION,Corriente profunda,Deep Current
+PRESTIGE_PRODUCTION_DESC,"Aumenta la producción de todas las peceras, ciclo tras ciclo.","Boosts the production of every tank, cycle after cycle."
+PRESTIGE_HEAD_START,Provisiones,Provisions
+PRESTIGE_HEAD_START_DESC,Cada ciclo empieza con conchas extra. Cada nivel triplica el regalo anterior.,Each cycle starts with extra shells. Every level triples the previous gift.
+PRESTIGE_VARIANT_LUCK,Ojo de perlero,Pearl Diver's Eye
+PRESTIGE_VARIANT_LUCK_DESC,Las crías salen más a menudo con variantes de color raras.,Hatchlings come out more often with rare colour variants.
+PRESTIGE_PEARL_VALUE,Perlas gordas,Plump Pearls
+PRESTIGE_PEARL_VALUE_DESC,Las perlas que recoges valen más conchas.,The pearls you collect are worth more shells.
+PRESTIGE_EFFECT_PRODUCTION,Producción %s,Production %s
+PRESTIGE_EFFECT_HEAD_START,Empiezas con %s ¢,You start with %s ¢
+PRESTIGE_EFFECT_VARIANT,Variantes raras %s,Rare variants %s
+PRESTIGE_EFFECT_PEARL,Valor de perlas %s,Pearl value %s
+PRESTIGE_EFFECT_NONE,Sin mejora todavía,No upgrade yet
+TOAST_PRESTIGE,¡Gran marea! +%d perlas negras,Great Tide! +%d black pearls
+TOAST_PRESTIGE_UPGRADE,Mejora: %s,Upgrade: %s
+TOAST_PRESTIGE_NOT_ENOUGH,Te faltan perlas negras,Not enough black pearls
+TOAST_PRESTIGE_NOT_YET,Aún no ganas ni una perla negra,You don't earn a black pearl yet
+TOAST_FINAL,¡Enciclopedia completa!,Encyclopedia complete!
+DECOR_TIDE_TROPHY,Trofeo de la Gran marea,Great Tide Trophy
+DECOR_TIDE_TROPHY_DESC,El premio por completar la Enciclopedia.,The prize for completing the Encyclopedia.
+FINAL_TITLE,G R A N   M A R E A,G R E A T   T I D E
+FINAL_LINE_1,"Cada especie, cada color, todos tuyos.","Every species, every colour, all of them yours."
+FINAL_LINE_2,La pecera ya no guarda secretos.,The tank holds no more secrets.
+FINAL_LINE_3,"Pero el mar es grande, y la marea vuelve.","But the sea is vast, and the tide returns."
+FINAL_LINE_4,Gracias por cuidar de todos ellos.,Thank you for looking after them all.
+FINAL_CLOSE,Seguirás nadando en el modo infinito.,You will keep swimming in endless mode.
+FINAL_HINT,Esc o clic para seguir,Esc or click to continue

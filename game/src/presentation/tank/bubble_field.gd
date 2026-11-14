@@ -8,6 +8,10 @@ const CHARACTERS: String = ".°oO"
 const MIN_RISE_SPEED: float = 2.5
 const MAX_RISE_SPEED: float = 5.0
 const WOBBLE_AMPLITUDE: float = 0.35
+## El vaivén crece según sube la burbuja (hasta este múltiplo).
+const WOBBLE_GROWTH: float = 1.6
+## Filas bajo la superficie en las que la burbuja se desvanece al llegar.
+const FADE_ROWS: float = 3.0
 const WOBBLE_SPEED: float = 2.5
 
 ## Fila de la superficie: las burbujas desaparecen al llegar.
@@ -54,8 +58,11 @@ func draw(canvas: AsciiCanvas) -> void:
 		var travel: float = maxf(bubble.start_y - surface_row, 0.001)
 		var progress: float = (bubble.start_y - bubble.y) / travel
 		var size_index: int = clampi(int(progress * float(CHARACTERS.length())), 0, 3)
-		var wobble: float = sin(_clock * WOBBLE_SPEED + bubble.phase) * WOBBLE_AMPLITUDE
-		canvas.put_char(CHARACTERS[size_index], Vector2(bubble.x + wobble, bubble.y), color)
+		var sway: float = WOBBLE_AMPLITUDE * (1.0 + (WOBBLE_GROWTH - 1.0) * progress)
+		var wobble: float = sin(_clock * WOBBLE_SPEED + bubble.phase) * sway
+		var tint: Color = color
+		tint.a = clampf((bubble.y - surface_row) / FADE_ROWS, 0.0, 1.0)
+		canvas.put_char(CHARACTERS[size_index], Vector2(bubble.x + wobble, bubble.y), tint)
 
 
 ## Una burbuja: posición, desde dónde subió, velocidad y desfase del vaivén.

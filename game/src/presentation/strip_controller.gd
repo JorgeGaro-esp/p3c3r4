@@ -7,7 +7,7 @@ extends Node
 ## coloque la ventana, reparte el espacio entre pecera, barra lateral y panel
 ## abierto, y reacciona a los cambios de ajustes, de monitor y de minimizado.
 
-enum Kind { NONE, SHOP, SETTINGS }
+enum Kind { NONE, SHOP, SETTINGS, FINAL }
 
 ## Tamaño de fuente a 100 % de escala; con 125 % o 150 % crece en proporción.
 const BASE_FONT_PX: int = 17
@@ -26,6 +26,7 @@ var _ui: UiRoot
 var _sidebar: SidebarPanel
 var _shop: ShopPanel
 var _settings_panel: SettingsPanel
+var _final: FinalPanel
 var _card: FishCard
 var _tank_tabs: TankTabs
 var _open: Kind = Kind.NONE
@@ -50,6 +51,10 @@ func _ready() -> void:
 	EventBus.species_unlocked.connect(_on_species_unlocked)
 	EventBus.tank_unlocked.connect(_on_tank_unlocked)
 	EventBus.achievement_unlocked.connect(_on_achievement_unlocked)
+	EventBus.event_started.connect(_on_event_started)
+	EventBus.event_rewarded.connect(_on_event_rewarded)
+	EventBus.phase_changed.connect(_on_phase_changed)
+	EventBus.final_reached.connect(_on_final_reached)
 	EventBus.tank_unlocked.connect(func(_index: int) -> void: _apply_layout())
 	EventBus.active_tank_changed.connect(func(_index: int) -> void: _apply_layout())
 	EventBus.pearl_collected.connect(_on_pearl_collected)
@@ -66,6 +71,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_sidebar.set_cleanliness(roundi(Game.state.active().cleanliness))
+	_sidebar.set_clock(Game.daylight.hour(), Game.daylight.phase())
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -199,6 +205,46 @@ func _on_achievement_unlocked(achievement_id: String) -> void:
 		_sidebar.show_toast(tr("TOAST_ACHIEVEMENT") % tr(def.name_key))
 
 
+func _on_event_started(event_id: String, species_id: String) -> void:
+	var def: EventDef = Game.content.events.get_event(event_id)
+	if def == null:
+		return
+	var message: String = tr(def.message_key)
+	if def.kind == EventDef.Kind.VISITOR:
+		var species: SpeciesDef = Game.content.get_species(species_id)
+		if species != null:
+			message = message % tr(species.name_key)
+	_sidebar.show_toast(message)
+
+
+func _on_event_rewarded(event_id: String, shells: float, decoration_id: String) -> void:
+	var def: EventDef = Game.content.events.get_event(event_id)
+	if def == null:
+		return
+	if not decoration_id.is_empty():
+		var decoration: DecorationDef = Game.content.get_decoration(decoration_id)
+		if decoration != null:
+			_sidebar.show_toast(tr("TOAST_EVENT_DECOR") % tr(decoration.name_key))
+		return
+	var amount: String = NumberFormat.compact(shells, TranslationServer.get_locale())
+	if def.kind == EventDef.Kind.ALGAE_BLOOM:
+		_sidebar.show_toast(tr("TOAST_EVENT_CLEAN") % amount)
+	else:
+		_sidebar.show_toast(tr("TOAST_EVENT_SHELLS") % amount)
+
+
+func _on_final_reached() -> void:
+	_sidebar.show_toast(tr("TOAST_FINAL"))
+	if _tank.is_decorating():
+		_tank.set_decorating(false)
+	open_panel(Kind.FINAL)
+
+
+func _on_phase_changed(phase: int) -> void:
+	var keys: PackedStringArray = ["PHASE_DAWN", "PHASE_DAY", "PHASE_DUSK", "PHASE_NIGHT"]
+	_sidebar.show_toast(tr(keys[clampi(phase, 0, keys.size() - 1)]))
+
+
 func _on_tank_unlocked(tank_index: int) -> void:
 	var biome: BiomeDef = Game.content.biomes.get_biome(Game.state.tanks[tank_index].biome_id)
 	if biome != null:
@@ -209,6 +255,7 @@ func _build_panels() -> void:
 	_sidebar = SidebarPanel.new(_ui)
 	_shop = ShopPanel.new(_ui)
 	_settings_panel = SettingsPanel.new(_ui)
+	_final = FinalPanel.new(_ui)
 	_card = FishCard.new(_ui)
 	_tank_tabs = TankTabs.new(_ui)
 	_card.close_requested.connect(close_card)
@@ -216,11 +263,14 @@ func _build_panels() -> void:
 	_sidebar.shop_pressed.connect(toggle_panel.bind(Kind.SHOP))
 	_sidebar.settings_pressed.connect(toggle_panel.bind(Kind.SETTINGS))
 	_sidebar.dex_pressed.connect(open_dex)
+	_sidebar.achievements_pressed.connect(open_achievements)
 	_sidebar.minimize_pressed.connect(Platform.minimize)
 	_sidebar.close_pressed.connect(Platform.request_quit)
 	_shop.close_requested.connect(close_panel)
 	_shop.decorate_requested.connect(toggle_decorating)
 	_settings_panel.close_requested.connect(close_panel)
+	_final.close_requested.connect(close_panel)
+	_shop.final_requested.connect(open_panel.bind(Kind.FINAL))
 	_shop.message.connect(_sidebar.show_toast)
 	_settings_panel.message.connect(_sidebar.show_toast)
 
@@ -278,6 +328,7 @@ func _apply_layout() -> void:
 	_sidebar.layout(layout.sidebar_rect)
 	_place_panel(_shop, Kind.SHOP, layout.panel_rect)
 	_place_panel(_settings_panel, Kind.SETTINGS, layout.panel_rect)
+	_place_panel(_final, Kind.FINAL, layout.panel_rect)
 	_place_card(layout.tank_rect)
 	_tank_tabs.layout(layout.tank_rect)
 	var covered: bool = (

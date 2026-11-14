@@ -1,0 +1,11 @@
+# deco_tide_trophy · decoración (premio de la Gran marea)
+[frame]
+\▀▀▀/
+ \█/
+  █
+ ▄█▄
+[colors]
+aaaaa
+ aaa
+  a
+ aaa

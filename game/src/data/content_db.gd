@@ -15,6 +15,10 @@ var errors: PackedStringArray = PackedStringArray()
 ## Biomas (pestañas de pecera); viven aparte para no engordar esta clase.
 var biomes: BiomeCatalog = BiomeCatalog.new()
 var achievements: AchievementCatalog = AchievementCatalog.new()
+## Eventos aleatorios (Fase 12).
+var events: EventCatalog = EventCatalog.new()
+## Mejoras permanentes que se compran con perlas negras (Fase 13).
+var prestige: PrestigeCatalog = PrestigeCatalog.new()
 
 var _species: Dictionary[String, SpeciesDef] = {}
 var _order: PackedStringArray = PackedStringArray()

@@ -9,6 +9,7 @@ name_key = "SPECIES_REEF_SEAHORSE"
 description_key = "SPECIES_REEF_SEAHORSE_DESC"
 biome_id = "reef"
 rarity = 2
+activity = 2
 base_cost = 32000.0
 base_production = 120.0
 unlock_kind = 4

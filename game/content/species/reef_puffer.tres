@@ -9,6 +9,7 @@ name_key = "SPECIES_REEF_PUFFER"
 description_key = "SPECIES_REEF_PUFFER_DESC"
 biome_id = "reef"
 rarity = 3
+activity = 1
 base_cost = 70000.0
 base_production = 260.0
 unlock_kind = 3

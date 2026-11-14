@@ -159,3 +159,15 @@ func test_frame_swallows_clicks_and_wheel() -> void:
 	var frame: AsciiFrame = AsciiFrame.new()
 	assert_true(frame.handle_click(Vector2i.ZERO, false))
 	assert_true(frame.handle_wheel(Vector2i.ZERO, 1))
+
+
+func test_a_second_toast_waits_for_the_first_instead_of_covering_it() -> void:
+	var toast: AsciiToast = AsciiToast.new()
+	toast.show_message("uno", 1.0)
+	toast.show_message("dos", 1.0)
+	assert_eq(toast.text, "uno")
+	toast.update(1.1, null)
+	assert_eq(toast.text, "dos")
+	assert_true(toast.is_active())
+	toast.update(AsciiToast.DEFAULT_SECONDS + 0.1, null)
+	assert_false(toast.is_active())

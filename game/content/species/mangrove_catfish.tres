@@ -9,6 +9,7 @@ name_key = "SPECIES_MANGROVE_CATFISH"
 description_key = "SPECIES_MANGROVE_CATFISH_DESC"
 biome_id = "mangrove"
 rarity = 1
+activity = 2
 base_cost = 72000.0
 base_production = 280.0
 unlock_kind = 4

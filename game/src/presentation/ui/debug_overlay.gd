@@ -10,6 +10,8 @@ const MEGABYTE: float = 1048576.0
 const TEXT_COLOR: Color = Color(1.0, 0.7843, 0.3412)
 const FONT_SIZE: int = 13
 const FISH_STEP: int = 5
+## Conchas que da F9 para probar la Gran marea.
+const DEBUG_EARN: float = 5.0e6
 
 @export var canvas_path: NodePath
 @export var tank_path: NodePath
@@ -49,6 +51,14 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if key_event.keycode == KEY_F3:
 		visible = not visible
+	elif key_event.keycode == KEY_F6:
+		Game.daylight.debug_advance()
+	elif key_event.keycode == KEY_F8:
+		Game.prestige.debug_complete_collection()
+	elif key_event.keycode == KEY_F9:
+		Game.prestige.debug_earn(DEBUG_EARN)
+	elif key_event.keycode == KEY_F7:
+		Game.events.debug_trigger()
 	elif key_event.keycode == KEY_F4:
 		if key_event.shift_pressed:
 			Game.debug_remove_fish(FISH_STEP)
@@ -68,6 +78,12 @@ func _build_text() -> String:
 			tank.fish_count(),
 			tank.bubble_count(),
 			memory_mb,
-			"F3 hide | F4 +5 fish | Shift+F4 -5",
+			(
+				(
+					"F3 hide | F4 +5 fish | Shift+F4 -5\nF6 +1 h | F7 evento (%.0f h)\n"
+					+ "F8 coleccion completa | F9 +5M conchas"
+				)
+				% Game.daylight.hour()
+			),
 		]
 	)

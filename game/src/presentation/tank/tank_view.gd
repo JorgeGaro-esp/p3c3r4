@@ -83,6 +83,7 @@ var _spots: GlassSpots = GlassSpots.new()
 var _pearls: PearlField = PearlField.new()
 var _eggs: EggField = EggField.new()
 var _equipment: EquipmentField = EquipmentField.new()
+var _events: EventLayer = EventLayer.new(self, _make_visitor_view, _bounds_for)
 var _decor_back: DecorationField = DecorationField.new(false)
 var _decor_front: DecorationField = DecorationField.new(true)
 var _decorating: bool = false
@@ -127,8 +128,10 @@ func _ready() -> void:
 		canvas.add_drawable(drawable)
 	_load_looks()
 	_biome = Game.content.biomes.get_biome(Game.state.active().biome_id)
+	_events.attach(canvas)
 	canvas.grid_changed.connect(_on_grid_changed)
 	_on_grid_changed()
+	EventBus.event_started.connect(_on_event_started)
 	EventBus.fish_added.connect(_on_fish_added)
 	EventBus.fish_removed.connect(_on_fish_removed)
 	EventBus.pearl_spawned.connect(_on_pearl_spawned)
@@ -141,6 +144,7 @@ func _process(delta: float) -> void:
 	_update_care()
 	_update_equipment(delta)
 	_update_decoration()
+	_events.update()
 	_next_bubble_in -= delta
 	if _next_bubble_in > 0.0 or _fish.is_empty():
 		return
@@ -176,7 +180,7 @@ func _input(event: InputEvent) -> void:
 func click_cell(cell: Vector2i) -> bool:
 	if not _in_water(cell):
 		return false
-	if clean_at(cell) or _collect_pearl_at(cell):
+	if _events.click(cell) or clean_at(cell) or _collect_pearl_at(cell):
 		return true
 	var hit: Fish = fish_at(cell)
 	if hit != null:
@@ -248,6 +252,16 @@ func set_area(area: Rect2i) -> void:
 	_area = area
 	if canvas != null:
 		_on_grid_changed()
+
+
+## Vista de un visitante raro de [param species_id] (no es un pez de la partida): un
+## ejemplar adulto con el aspecto de una variante llamativa. Null si no se conoce.
+func _make_visitor_view(species_id: String) -> FishView:
+	if not _looks.has(species_id):
+		return null
+	var visitor: Fish = Fish.new(species_id)
+	visitor.variant_id = _showy_variant_id()
+	return _make_view(visitor)
 
 
 ## Número de peces que hay ahora mismo.
@@ -443,6 +457,7 @@ func _on_active_tank_changed(_tank_index: int) -> void:
 	for value: float in _pearls.take_all():
 		Game.collect_pearl(value)
 	_food.clear()
+	_events.clear()
 	_held_id = ""
 	_decor_front.clear_ghost()
 	for view: FishView in _fish.duplicate():
@@ -505,6 +520,15 @@ func _on_grid_changed() -> void:
 			area.position.y + SURFACE_ROWS,
 			area.size.x,
 			area.size.y - SURFACE_ROWS - SAND_ROWS
+		)
+	)
+	_events.configure(
+		area,
+		Rect2(
+			float(area.position.x),
+			float(area.position.y + SURFACE_ROWS + 1),
+			maxf(float(area.size.x - 4), 0.0),
+			maxf(float(area.size.y - SURFACE_ROWS - SAND_ROWS - 3), 0.0)
 		)
 	)
 	for fish: FishView in _fish:
@@ -727,3 +751,16 @@ func _update_decoration() -> void:
 	_decor_front.set_ghost(
 		def, rect.position.x, rect.position.y, verdict == DecorationLayout.Result.OK
 	)
+
+
+func _on_event_started(event_id: String, _species_id: String) -> void:
+	_events.on_event_started(event_id)
+
+
+## Variante que se usa para el visitante: la prismática, la dorada o la normal.
+func _showy_variant_id() -> String:
+	for wanted: VariantDef.Look in [VariantDef.Look.PRISMATIC, VariantDef.Look.GOLDEN]:
+		for variant_id: String in Game.content.variant_ids():
+			if Game.content.get_variant(variant_id).look == wanted:
+				return variant_id
+	return VariantDef.NORMAL_ID

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PrestigeUpgradeDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/prestige_upgrade_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "tide_production"
+name_key = "PRESTIGE_PRODUCTION"
+description_key = "PRESTIGE_PRODUCTION_DESC"
+kind = 0
+max_level = 25
+base_cost = 2
+cost_growth = 1.45
+per_level = 0.1

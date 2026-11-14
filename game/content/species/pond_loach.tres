@@ -9,6 +9,7 @@ name_key = "SPECIES_POND_LOACH"
 description_key = "SPECIES_POND_LOACH_DESC"
 biome_id = "pond"
 rarity = 1
+activity = 2
 base_cost = 150.0
 base_production = 0.8
 unlock_kind = 4

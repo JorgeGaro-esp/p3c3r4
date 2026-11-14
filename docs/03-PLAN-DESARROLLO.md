@@ -279,7 +279,7 @@
 
 ---
 
-## Fase 12 · Día/noche y eventos aleatorios
+## Fase 12 · Día/noche y eventos aleatorios (hecha, ver T118–T126)
 
 **Tareas**
 
@@ -295,7 +295,7 @@
 
 ---
 
-## Fase 13 · Prestigio y meta final
+## Fase 13 · Prestigio y meta final (hecha, ver T128–T133)
 
 **Tareas**
 
@@ -331,7 +331,7 @@
 
 **Tareas**
 
-- 15.1 Sombreador CRT: líneas de barrido, brillo, ligera curvatura; tres niveles.
+- 15.1 Sombreador CRT: adelantado en la Fase 11C (brillo, líneas, viñeta, tres niveles); aquí solo se afina y se enlaza con la accesibilidad.
 - 15.2 Opciones de accesibilidad del GDD §15.
 - 15.3 Revisión completa de la traducción al inglés y de textos que no caben.
 - 15.4 Pantalla de ajustes completa.

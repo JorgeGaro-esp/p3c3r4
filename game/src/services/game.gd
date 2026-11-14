@@ -22,6 +22,11 @@ var state: GameState = GameState.new()
 var content: ContentDB = ContentDB.new()
 ## Pecera activa, apertura de biomas y sus costes.
 var biomes: BiomeDirector = BiomeDirector.new(self)
+## El día y la noche, y los eventos aleatorios (Fase 12).
+var daylight: DaylightDirector = DaylightDirector.new(self)
+var events: EventDirector = EventDirector.new(self)
+## La Gran marea (prestigio) y el final (Fase 13).
+var prestige: PrestigeDirector = PrestigeDirector.new(self)
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 var _stepper: FixedStepper = FixedStepper.new()
@@ -37,13 +42,18 @@ func _ready() -> void:
 	var decorations_ok: bool = content.load_decorations_dir()
 	var biomes_ok: bool = content.biomes.load_dir()
 	var achievements_ok: bool = content.achievements.load_dir()
+	var events_ok: bool = content.events.load_dir()
+	var prestige_ok: bool = content.prestige.load_dir()
 	var refs_ok: bool = BiomeCatalog.check_references(content)
 	var achievement_refs_ok: bool = AchievementCatalog.check_references(content)
 	var all_ok: bool = variants_ok and species_ok and equipment_ok and decorations_ok
 	var extra_ok: bool = biomes_ok and refs_ok and achievements_ok and achievement_refs_ok
+	extra_ok = extra_ok and events_ok and prestige_ok
 	if not all_ok or not extra_ok:
 		var messages: PackedStringArray = content.errors + content.biomes.errors
-		for message: String in messages + content.achievements.errors:
+		messages += content.achievements.errors + content.events.errors
+		messages += content.prestige.errors
+		for message: String in messages:
 			push_error("ContentDB: %s" % message)
 	start_new_game(DEFAULT_SEED)
 
@@ -51,6 +61,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	for _step: int in range(_stepper.advance(delta)):
 		Simulation.step(state, FixedStepper.STEP_SECONDS, content, rng)
+		events.advance(FixedStepper.STEP_SECONDS)
+	daylight.refresh()
 	for spawn: PearlSpawn in state.take_pearls():
 		if spawn.tank_index == state.active_tank:
 			EventBus.pearl_spawned.emit(spawn.tank_index, spawn.fish, spawn.value)
@@ -65,6 +77,7 @@ func _process(delta: float) -> void:
 	if _achievement_timer >= ACHIEVEMENT_CHECK_SECONDS:
 		_achievement_timer = 0.0
 		_check_achievements(true)
+		prestige.check_final()
 	_publish_changes()
 
 
@@ -286,6 +299,7 @@ func clean_spot(tank_index: int = -1) -> bool:
 		return false
 	tank.cleanliness = minf(tank.cleanliness + Care.SPOT_STEP, Care.MAX_CLEANLINESS)
 	state.stats.add(GameStats.SPOTS_CLEANED)
+	events.on_spot_cleaned()
 	return true
 
 
@@ -333,6 +347,8 @@ func _replace_state(fresh: GameState) -> void:
 		tank.refresh_bonuses(content)
 	state.mark_production_dirty()
 	_stepper.reset()
+	events.reseed(state.rng_seed)
+	daylight.refresh(false)
 	for tank_index: int in range(state.tanks.size()):
 		for fish: Fish in state.tanks[tank_index].fish:
 			EventBus.fish_added.emit(tank_index, fish)

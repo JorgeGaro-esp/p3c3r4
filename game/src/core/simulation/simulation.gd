@@ -6,7 +6,7 @@ extends RefCounted
 ## modo que con la misma semilla y los mismos pasos el resultado sea idéntico.
 ## Sistemas, por orden: cuidados (hambre, limpieza, felicidad y perlas) y producción
 ## pasiva, más el ciclo de vida (crecimiento, puesta y eclosión, ver [Lifecycle]).
-## Eventos y logros se añadirán aquí en sus fases.
+## La hora del día y los eventos la ajustan (ver [DayCycle] y [EventState]).
 
 ## Cambio mínimo de felicidad que se tiene en cuenta (evita recalcular a cada paso).
 const HAPPINESS_EPSILON: float = 0.5
@@ -41,10 +41,18 @@ static func total_production(state: GameState, content: ContentDB) -> float:
 				continue
 			var species: SpeciesDef = content.get_species(fish.species_id)
 			if species != null:
-				total += Economy.fish_rate(
+				var rate: float = Economy.fish_rate(
 					species.base_production, fish.happiness, tank.bonuses.production_multiplier
 				)
-	return total * Achievements.multiplier(state, content)
+				total += (
+					rate
+					* DayCycle.activity_factor(
+						species.activity, state.darkness, tank.bonuses.night_shield
+					)
+				)
+	var factor: float = Achievements.multiplier(state, content)
+	factor *= Prestige.production_multiplier(state, content)
+	return total * factor * state.events.production_multiplier()
 
 
 ## Hambre, limpieza, felicidad y perlas de todas las peceras.
@@ -101,4 +109,5 @@ static func _pearl_tick(
 	if species == null or state.pending_pearls.size() >= GameState.MAX_PENDING_PEARLS:
 		return
 	var rate: float = Economy.fish_rate(species.base_production, fish.happiness)
-	state.pending_pearls.append(PearlSpawn.new(tank_index, fish, Care.pearl_value(rate)))
+	var value: float = Care.pearl_value(rate) * Prestige.pearl_multiplier(state, content)
+	state.pending_pearls.append(PearlSpawn.new(tank_index, fish, ceilf(value)))

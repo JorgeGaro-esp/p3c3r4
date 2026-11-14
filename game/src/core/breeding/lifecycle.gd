@@ -22,7 +22,7 @@ static func step(
 	var tank: Tank = state.tanks[tank_index]
 	_grow(state, tank, dt * tank.bonuses.growth_speed, content)
 	_hatch(state, tank_index, dt * tank.bonuses.hatch_speed, content)
-	_breed(tank, dt, content, rng)
+	_breed(tank, dt, content, rng, Prestige.variant_multiplier(state, content))
 
 
 ## Verdadero si [param species_id] puede poner un huevo ahora mismo en [param tank]:
@@ -72,7 +72,9 @@ static func _hatch(state: GameState, tank_index: int, dt: float, content: Conten
 	tank.eggs = waiting
 
 
-static func _breed(tank: Tank, dt: float, content: ContentDB, rng: RandomNumberGenerator) -> void:
+static func _breed(
+	tank: Tank, dt: float, content: ContentDB, rng: RandomNumberGenerator, luck: float
+) -> void:
 	var adults: Dictionary[String, int] = {}
 	var happiness: Dictionary[String, float] = {}
 	for fish: Fish in tank.fish:
@@ -92,14 +94,14 @@ static func _breed(tank: Tank, dt: float, content: ContentDB, rng: RandomNumberG
 		var previous: float = tank.breed_timers.get(species_id, 0.0)
 		var timer: float = minf(previous + dt * float(pairs), interval)
 		if timer >= interval and not tank.is_full():
-			_lay_egg(tank, species, content, rng)
+			_lay_egg(tank, species, content, rng, luck)
 			timer = 0.0
 		tank.breed_timers[species_id] = timer
 
 
 static func _lay_egg(
-	tank: Tank, species: SpeciesDef, content: ContentDB, rng: RandomNumberGenerator
+	tank: Tank, species: SpeciesDef, content: ContentDB, rng: RandomNumberGenerator, luck: float
 ) -> void:
-	var variant_id: String = VariantRoll.pick(content, rng, tank.bonuses.rare_multiplier)
+	var variant_id: String = VariantRoll.pick(content, rng, tank.bonuses.rare_multiplier * luck)
 	var egg: Egg = Egg.new(species.id, variant_id, species.hatch_seconds, rng.randf())
 	tank.eggs.append(egg)

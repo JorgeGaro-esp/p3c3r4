@@ -9,6 +9,7 @@ name_key = "SPECIES_POND_ANGELFISH"
 description_key = "SPECIES_POND_ANGELFISH_DESC"
 biome_id = "pond"
 rarity = 3
+activity = 1
 base_cost = 4000.0
 base_production = 17.0
 unlock_kind = 2

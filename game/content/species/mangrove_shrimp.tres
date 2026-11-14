@@ -9,6 +9,7 @@ name_key = "SPECIES_MANGROVE_SHRIMP"
 description_key = "SPECIES_MANGROVE_SHRIMP_DESC"
 biome_id = "mangrove"
 rarity = 1
+activity = 2
 base_cost = 48000.0
 base_production = 190.0
 unlock_kind = 3

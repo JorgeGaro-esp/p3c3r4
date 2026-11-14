@@ -9,6 +9,7 @@ name_key = "SPECIES_POND_KOI"
 description_key = "SPECIES_POND_KOI_DESC"
 biome_id = "pond"
 rarity = 4
+activity = 1
 base_cost = 15000.0
 base_production = 60.0
 unlock_kind = 3

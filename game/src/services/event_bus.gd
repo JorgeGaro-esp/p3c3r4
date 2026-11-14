@@ -35,3 +35,17 @@ signal decoration_changed(tank_index: int)
 signal active_tank_changed(tank_index: int)
 ## Se ha abierto la pecera de un bioma nuevo.
 signal tank_unlocked(tank_index: int)
+## Cambió la franja del día (valor de [enum DayCycle.Phase]).
+signal phase_changed(phase: int)
+## Empezó un evento aleatorio; [param species_id] es el visitante, si lo hay.
+signal event_started(event_id: String, species_id: String)
+## Un evento terminó (se cobró, caducó o se apagó).
+signal event_finished(event_id: String)
+## El jugador cobró un evento: conchas y, a veces, un objeto de decoración.
+signal event_rewarded(event_id: String, shells: float, decoration_id: String)
+## Se hizo la Gran marea y se ganaron [param pearls] perlas negras.
+signal prestiged(pearls: int)
+## Se compró un nivel de una mejora permanente.
+signal prestige_upgrade_bought(upgrade_id: String, level: int)
+## Se completó la Enciclopedia: empieza la secuencia final y el modo infinito.
+signal final_reached

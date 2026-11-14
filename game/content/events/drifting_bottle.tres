@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EventDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/event_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "drifting_bottle"
+name_key = "EVENT_DRIFTING_BOTTLE"
+message_key = "EVENT_DRIFTING_BOTTLE_MSG"
+kind = 4
+weight = 2.0
+min_fish = 1
+duration = 40.0
+reward_seconds = 30.0
+reward_min = 20.0

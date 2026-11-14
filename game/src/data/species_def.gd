@@ -18,6 +18,9 @@ enum UnlockKind {
 	SPECIES_COUNT,  ## Peces de `unlock_species_id` >= `unlock_amount`.
 	DECORATION_TAG,  ## Objetos colocados con la etiqueta `unlock_tag` >= `unlock_amount`.
 }
+## Cuándo está más activa la especie (Fase 12): las nocturnas producen más de noche,
+## las diurnas más de día, y las neutras igual a todas horas.
+enum Activity { NEUTRAL, DIURNAL, NOCTURNAL }
 ## Un símbolo por rareza, para no depender solo del color (GDD §4.2).
 const RARITY_SYMBOLS: String = "·+*#@"
 
@@ -28,6 +31,7 @@ const RARITY_SYMBOLS: String = "·+*#@"
 @export var description_key: String = ""
 @export var biome_id: String = "pond"
 @export var rarity: Rarity = Rarity.COMMON
+@export var activity: Activity = Activity.NEUTRAL
 ## Coste del primer pez de esta especie, en conchas.
 @export var base_cost: float = 10.0
 ## Conchas por segundo de un adulto con felicidad máxima, sin bonificaciones.

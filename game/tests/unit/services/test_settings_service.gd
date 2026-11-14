@@ -90,3 +90,15 @@ func test_autostart_is_refused_outside_an_exported_windows_build() -> void:
 	assert_true(
 		service.set_launch_with_windows(false), "ya estaba desactivado: no hay nada que hacer"
 	)
+
+
+func test_crt_level_is_clamped_and_announced() -> void:
+	var service: SettingsService = _make_service()
+	var counter: Array[int] = [0]
+	service.changed.connect(func() -> void: counter[0] += 1)
+	service.set_crt_level(0)
+	assert_eq(service.data.crt_level, 0)
+	service.set_crt_level(77)
+	assert_eq(service.data.crt_level, SettingsData.CRT_LEVELS - 1)
+	service.set_crt_level(SettingsData.CRT_LEVELS - 1)
+	assert_eq(counter[0], 2, "solo avisa cuando cambia")

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EventDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/event_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "golden_fish"
+name_key = "EVENT_GOLDEN_FISH"
+message_key = "EVENT_GOLDEN_FISH_MSG"
+kind = 2
+weight = 3.0
+min_fish = 1
+duration = 14.0
+reward_seconds = 45.0
+reward_min = 25.0

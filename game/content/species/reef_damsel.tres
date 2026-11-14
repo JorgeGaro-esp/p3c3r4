@@ -9,6 +9,7 @@ name_key = "SPECIES_REEF_DAMSEL"
 description_key = "SPECIES_REEF_DAMSEL_DESC"
 biome_id = "reef"
 rarity = 0
+activity = 1
 base_cost = 2500.0
 base_production = 10.5
 unlock_kind = 0

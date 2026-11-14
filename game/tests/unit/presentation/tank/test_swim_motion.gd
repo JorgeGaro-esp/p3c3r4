@@ -65,3 +65,54 @@ func test_body_offset_zero_at_head_and_bounded() -> void:
 	assert_eq(motion.body_offset(0, 6), 0.0)
 	for column: int in range(6):
 		assert_lte(absf(motion.body_offset(column, 6)), motion.amplitude + 0.0001)
+
+
+func test_a_fish_never_swims_backwards() -> void:
+	for style: SwimMotion.Style in [
+		SwimMotion.Style.DART, SwimMotion.Style.GLIDE, SwimMotion.Style.DRIFT
+	]:
+		var motion: SwimMotion = _make(style, 3)
+		for _i: int in range(STEPS):
+			motion.step(STEP)
+			assert_gte(motion.velocity.x * float(motion.facing), -0.0001, "marcha atrás")
+
+
+func test_turning_flattens_the_fish_and_flips_it_at_the_flattest_point() -> void:
+	var motion: SwimMotion = _make(SwimMotion.Style.GLIDE, 5)
+	var turns: int = 0
+	var was_turning: bool = false
+	var flattest: float = 1.0
+	var facing_before: int = motion.facing
+	for _i: int in range(STEPS):
+		motion.step(STEP)
+		if motion.is_turning():
+			if not was_turning:
+				facing_before = motion.facing
+				flattest = 1.0
+			flattest = minf(flattest, motion.turn_scale())
+		elif was_turning:
+			turns += 1
+			assert_lt(flattest, 0.2, "el giro no llega a ponerse de canto")
+			assert_ne(motion.facing, facing_before, "el giro no cambia el sentido")
+		was_turning = motion.is_turning()
+	assert_gt(turns, 3, "no hay giros")
+
+
+func test_the_scale_is_one_when_not_turning() -> void:
+	var motion: SwimMotion = _make(SwimMotion.Style.GLIDE)
+	assert_eq(motion.turn_scale(), 1.0)
+	assert_false(motion.is_turning())
+
+
+func test_a_crawler_stays_on_the_floor_and_does_not_wave() -> void:
+	var motion: SwimMotion = _make(SwimMotion.Style.CRAWL, 9)
+	assert_eq(motion.position.y, BOUNDS.end.y)
+	var moved: float = 0.0
+	var start: float = motion.position.x
+	for _i: int in range(STEPS):
+		motion.step(STEP)
+		assert_eq(motion.position.y, BOUNDS.end.y)
+		assert_eq(motion.body_offset(3, 8), 0.0)
+		assert_eq(motion.tilt_offset(3, 8), 0.0)
+		moved = maxf(moved, absf(motion.position.x - start))
+	assert_gt(moved, 3.0, "el bicho de fondo no se mueve")

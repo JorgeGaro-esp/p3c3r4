@@ -38,20 +38,22 @@ func _press(keycode: Key) -> void:
 	key.keycode = keycode
 	key.pressed = true
 	Input.parse_input_event(key)
+	await wait_frames(1)
 	# Sin soltar la tecla, la segunda pulsación contaría como eco.
 	var release: InputEventKey = InputEventKey.new()
 	release.keycode = keycode
 	release.pressed = false
 	Input.parse_input_event(release)
+	await wait_frames(1)
 
 
 func test_l_opens_the_achievements_tab_and_closes_it() -> void:
-	_press(KEY_L)
+	await _press(KEY_L)
 	await wait_frames(2)
 	assert_eq(_controller.open_kind(), StripController.Kind.SHOP)
 	var shop: ShopPanel = _controller._shop
 	assert_eq(shop.current_tab(), ShopPanel.ACHIEVEMENTS_TAB)
-	_press(KEY_L)
+	await _press(KEY_L)
 	await wait_frames(2)
 	assert_eq(_controller.open_kind(), StripController.Kind.NONE)
 
