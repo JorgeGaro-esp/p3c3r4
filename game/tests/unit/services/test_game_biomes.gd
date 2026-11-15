@@ -59,19 +59,19 @@ func test_switching_tanks_validates_the_index() -> void:
 func test_species_can_only_be_bought_in_their_own_biome() -> void:
 	Game.biomes.unlock("reef")
 	assert_eq(Game.buy_fish("pond_guppy"), GameService.BuyResult.WRONG_BIOME)
-	assert_eq(Game.buy_fish("reef_clownfish"), GameService.BuyResult.OK)
-	assert_eq(Game.state.tanks[1].count_of("reef_clownfish"), 1)
-	assert_eq(Game.state.tanks[0].count_of("reef_clownfish"), 0)
+	assert_eq(Game.buy_fish("reef_krill"), GameService.BuyResult.OK)
+	assert_eq(Game.state.tanks[1].count_of("reef_krill"), 1)
+	assert_eq(Game.state.tanks[0].count_of("reef_krill"), 0)
 	Game.biomes.set_active(0)
-	assert_eq(Game.buy_fish("reef_clownfish"), GameService.BuyResult.WRONG_BIOME)
+	assert_eq(Game.buy_fish("reef_krill"), GameService.BuyResult.WRONG_BIOME)
 	assert_eq(Game.buy_fish("pond_guppy"), GameService.BuyResult.OK)
 
 
 func test_fish_cost_counts_only_the_active_tank() -> void:
 	Game.biomes.unlock("reef")
-	var first: float = Game.fish_cost("reef_clownfish")
-	Game.buy_fish("reef_clownfish")
-	assert_gt(Game.fish_cost("reef_clownfish"), first)
+	var first: float = Game.fish_cost("reef_krill")
+	Game.buy_fish("reef_krill")
+	assert_gt(Game.fish_cost("reef_krill"), first)
 	Game.biomes.set_active(0)
 	assert_eq(Game.fish_cost("pond_guppy"), Economy.fish_cost(10.0, 2))
 
@@ -98,7 +98,7 @@ func test_decoration_is_placed_in_the_active_tank() -> void:
 
 func test_selling_works_on_the_active_tank() -> void:
 	Game.biomes.unlock("reef")
-	Game.buy_fish("reef_clownfish")
+	Game.buy_fish("reef_krill")
 	var fish: Fish = Game.state.tanks[1].fish[0]
 	assert_gt(Game.sell_fish(fish), 0.0)
 	assert_eq(Game.state.tanks[1].fish.size(), 0)
@@ -107,7 +107,7 @@ func test_selling_works_on_the_active_tank() -> void:
 
 func test_sell_all_defaults_to_the_active_tank() -> void:
 	Game.biomes.unlock("reef")
-	Game.buy_fish("reef_clownfish")
+	Game.buy_fish("reef_krill")
 	Game.sell_all_fish()
 	assert_eq(Game.state.tanks[1].fish.size(), 0)
 	assert_eq(Game.state.tanks[0].fish.size(), 2)
@@ -126,11 +126,11 @@ func test_fish_hatched_in_a_hidden_tank_are_announced_with_their_index() -> void
 	_fish_events.clear()
 	EventBus.fish_added.connect(_record_fish)
 	Game.biomes.set_active(1)
-	Game.buy_fish("reef_clownfish")
+	Game.buy_fish("reef_krill")
 	Game.biomes.set_active(0)
 	_fish_events.clear()
 	var reef: Tank = Game.state.tanks[1]
-	var egg: Egg = Egg.new("reef_clownfish", VariantDef.NORMAL_ID, 0.0)
+	var egg: Egg = Egg.new("reef_krill", VariantDef.NORMAL_ID, 0.0)
 	reef.eggs.append(egg)
 	await wait_process_frames(3)
 	EventBus.fish_added.disconnect(_record_fish)
@@ -140,7 +140,7 @@ func test_fish_hatched_in_a_hidden_tank_are_announced_with_their_index() -> void
 
 func test_pearls_from_a_hidden_tank_are_collected_automatically() -> void:
 	Game.biomes.unlock("reef")
-	Game.buy_fish("reef_clownfish")
+	Game.buy_fish("reef_krill")
 	var fish: Fish = Game.state.tanks[1].fish[0]
 	Game.biomes.set_active(0)
 	var before: float = Game.state.wallet.shells
@@ -181,7 +181,7 @@ func test_each_new_biome_sells_only_its_own_species() -> void:
 	Game.state.wallet.add(1.0e9)
 	for id: String in ["reef", "mangrove", "abyss"]:
 		Game.biomes.unlock(id)
-	assert_eq(Game.buy_fish("mangrove_archer"), Game.BuyResult.WRONG_BIOME)
+	assert_eq(Game.buy_fish("mangrove_tadpole"), Game.BuyResult.WRONG_BIOME)
 	assert_eq(Game.buy_fish("abyss_lantern"), Game.BuyResult.OK)
 	Game.biomes.set_active(2)
-	assert_eq(Game.buy_fish("mangrove_archer"), Game.BuyResult.OK)
+	assert_eq(Game.buy_fish("mangrove_tadpole"), Game.BuyResult.OK)

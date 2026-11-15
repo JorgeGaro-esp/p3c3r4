@@ -3,8 +3,8 @@
 Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre el progreso.
 
 **Última actualización:** 2026-11-14
-**Fase actual:** Fase 15 · Accesibilidad, idioma y tutorial: código y 676 tests hechos (Fases 7–15 sin commit aún). Pendiente de Jorge: probar el audio (Fase 14), la pestaña Marea (13), el tinte (F6), los eventos (F7) y los ajustes nuevos (lista abajo). Falta de la Fase 15: revisión del inglés y de textos cortados a ojo en pantalla. Siguiente: **Fase 16 · Balance y versión 1.0**. Al terminar la Fase 16: pasada de estilo con el HTML de referencia (P11).
-**Versión:** `0.19.0` (pendiente de commit; `0.8.0` a `0.16.0` tampoco tienen etiqueta aún). Etiquetas hasta `v0.7.0`.
+**Fase actual:** Fase 21 (parte 1: apodo y favorito, 0.36.0) en código; antes Fase 20 · Pecera con más vida (0.35.0: reacciones al cursor, susto por clic y sueño día/noche) hecha en código, sin probar en el motor; antes, 0.34.0 comportamiento realista y 0.33.0 diseños compactos. Anteriormente, Fase 19 · Efecto binario; 0.26.0: Enciclopedia de libro, paneles separados, F12 y formas de planta (antes: música lofi 0.22.1, Fase 18 cámara, Fase 17 título y ranuras). Pendiente de Jorge: probar, reimportar, borrar archivos obsoletos y hacer el commit; después, más pulido de diseño, música e interfaces.
+**Versión:** `0.36.0` (sin commit desde `0.8.0`; etiquetas hasta `v0.7.0`).
 
 ## Progreso por fases
 
@@ -26,8 +26,13 @@ Se actualiza al final de cada sesión de trabajo. Es la fuente de verdad sobre e
 | 13 | Prestigio y meta final | Hecha en código; pendiente de prueba manual de Jorge |
 | 14 | Audio | Hecha en código; pendiente de prueba manual de Jorge |
 | 15 | CRT, accesibilidad e inglés | Hecha en código; pendiente de prueba manual y revisión visual del inglés |
-| 16 | Balance, pruebas y versión 1.0 | Pendiente |
-| 17 | (Futuro) Versión web y publicación | Sin planificar en detalle |
+| 16 | Balance, pruebas y versión 1.0 | Calibración hecha; pendiente de sesiones reales y exportación |
+| 17 | Título, ranuras de guardado y paneles modales | Hecha en código; pendiente de prueba manual de Jorge |
+| 18 | Cámara de la pecera y barra lateral ancha | Hecha en código; pendiente de prueba manual de Jorge |
+| 19 | Efecto binario (unos y ceros) | Hecha en código; pendiente de prueba manual de Jorge |
+| 20 | Pecera con más vida (cursor, clics, sueño) | Hecha en código; pendiente de prueba manual de Jorge |
+| 21–25 | Personalización, retención, comodidad, interacciones, temporadas | Planificadas (ver plan) |
+| 26 | (Futuro) Versión web y publicación | Sin planificar en detalle |
 
 ## Hecho hasta ahora
 

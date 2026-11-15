@@ -1,3 +1,5 @@
+# gdlint: disable=max-public-methods
+# (fachada de la tienda: un método de consulta o de prueba por pestaña)
 class_name ShopPanel
 extends UiPanel
 ## Tienda de peces: lista las especies del estanque con su precio, rareza y
@@ -12,6 +14,9 @@ signal message(text: String)
 signal decorate_requested
 ## El jugador quiere volver a ver la secuencia final.
 signal final_requested
+
+## Grupos de pestañas: cada acceso de la barra lateral abre solo el suyo.
+enum Group { SHOP, DEX, ACHIEVEMENTS, STATS }
 
 const MIN_LIST_WIDTH: int = 24
 const MAX_LIST_WIDTH: int = 44
@@ -29,9 +34,8 @@ const PRESTIGE_TAB: int = 7
 ## Filas especiales de la pestaña de la Gran marea (el resto son mejoras).
 const RESET_ENTRY: String = "@reset"
 const FINAL_ENTRY: String = "@final"
-## Ancho del retrato del pez en la Enciclopedia y ancho mínimo del detalle para verlo.
-const PORTRAIT_WIDTH: int = 20
-const MIN_DETAIL_FOR_PORTRAIT: int = 44
+## Pestañas de la tienda (peces, equipo, decoración, biomas y la Gran marea).
+const SHOP_TABS: PackedInt32Array = [0, 1, 2, 3, 7]
 
 var _ids: PackedStringArray = PackedStringArray()
 var _equipment_ids: PackedStringArray = PackedStringArray()
@@ -44,8 +48,14 @@ var _prestige_ids: PackedStringArray = PackedStringArray()
 var _reset_armed: bool = false
 var _stat_rows: Array[PackedStringArray] = []
 var _tab: int = 0
+var _group: Group = Group.SHOP
+## Pestaña cuya lista se pintó por última vez (para conservar el desplazamiento).
+var _filled_tab: int = -1
 var _frame: AsciiFrame = AsciiFrame.new()
 var _tabs: AsciiTabs = AsciiTabs.new()
+## Pestañas de bioma de la Enciclopedia (comparten la fila de las pestañas del grupo).
+var _dex_tabs: AsciiTabs = AsciiTabs.new()
+var _dex_biomes: PackedStringArray = PackedStringArray()
 var _list: AsciiList = AsciiList.new()
 var _name: AsciiLabel = null
 var _price: AsciiLabel = null
@@ -54,6 +64,7 @@ var _description: AsciiLabel = null
 var _owned: AsciiLabel = null
 var _progress: AsciiProgress = AsciiProgress.new()
 var _portrait: AsciiPortrait = AsciiPortrait.new()
+var _book: DexBook = DexBook.new()
 var _area: Rect2i = Rect2i()
 var _buy: AsciiButton = null
 var _close: AsciiButton = null
@@ -65,6 +76,7 @@ func _init(root: UiRoot) -> void:
 	_frame.is_double = true
 	_add(_frame, UiRoot.LAYER_PANEL)
 	_add(_tabs)
+	_add(_dex_tabs)
 	_add(_list)
 	_name = _make_label("", AsciiColors.AMBER)
 	_price = _make_label("")
@@ -74,6 +86,7 @@ func _init(root: UiRoot) -> void:
 	_owned = _make_label("")
 	_add(_progress)
 	_add(_portrait)
+	_add(_book, UiRoot.LAYER_WIDGET + 5)
 	_buy = _make_button("")
 	_close = _make_button("")
 	_decorate = _make_button("", "D")
@@ -92,6 +105,8 @@ func _init(root: UiRoot) -> void:
 	EventBus.equipment_changed.connect(_on_equipment_changed)
 	EventBus.achievement_unlocked.connect(_on_state_changed)
 	_tabs.tab_changed.connect(_on_tab_changed)
+	_dex_tabs.tab_changed.connect(_on_dex_biome_changed)
+	_tabs.set_visible_tabs(SHOP_TABS)
 	refresh()
 
 
@@ -104,6 +119,7 @@ func layout(area: Rect2i) -> void:
 	var height: int = area.size.y
 	var list_width: int = clampi(floori(float(inner) * 0.4), MIN_LIST_WIDTH, MAX_LIST_WIDTH)
 	_tabs.rect = Rect2i(left, top + 1, inner, 1)
+	_dex_tabs.rect = _tabs.rect
 	_list.set_rect(Rect2i(left, top + 2, list_width, maxi(height - 4, 1)))
 	var detail_x: int = left + list_width + DETAIL_GAP
 	var full_width: int = maxi(inner - list_width - DETAIL_GAP, 1)
@@ -119,36 +135,43 @@ func layout(area: Rect2i) -> void:
 	_close.rect = Rect2i(detail_x + BUY_BUTTON_WIDTH + 1, top + height - 2, CLOSE_BUTTON_WIDTH, 1)
 	var decorate_x: int = detail_x + BUY_BUTTON_WIDTH + CLOSE_BUTTON_WIDTH + 2
 	_decorate.rect = Rect2i(decorate_x, top + height - 2, DECORATE_BUTTON_WIDTH, 1)
+	_book.spine = Rect2i()
+	_book.page = Rect2i()
+	_book.checklist = Rect2i()
 	if _tab >= DEX_TAB and _tab != PRESTIGE_TAB:
 		_layout_dex(detail_x, top, owned_row, full_width)
 	else:
 		_portrait.is_shown = false
+	if _tab == DEX_TAB:
+		_book.spine = Rect2i(left + list_width, area.position.y, DETAIL_GAP, height)
+		_book.page = Rect2i(detail_x, top + 2, full_width, maxi(owned_row - top, 1))
+	_book.is_shown = is_active and _tab == DEX_TAB
 	_show_detail(_list.selected_index())
 
 
-## Reparte el detalle de la Enciclopedia: textos a la izquierda, retrato a la derecha,
-## las variantes en una fila entera y los totales junto a la barra.
+## Coloca el detalle de la Enciclopedia, Logros o Estadísticas (ver [DexLayout]).
 func _layout_dex(detail_x: int, top: int, owned_row: int, full_width: int) -> void:
-	var has_portrait: bool = _tab == DEX_TAB and full_width >= MIN_DETAIL_FOR_PORTRAIT
-	var text_width: int = full_width - PORTRAIT_WIDTH - 1 if has_portrait else full_width
-	_portrait.rect = Rect2i(
-		detail_x + text_width + 1, top + 2, PORTRAIT_WIDTH, maxi(owned_row - top - 2, 1)
+	var plan: DexLayout = DexLayout.compute(
+		_tab == DEX_TAB,
+		detail_x,
+		top,
+		owned_row,
+		full_width,
+		DexLayout.wanted_portrait_width(AsciiPortrait.widest_fish(Game.content))
 	)
-	_portrait.is_shown = is_active and has_portrait
-	_name.rect = Rect2i(detail_x, top + 2, text_width, 1)
-	_rarity.rect = Rect2i(detail_x, top + 3, text_width, 1)
-	_description.rect = Rect2i(detail_x, top + 4, text_width, maxi(owned_row - top - 4, 1))
-	_owned.rect = Rect2i(detail_x, owned_row, full_width, 1)
-	var bar_width: int = mini(full_width, 24)
-	_progress.rect = Rect2i(detail_x, owned_row + 1, bar_width, 1)
-	_price.rect = Rect2i(
-		detail_x + bar_width + 2, owned_row + 1, maxi(full_width - bar_width - 2, 1), 1
-	)
+	_portrait.rect = plan.portrait
+	_portrait.is_shown = is_active and plan.has_portrait
+	_name.rect = plan.name_rect
+	_rarity.rect = plan.rarity
+	_description.rect = plan.description
+	_owned.rect = plan.owned
+	_price.rect = plan.price
+	_progress.rect = plan.progress
+	_book.checklist = plan.checklist
 
 
 ## Vuelve a escribir todos los textos (cambio de idioma) y la lista.
 func refresh() -> void:
-	_frame.title = _text("SHOP_TITLE")
 	_tabs.set_titles(
 		PackedStringArray(
 			[
@@ -164,6 +187,9 @@ func refresh() -> void:
 		)
 	)
 	_tabs.selected = _tab
+	_refresh_dex_tabs()
+	_book.heading = _text("DEX_VARIANTS")
+	_update_group_header()
 	_buy.label = "[ %s ]" % _text("UI_BUY")
 	_close.label = _text("UI_CLOSE_PANEL")
 	_decorate.label = _text("UI_DECORATE")
@@ -180,6 +206,9 @@ func set_active(value: bool) -> void:
 	super(value)
 	_decorate.is_shown = value and _tab == 2
 	_portrait.is_shown = value and _tab == DEX_TAB
+	_book.is_shown = value and _tab == DEX_TAB
+	_tabs.is_shown = value and _tabs.shown_tabs().size() > 1
+	_dex_tabs.is_shown = value and _tab == DEX_TAB
 
 
 ## Ids de la decoración a la venta, en el orden de la lista.
@@ -247,6 +276,7 @@ func current_tab() -> int:
 ## Selecciona la especie [param species_id] en la Enciclopedia (para los tests).
 func select_dex_species(species_id: String) -> void:
 	select_tab(DEX_TAB)
+	_dex_tabs.select(maxi(_dex_biomes.find(Game.content.get_species(species_id).biome_id), 0))
 	var index: int = _dex_ids.find(species_id)
 	if index >= 0:
 		_list.model.select(index)
@@ -254,9 +284,45 @@ func select_dex_species(species_id: String) -> void:
 
 
 ## Cambia a la pestaña [param index] (0 peces, 1 equipo, 2 decoración, 3 biomas,
-## 4 Enciclopedia, 5 Logros, 6 Estadísticas).
+## 4 Enciclopedia, 5 Logros, 6 Estadísticas, 7 Gran marea). Si pertenece a otro grupo
+## de pestañas, pasa a ese grupo.
 func select_tab(index: int) -> void:
+	_set_group(group_of(index))
 	_tabs.select(index)
+
+
+## Grupo de pestañas que está a la vista.
+func group() -> Group:
+	return _group
+
+
+## Grupo al que pertenece la pestaña [param tab].
+static func group_of(tab: int) -> Group:
+	match tab:
+		DEX_TAB:
+			return Group.DEX
+		ACHIEVEMENTS_TAB:
+			return Group.ACHIEVEMENTS
+		STATS_TAB:
+			return Group.STATS
+	return Group.SHOP
+
+
+## Enseña el grupo [param value] en su primera pestaña (o en la que ya estaba, si es
+## de ese grupo).
+func show_group(value: Group) -> void:
+	if group_of(_tab) == value:
+		_set_group(value)
+		return
+	match value:
+		Group.DEX:
+			select_tab(DEX_TAB)
+		Group.ACHIEVEMENTS:
+			select_tab(ACHIEVEMENTS_TAB)
+		Group.STATS:
+			select_tab(STATS_TAB)
+		_:
+			select_tab(0)
 
 
 ## Selecciona el equipo [param equipment_id] (para los tests).
@@ -299,6 +365,33 @@ func _on_decoration_changed(_tank_index: int) -> void:
 func _on_selection_changed(index: int) -> void:
 	_reset_armed = false
 	_show_detail(index)
+	if _tab == DEX_TAB:
+		_book.flip()
+
+
+## Deja a la vista solo las pestañas del grupo [param value] y pone su título al marco.
+func _set_group(value: Group) -> void:
+	_group = value
+	match value:
+		Group.DEX:
+			_tabs.set_visible_tabs(PackedInt32Array([DEX_TAB]))
+		Group.ACHIEVEMENTS:
+			_tabs.set_visible_tabs(PackedInt32Array([ACHIEVEMENTS_TAB]))
+		Group.STATS:
+			_tabs.set_visible_tabs(PackedInt32Array([STATS_TAB]))
+		_:
+			_tabs.set_visible_tabs(SHOP_TABS)
+	_tabs.is_shown = is_active and _tabs.shown_tabs().size() > 1
+	_update_group_header()
+
+
+## El marco lleva «Tienda», o el nombre de la pestaña si el grupo es de una sola.
+func _update_group_header() -> void:
+	var shown: PackedInt32Array = _tabs.shown_tabs()
+	if shown.size() == 1 and shown[0] < _tabs.titles.size():
+		_frame.title = _tabs.titles[shown[0]]
+	else:
+		_frame.title = _text("SHOP_TITLE")
 
 
 func _on_tab_changed(index: int) -> void:
@@ -306,6 +399,7 @@ func _on_tab_changed(index: int) -> void:
 	_reset_armed = false
 	_buy.label = "[ %s ]" % _text("UI_BUY")
 	_decorate.is_shown = is_active and _tab == 2
+	_dex_tabs.is_shown = is_active and _tab == DEX_TAB
 	if _area.size != Vector2i.ZERO:
 		layout(_area)
 	_fill_list()
@@ -316,22 +410,14 @@ func _on_fish_changed(_tank_index: int, _fish: Fish) -> void:
 		_fill_list()
 
 
-func _collect_ids() -> PackedStringArray:
-	var entries: Array[SpeciesDef] = []
-	for species_id: String in Game.content.species_ids():
-		var def: SpeciesDef = Game.content.get_species(species_id)
-		if def.biome_id == Game.state.active().biome_id:
-			entries.append(def)
-	entries.sort_custom(
-		func(a: SpeciesDef, b: SpeciesDef) -> bool: return a.base_cost < b.base_cost
-	)
-	var result: PackedStringArray = PackedStringArray()
-	for def: SpeciesDef in entries:
-		result.append(def.id)
-	return result
-
-
 func _fill_list() -> void:
+	var keep_scroll: int = _list.model.scroll if _filled_tab == _tab else 0
+	_fill_tab_list()
+	_filled_tab = _tab
+	_list.model.scroll = clampi(keep_scroll, 0, _list.model.max_scroll())
+
+
+func _fill_tab_list() -> void:
 	match _tab:
 		PRESTIGE_TAB:
 			_fill_prestige_list()
@@ -352,7 +438,7 @@ func _fill_list() -> void:
 
 
 func _fill_fish_list() -> void:
-	_ids = _collect_ids()
+	_ids = Encyclopedia.species_of(Game.content, Game.state.active().biome_id)
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
 	var prices: PackedStringArray = PackedStringArray()
@@ -393,7 +479,7 @@ func _fill_equipment_list() -> void:
 
 
 func _fill_decoration_list() -> void:
-	_decor_ids = _decoration_for_active_biome()
+	_decor_ids = DecorationShelf.sellable_in(Game.content, Game.state.active().biome_id)
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
 	var prices: PackedStringArray = PackedStringArray()
@@ -411,18 +497,28 @@ func _fill_decoration_list() -> void:
 
 
 ## Decoración que se vende en la pecera activa: la de todos los biomas y la del suyo.
-func _decoration_for_active_biome() -> PackedStringArray:
-	var ids: PackedStringArray = PackedStringArray()
-	var biome_id: String = Game.state.active().biome_id
-	for decoration_id: String in DecorationShelf.sellable_ids(Game.content):
-		var def: DecorationDef = Game.content.get_decoration(decoration_id)
-		if def.biome_id.is_empty() or def.biome_id == biome_id:
-			ids.append(decoration_id)
-	return ids
+## Pone los nombres de los biomas en sus pestañas (se conserva el bioma elegido).
+func _refresh_dex_tabs() -> void:
+	var keep: int = _dex_tabs.selected
+	_dex_biomes = Game.content.biomes.ids()
+	var titles: PackedStringArray = PackedStringArray()
+	for biome_id: String in _dex_biomes:
+		titles.append(_text(Game.content.biomes.get_biome(biome_id).name_key))
+	_dex_tabs.set_titles(titles)
+	_dex_tabs.selected = clampi(keep, 0, maxi(titles.size() - 1, 0))
+
+
+func _on_dex_biome_changed(_index: int) -> void:
+	_filled_tab = -1
+	_list.model.select(0)
+	_fill_list()
 
 
 func _fill_dex_list() -> void:
-	_dex_ids = Encyclopedia.species_of(Game.content)
+	var biome_id: String = ""
+	if _dex_tabs.selected < _dex_biomes.size():
+		biome_id = _dex_biomes[_dex_tabs.selected]
+	_dex_ids = Encyclopedia.species_of(Game.content, biome_id)
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
 	var extras: PackedStringArray = PackedStringArray()
@@ -444,12 +540,10 @@ func _show_dex_detail(index: int) -> void:
 	var species_total: Vector2i = Encyclopedia.species_progress(Game.state, Game.content)
 	_price.text = _text("DEX_TOTALS") % [species_total.x, species_total.y]
 	if index < 0 or index >= _dex_ids.size():
-		_name.text = ""
-		_rarity.text = ""
-		_description.text = ""
-		_owned.text = ""
-		_progress.value = 0.0
+		_clear_detail()
+		_price.text = _text("DEX_TOTALS") % [species_total.x, species_total.y]
 		_portrait.clear()
+		_book.set_variants(PackedStringArray(), [])
 		return
 	var def: SpeciesDef = Game.content.get_species(_dex_ids[index])
 	var found: int = Encyclopedia.variants_found(Game.state, Game.content, def.id)
@@ -460,7 +554,7 @@ func _show_dex_detail(index: int) -> void:
 	if found > 0:
 		_name.text = _text(def.name_key)
 		_description.text = _text(def.description_key)
-		_owned.text = _variant_line(def)
+		_owned.text = DexText.variant_line(def)
 	else:
 		_name.text = _text("DEX_UNKNOWN")
 		_description.text = _text("DEX_UNKNOWN_HINT")
@@ -468,29 +562,13 @@ func _show_dex_detail(index: int) -> void:
 	var total_variants: int = Game.content.variant_ids().size()
 	_progress.value = float(found) / float(maxi(total_variants, 1))
 	_show_portrait(def)
+	_book.set_variants(DexText.variant_names(), DexText.found_flags(def))
 
 
-## Pone el retrato de [param def]: cada variante que se ha tenido o, si no hay
-## ninguna, su silueta.
+## Pone la foto de [param def]: cada variante que se ha tenido o, si no hay ninguna,
+## su silueta.
 func _show_portrait(def: SpeciesDef) -> void:
-	var looks: Array[VariantDef.Look] = []
-	var names: PackedStringArray = PackedStringArray()
-	for variant_id: String in Game.content.variant_ids():
-		if Game.state.is_discovered(def.id, variant_id):
-			var variant: VariantDef = Game.content.get_variant(variant_id)
-			looks.append(variant.look)
-			names.append(_text(variant.name_key))
-	_portrait.show_species(def, looks, names)
-
-
-## Una línea con cada variante: marcada si ya se ha tenido.
-func _variant_line(def: SpeciesDef) -> String:
-	var parts: PackedStringArray = PackedStringArray()
-	for variant_id: String in Game.content.variant_ids():
-		var variant: VariantDef = Game.content.get_variant(variant_id)
-		var mark: String = "x" if Game.state.is_discovered(def.id, variant_id) else " "
-		parts.append("[%s]%s" % [mark, _text(variant.name_key)])
-	return " ".join(parts)
+	_portrait.show_species(def, DexText.discovered_looks(def), DexText.discovered_names(def))
 
 
 func _fill_achievement_list() -> void:

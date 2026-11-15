@@ -7,13 +7,59 @@ extends RefCounted
 ## superior a la conocida no se migra: la rechaza [SaveCodec].
 
 ## Versión actual del formato. Sube en cada cambio incompatible.
-const CURRENT_FORMAT: int = 9
+const CURRENT_FORMAT: int = 13
 
 ## Especies de prueba de las fases 3 y 4 y la especie definitiva que las sustituye.
 const RENAMED_SPECIES: Dictionary[String, String] = {
 	"test_guppy": "pond_guppy",
-	"test_minnow": "pond_minnow",
-	"test_angelfish": "pond_angelfish",
+	"test_minnow": "pond_carp",
+	"test_angelfish": "pond_salmon",
+}
+
+## Enciclopedia 2 (Estanque): las especies que salen pasan a la que ocupa su hueco.
+const POND_REPLACEMENTS: Dictionary[String, String] = {
+	"pond_minnow": "pond_carp",
+	"pond_tetra": "pond_goldfish",
+	"pond_loach": "pond_catfish",
+	"pond_snail": "pond_trout",
+	"pond_angelfish": "pond_salmon",
+}
+
+## Enciclopedia 2 (Arrecife). Un solo paso, sin encadenar: la raya y el pez payaso
+## conservan su identificador pero cambian de hueco, así que la antigua raya pasa a
+## tiburón y el pez globo a raya a la vez.
+const REEF_REPLACEMENTS: Dictionary[String, String] = {
+	"reef_damsel": "reef_anchovy",
+	"reef_butterfly": "reef_clownfish",
+	"reef_starfish": "reef_eel",
+	"reef_tang": "reef_tuna",
+	"reef_seahorse": "reef_squid",
+	"reef_puffer": "reef_ray",
+	"reef_ray": "reef_shark",
+}
+
+## Enciclopedia 2 (Manglar): cada especie pasa a la que ocupa su hueco, también en un
+## solo paso (varias conservan su identificador pero cambian de hueco).
+const MANGROVE_REPLACEMENTS: Dictionary[String, String] = {
+	"mangrove_archer": "mangrove_tadpole",
+	"mangrove_crab": "mangrove_frog",
+	"mangrove_shrimp": "mangrove_crab",
+	"mangrove_catfish": "mangrove_mudskipper",
+	"mangrove_snapper": "mangrove_archer",
+	"mangrove_mudskipper": "mangrove_barracuda",
+	"mangrove_barracuda": "mangrove_arawana",
+	"mangrove_sawfish": "mangrove_crocodile",
+}
+
+## Enciclopedia 2 (Abismo): un solo paso por hueco. La linterna y la medusa se
+## mantienen; el pez remo pasa a ser el calamar gigante y este, al cachalote.
+const ABYSS_REPLACEMENTS: Dictionary[String, String] = {
+	"abyss_hatchet": "abyss_viperfish",
+	"abyss_squid": "abyss_blobfish",
+	"abyss_viperfish": "abyss_anglerfish",
+	"abyss_anglerfish": "abyss_pelican",
+	"abyss_oarfish": "abyss_giant_squid",
+	"abyss_giant_squid": "abyss_sperm_whale",
 }
 
 
@@ -41,6 +87,14 @@ static func migrate(data: Dictionary, from_version: int) -> Dictionary:
 				result = migrate_7_to_8(result)
 			8:
 				result = migrate_8_to_9(result)
+			9:
+				result = migrate_9_to_10(result)
+			10:
+				result = migrate_10_to_11(result)
+			11:
+				result = migrate_11_to_12(result)
+			12:
+				result = migrate_12_to_13(result)
 			_:
 				push_error("SaveMigrations: no hay migración desde la versión %d" % version)
 				return result
@@ -181,4 +235,81 @@ static func migrate_8_to_9(data: Dictionary) -> Dictionary:
 	var result: Dictionary = data.duplicate(true)
 	if not result.has("prestige"):
 		result["prestige"] = {}
+	return result
+
+
+## Enciclopedia 2: las especies del Estanque cambian. Los peces, los huevos, las
+## especies desbloqueadas y lo descubierto en la Enciclopedia pasan a la especie
+## nueva que ocupa el hueco de la antigua ([constant POND_REPLACEMENTS]).
+static func migrate_9_to_10(data: Dictionary) -> Dictionary:
+	return _replace_species(data, POND_REPLACEMENTS)
+
+
+## Enciclopedia 2: lo mismo para el Arrecife ([constant REEF_REPLACEMENTS]).
+static func migrate_10_to_11(data: Dictionary) -> Dictionary:
+	return _replace_species(data, REEF_REPLACEMENTS)
+
+
+## Enciclopedia 2: lo mismo para el Manglar ([constant MANGROVE_REPLACEMENTS]).
+static func migrate_11_to_12(data: Dictionary) -> Dictionary:
+	return _replace_species(data, MANGROVE_REPLACEMENTS)
+
+
+## Enciclopedia 2: lo mismo para el Abismo ([constant ABYSS_REPLACEMENTS]).
+static func migrate_12_to_13(data: Dictionary) -> Dictionary:
+	return _replace_species(data, ABYSS_REPLACEMENTS)
+
+
+static func _replace_species(
+	data: Dictionary, replacements: Dictionary[String, String]
+) -> Dictionary:
+	var result: Dictionary = data.duplicate(true)
+	var tanks: Variant = result.get("tanks")
+	if typeof(tanks) == TYPE_ARRAY:
+		var tank_list: Array = tanks
+		for tank: Variant in tank_list:
+			if typeof(tank) != TYPE_DICTIONARY:
+				continue
+			var tank_data: Dictionary = tank
+			for key: String in ["fish", "eggs"]:
+				_replace_species_in(tank_data.get(key), replacements)
+	if result.has("unlocked"):
+		result["unlocked"] = _replace_ids(result["unlocked"], false, replacements)
+	if result.has("discovered"):
+		result["discovered"] = _replace_ids(result["discovered"], true, replacements)
+	return result
+
+
+static func _replace_species_in(entries: Variant, replacements: Dictionary[String, String]) -> void:
+	if typeof(entries) != TYPE_ARRAY:
+		return
+	var list: Array = entries
+	for entry: Variant in list:
+		if typeof(entry) != TYPE_DICTIONARY:
+			continue
+		var entry_data: Dictionary = entry
+		var old_id: Variant = entry_data.get("species_id")
+		if typeof(old_id) == TYPE_STRING and replacements.has(old_id):
+			entry_data["species_id"] = replacements[old_id]
+
+
+## Cambia los identificadores de una lista (`unlocked`) o de claves `especie|variante`
+## (`discovered`), sin repetir ninguno. Si no hay lista, la deja como estaba.
+static func _replace_ids(
+	raw: Variant, has_variant: bool, replacements: Dictionary[String, String]
+) -> Variant:
+	if typeof(raw) != TYPE_ARRAY:
+		return raw
+	var source: Array = raw
+	var result: Array = []
+	for item: Variant in source:
+		var value: Variant = item
+		if typeof(item) == TYPE_STRING:
+			var text: String = item
+			var parts: PackedStringArray = text.split("|") if has_variant else [text]
+			if replacements.has(parts[0]):
+				parts[0] = replacements[parts[0]]
+			value = "|".join(parts)
+		if not result.has(value):
+			result.append(value)
 	return result

@@ -1,19 +1,11 @@
 # mangrove_barracuda · adulto
 [frame]
-    .--.
-><=======°>>
-    '--'
+><=(===°)>
 [colors]
-    ffff
-ttbbbbbbbebb
-    ffff
+ttdbdddebb
 [frame]
-    .--.
-<>=======°>>
-    '--'
+<>=(===°)>
 [colors]
-    ffff
-ttbbbbbbbebb
-    ffff
+ttdbdddebb
 [anchor]
-eye=9,1
+eye=7,0

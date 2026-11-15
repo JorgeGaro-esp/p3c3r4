@@ -1,0 +1,11 @@
+# reef_squid · juvenil
+[frame]
+<(:°)≈
+[colors]
+tbdebf
+[frame]
+-(:°)~
+[colors]
+tbdebf
+[anchor]
+eye=3,0

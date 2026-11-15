@@ -1,0 +1,15 @@
+# reef_eel · adulto
+[frame]
+  ,-.  ,-.   
+~'  `-'  `-°>
+[colors]
+  fff  fff   
+tb  bbb  bbeb
+[frame]
+  ,-.  ,-.   
+-`  '-`  '-°>
+[colors]
+  fff  fff   
+tb  bbb  bbeb
+[anchor]
+eye=11,1

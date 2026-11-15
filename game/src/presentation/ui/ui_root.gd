@@ -44,6 +44,12 @@ func add_widget(widget: AsciiWidget, layer: int = LAYER_WIDGET) -> void:
 	canvas.add_drawable(widget)
 
 
+## Da el foco del teclado a [param widget] (si puede tenerlo).
+func focus_widget(widget: AsciiWidget) -> void:
+	if widget != null and widget.can_focus():
+		_set_focus(widget)
+
+
 ## Copia de la lista de componentes registrados, en orden de registro.
 func all_widgets() -> Array[AsciiWidget]:
 	return _widgets.duplicate()
@@ -73,15 +79,19 @@ func _on_mouse_button(button: InputEventMouseButton) -> void:
 		return
 	pointer_pressed.emit()
 	var cell: Vector2i = canvas.cell_at(button.position)
+	if (
+		button.button_index == MOUSE_BUTTON_WHEEL_UP
+		or button.button_index == MOUSE_BUTTON_WHEEL_DOWN
+	):
+		var direction: int = -1 if button.button_index == MOUSE_BUTTON_WHEEL_UP else 1
+		if dispatch_wheel(cell, direction):
+			get_viewport().set_input_as_handled()
+		return
 	var target: AsciiWidget = _widget_at(cell)
 	if target == null:
 		return
 	var handled: bool = false
-	if button.button_index == MOUSE_BUTTON_WHEEL_UP:
-		handled = target.handle_wheel(cell, -1)
-	elif button.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-		handled = target.handle_wheel(cell, 1)
-	elif button.button_index == MOUSE_BUTTON_LEFT and target.is_interactive():
+	if button.button_index == MOUSE_BUTTON_LEFT and target.is_interactive():
 		if target.focus_on_click:
 			_set_focus(target)
 		handled = target.handle_click(cell, button.double_click)
@@ -89,6 +99,32 @@ func _on_mouse_button(button: InputEventMouseButton) -> void:
 			EventBus.ui_clicked.emit()
 	if handled:
 		get_viewport().set_input_as_handled()
+
+
+## Reparte la rueda: primero los componentes bajo el cursor, de arriba abajo; si
+## ninguno la atiende, las listas visibles (el cursor puede estar sobre su detalle).
+func dispatch_wheel(cell: Vector2i, direction: int) -> bool:
+	var under: Array[AsciiWidget] = []
+	for widget: AsciiWidget in _widgets:
+		if widget.contains_cell(cell):
+			under.append(widget)
+	under.sort_custom(
+		func(first: AsciiWidget, second: AsciiWidget) -> bool:
+			if first.layer != second.layer:
+				return first.layer > second.layer
+			return _widgets.find(first) > _widgets.find(second)
+	)
+	for widget: AsciiWidget in under:
+		if widget.handle_wheel(cell, direction):
+			return true
+	for widget: AsciiWidget in _widgets:
+		if (
+			widget.wheel_fallback
+			and widget.is_interactive()
+			and widget.handle_wheel(cell, direction)
+		):
+			return true
+	return false
 
 
 func _on_key(key: InputEventKey) -> void:

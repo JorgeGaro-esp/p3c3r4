@@ -32,6 +32,8 @@ func before_each() -> void:
 
 
 func after_each() -> void:
+	_main.queue_free()
+	await wait_process_frames(2)
 	Game.start_new_game(Game.DEFAULT_SEED)
 
 

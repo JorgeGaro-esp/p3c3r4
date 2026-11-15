@@ -15,11 +15,15 @@ var scroll: int = 0
 func configure(new_count: int, new_visible_rows: int) -> void:
 	count = maxi(new_count, 0)
 	visible_rows = maxi(new_visible_rows, 1)
+	var before: int = selected
 	selected = clampi(selected, 0, count - 1) if count > 0 else -1
 	if count > 0 and selected < 0:
 		selected = 0
 	scroll = clampi(scroll, 0, max_scroll())
-	_ensure_visible()
+	# Solo se recoloca la vista si la selección cambió: reajustar el tamaño no debe
+	# deshacer lo que el usuario desplazó con la rueda.
+	if selected != before:
+		_ensure_visible()
 
 
 ## Mayor desplazamiento posible.

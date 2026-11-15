@@ -55,14 +55,29 @@ const RARITY_SYMBOLS: String = "·+*#@"
 ## Sprites de alevín y juvenil. Vacíos, se usan los genéricos de `content/sprites/`.
 @export_file("*.txt") var fry_sprite_path: String = ""
 @export_file("*.txt") var juvenile_sprite_path: String = ""
-## Estilo de nado: 0 DART, 1 GLIDE, 2 DRIFT, 3 CRAWL (ver `SwimMotion.Style`).
-@export_range(0, 3) var style: int = 1
+## Estilo de nado: 0 DART, 1 GLIDE, 2 DRIFT, 3 CRAWL, 4 HOP (ver `SwimMotion.Style`).
+@export_range(0, 4) var style: int = 1
 ## Velocidad de crucero, en celdas por segundo.
 @export var speed: float = 6.0
 ## Amplitud máxima de la onda del cuerpo, en celdas.
 @export var amplitude: float = 0.15
 ## Ondulaciones por segundo.
 @export var frequency: float = 1.2
+## Radianes de onda a lo largo del cuerpo (1 rígido, 8 serpenteante como una anguila).
+@export_range(1.0, 12.0) var wave_number: float = 4.0
+## Cuánto tiende el pez a nadar con los de su especie (0 solo, 1 banco muy unido).
+@export_range(0.0, 1.0) var school_pull: float = 0.0
+## Franja de profundidad donde vive, de 0 (superficie) a 1 (fondo): el siluro va al
+## fondo y el arawana junto a la superficie.
+@export_range(0.0, 1.0) var depth_min: float = 0.0
+@export_range(0.0, 1.0) var depth_max: float = 1.0
+## Probabilidad de quedarse parado al llegar a un destino (el rape emboscado casi
+## siempre; el tiburón nunca) y segundos medios que dura la parada.
+@export_range(0.0, 1.0) var rest_chance: float = 0.0
+@export_range(0.5, 20.0) var rest_seconds: float = 3.0
+## Carácter ante el cursor y los clics: de -1 (huidizo, se aparta) a 1 (curioso, se
+## acerca). Con 0 no le importa.
+@export_range(-1.0, 1.0) var temperament: float = 0.0
 ## Segundos que dura cada fotograma de la animación.
 @export var frame_duration: float = 0.4
 

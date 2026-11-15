@@ -1,0 +1,11 @@
+# mangrove_crab · juvenil
+[frame]
+~=(:°)>
+[colors]
+ttbdebf
+[frame]
+-=(:°)>
+[colors]
+ttbdebf
+[anchor]
+eye=4,0

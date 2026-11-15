@@ -22,7 +22,7 @@ func _state(active: int) -> GameState:
 	var state: GameState = GameState.new()
 	state.tanks.clear()
 	state.tanks.append(_fish_tank("pond", "pond_guppy", 6))
-	state.tanks.append(_fish_tank("reef", "reef_clownfish", 6))
+	state.tanks.append(_fish_tank("reef", "reef_krill", 6))
 	state.active_tank = active
 	return state
 
@@ -70,7 +70,7 @@ func test_care_runs_in_every_tank_whether_it_is_seen_or_not() -> void:
 
 func test_eggs_hatch_in_a_hidden_tank() -> void:
 	var state: GameState = _state(0)
-	state.tanks[1].eggs.append(Egg.new("reef_clownfish", VariantDef.NORMAL_ID, 1.0))
+	state.tanks[1].eggs.append(Egg.new("reef_krill", VariantDef.NORMAL_ID, 1.0))
 	var before: int = state.tanks[1].fish.size()
 	var hatched: int = 0
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()

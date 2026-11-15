@@ -100,7 +100,7 @@ func test_two_happy_adults_lay_an_egg_after_the_species_interval() -> void:
 
 func test_one_adult_alone_never_breeds() -> void:
 	_add("pond_guppy")
-	_add("pond_minnow")
+	_add("pond_carp")
 	_run(_content.get_species("pond_guppy").breed_seconds * 3.0)
 	assert_eq(_tank().eggs.size(), 0)
 
@@ -143,13 +143,13 @@ func test_an_egg_takes_a_free_slot_until_it_hatches() -> void:
 
 
 func test_an_egg_hatches_into_a_fry_with_the_rolled_variant() -> void:
-	var egg: Egg = Egg.new("pond_koi", "golden", 0.5)
+	var egg: Egg = Egg.new("pond_wels", "golden", 0.5)
 	_tank().eggs.append(egg)
 	_run(1.0)
 	assert_eq(_tank().eggs.size(), 0)
 	assert_eq(_tank().fish.size(), 1)
 	var baby: Fish = _tank().fish[0]
-	assert_eq(baby.species_id, "pond_koi")
+	assert_eq(baby.species_id, "pond_wels")
 	assert_eq(baby.variant_id, "golden")
 	assert_eq(baby.stage(), LifeStage.Stage.FRY)
 	var hatched: Array[HatchEvent] = _state.take_hatched()
@@ -161,7 +161,7 @@ func test_an_egg_hatches_into_a_fry_with_the_rolled_variant() -> void:
 func test_hatching_does_not_change_the_number_of_used_slots() -> void:
 	_tank().capacity = 4
 	_tank().eggs.append(Egg.new("pond_guppy", "normal", 0.2))
-	_add("pond_minnow")
+	_add("pond_carp")
 	var before: int = _tank().occupied()
 	_run(1.0)
 	assert_eq(_tank().occupied(), before)

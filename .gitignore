@@ -32,3 +32,5 @@ __pycache__/
 save*.json
 !game/tests/fixtures/**
 .env
+build/
+game/.godot/

@@ -96,11 +96,12 @@ func test_reduce_motion_turns_off_the_crt_flicker() -> void:
 	assert_eq(flicker, 0.0)
 
 
-func test_deleting_the_game_starts_a_new_one_after_three_presses() -> void:
-	Game.state.wallet.add(5000.0)
+func test_deleting_the_slot_asks_the_title_only_after_three_presses() -> void:
 	var settings: SettingsPanel = _strip._settings_panel
+	watch_signals(settings)
 	settings._on_delete_pressed()
 	settings._on_delete_pressed()
-	assert_gt(Game.state.wallet.shells, 1000.0)
+	assert_signal_not_emitted(settings, "title_requested")
 	settings._on_delete_pressed()
-	assert_lt(Game.state.wallet.shells, 1000.0)
+	assert_signal_emit_count(settings, "title_requested", 1)
+	assert_signal_emitted_with_parameters(settings, "title_requested", [true])

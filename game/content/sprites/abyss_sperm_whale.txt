@@ -1,0 +1,15 @@
+# abyss_sperm_whale · adulto
+[frame]
+    ,-----. 
+><=(~~~°   )
+[colors]
+    fffffff 
+tttbddde   b
+[frame]
+    ,-----. 
+<>=(~~~°   )
+[colors]
+    fffffff 
+tttbddde   b
+[anchor]
+eye=7,1

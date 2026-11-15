@@ -1,0 +1,11 @@
+# pond_guppy · juvenil
+[frame]
+<°>
+[colors]
+teb
+[frame]
+-°>
+[colors]
+teb
+[anchor]
+eye=1,0

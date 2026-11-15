@@ -1,0 +1,11 @@
+# pond_trout · adulto
+[frame]
+><(:°)>
+[colors]
+ttbbebb
+[frame]
+<>(:°)>
+[colors]
+ttbbebb
+[anchor]
+eye=4,0

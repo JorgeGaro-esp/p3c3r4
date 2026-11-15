@@ -1,19 +1,11 @@
 # mangrove_archer · adulto
 [frame]
-  _.-._
-><(|||°)>
-  '-.-'
+><(||°)>··
 [colors]
-  fffff
-ttbdddebb
-  fffff
+ttbddebbff
 [frame]
-  _.-._
-<>(|||°)>
-  '-.-'
+<>(||°)> ·
 [colors]
-  fffff
-ttbdddebb
-  fffff
+ttbddebb f
 [anchor]
-eye=6,1
+eye=5,0

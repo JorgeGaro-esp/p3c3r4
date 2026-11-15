@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "mangrove_frog"
+name_key = "SPECIES_MANGROVE_FROG"
+description_key = "SPECIES_MANGROVE_FROG_DESC"
+biome_id = "mangrove"
+rarity = 0
+activity = 2
+base_cost = 20000.0
+base_production = 29.57
+unlock_kind = 0
+unlock_amount = 0.0
+unlock_species_id = ""
+unlock_tag = ""
+sprite_path = "res://content/sprites/mangrove_frog.txt"
+palette_roles = PackedStringArray("b", "t", "d", "f", "e")
+palette_colors = PackedColorArray(0.5, 0.85, 0.4, 1, 0.45, 0.75, 0.35, 1, 0.85, 0.95, 0.5, 1, 0.45, 0.75, 0.35, 1, 1, 1, 1, 1)
+growth_seconds = 330.0
+breed_seconds = 480.0
+hatch_seconds = 75.0
+fry_sprite_path = "res://content/sprites/mangrove_frog_fry.txt"
+juvenile_sprite_path = "res://content/sprites/mangrove_frog_juvenile.txt"
+style = 4
+speed = 3.0
+amplitude = 0.1
+frequency = 0.8
+frame_duration = 0.5
+wave_number = 2.0
+school_pull = 0.0
+depth_min = 0.0
+depth_max = 1.0
+rest_chance = 0.0
+rest_seconds = 2.5
+temperament = -0.7

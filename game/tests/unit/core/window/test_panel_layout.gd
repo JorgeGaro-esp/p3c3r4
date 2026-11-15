@@ -17,14 +17,15 @@ func test_closed_panel_leaves_tank_and_sidebar_side_by_side() -> void:
 func test_replace_panel_covers_the_tank() -> void:
 	var layout: PanelLayout = PanelLayout.compute(120, 12, 12, REPLACE, true)
 	assert_eq(layout.panel_rect, layout.tank_rect)
-	assert_eq(layout.sidebar_rect.position.x, 100)
+	assert_eq(layout.sidebar_rect.position.x, 120 - PanelLayout.SIDEBAR_WIDTH)
 
 
 func test_grow_up_panel_goes_above_the_tank() -> void:
 	var layout: PanelLayout = PanelLayout.compute(120, 26, 12, GROW_UP, true)
 	assert_eq(layout.panel_rect, Rect2i(0, 0, 120, 14))
-	assert_eq(layout.tank_rect, Rect2i(0, 14, 100, 12), "la pecera conserva su altura")
-	assert_eq(layout.sidebar_rect, Rect2i(100, 14, 20, 12))
+	var side: int = PanelLayout.SIDEBAR_WIDTH
+	assert_eq(layout.tank_rect, Rect2i(0, 14, 120 - side, 12), "la pecera conserva su altura")
+	assert_eq(layout.sidebar_rect, Rect2i(120 - side, 14, side, 12))
 	assert_false(layout.panel_rect.intersects(layout.tank_rect))
 	assert_false(layout.panel_rect.intersects(layout.sidebar_rect))
 

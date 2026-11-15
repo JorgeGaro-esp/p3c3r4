@@ -76,6 +76,34 @@ func quarantine(file_name: String, unix_time: int) -> bool:
 	return moved
 
 
+## Todos los archivos de partida que gestiona (principal, copias y temporal).
+func managed_files() -> PackedStringArray:
+	var names: PackedStringArray = PackedStringArray([MAIN_FILE, TEMP_FILE])
+	for number: int in range(1, BACKUP_COUNT + 1):
+		names.append(backup_name(number))
+	return names
+
+
+## Borra la partida y sus copias (no los archivos apartados por dañados).
+func clear() -> void:
+	for file_name: String in managed_files():
+		_remove(file_name)
+
+
+## Mueve la partida y sus copias a [param target_directory]. Devuelve si todo pasó.
+func move_to(target_directory: String) -> bool:
+	if DirAccess.make_dir_recursive_absolute(target_directory) != OK:
+		return false
+	var all_moved: bool = true
+	for file_name: String in managed_files():
+		if not FileAccess.file_exists(_path(file_name)):
+			continue
+		var target: String = target_directory.path_join(file_name)
+		if DirAccess.rename_absolute(_path(file_name), target) != OK:
+			all_moved = false
+	return all_moved
+
+
 func exists(file_name: String) -> bool:
 	return FileAccess.file_exists(_path(file_name))
 

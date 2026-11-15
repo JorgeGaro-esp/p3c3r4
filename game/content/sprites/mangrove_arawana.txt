@@ -1,0 +1,15 @@
+# mangrove_arawana · adulto
+[frame]
+   _____   
+><(_____°)≈
+[colors]
+   ddddd   
+ttbdddddebf
+[frame]
+   _____   
+<>(_____°)~
+[colors]
+   ddddd   
+ttbdddddebf
+[anchor]
+eye=8,1

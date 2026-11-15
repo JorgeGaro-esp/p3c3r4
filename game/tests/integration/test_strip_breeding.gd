@@ -35,6 +35,8 @@ func before_each() -> void:
 
 
 func after_each() -> void:
+	_main.queue_free()
+	await wait_process_frames(2)
 	Game.start_new_game(Game.DEFAULT_SEED)
 
 
@@ -62,7 +64,7 @@ func _hatch(species_id: String, variant_id: String) -> Fish:
 
 
 func test_a_hatchling_appears_as_a_fry_and_changes_sprite_when_it_grows() -> void:
-	var baby: Fish = await _hatch("pond_koi", "normal")
+	var baby: Fish = await _hatch("pond_wels", "normal")
 	var view: FishView = _view_of(baby)
 	assert_eq(view.stage, LifeStage.Stage.FRY)
 	var fry_width: int = view.width
@@ -78,7 +80,7 @@ func test_a_hatchling_appears_as_a_fry_and_changes_sprite_when_it_grows() -> voi
 
 
 func test_a_growing_fish_keeps_its_place_in_the_water() -> void:
-	var baby: Fish = await _hatch("pond_goldfish", "normal")
+	var baby: Fish = await _hatch("pond_salmon", "normal")
 	var before: Vector2 = _tank.fish_position(baby)
 	baby.maturity = 0.5
 	await wait_frames(1)
@@ -93,7 +95,7 @@ func test_eggs_in_the_model_are_drawn_on_the_bottom() -> void:
 
 
 func test_a_rare_hatchling_shows_a_notice_in_the_sidebar() -> void:
-	await _hatch("pond_tetra", "golden")
+	await _hatch("pond_goldfish", "golden")
 	var found: bool = false
 	for text: String in _visible_label_texts():
 		if text.contains("Dorada"):
@@ -102,7 +104,7 @@ func test_a_rare_hatchling_shows_a_notice_in_the_sidebar() -> void:
 
 
 func test_the_fish_card_shows_stage_and_variant() -> void:
-	var baby: Fish = await _hatch("pond_tetra", "albino")
+	var baby: Fish = await _hatch("pond_goldfish", "albino")
 	_controller.show_card(baby)
 	await wait_frames(2)
 	var found: bool = false
@@ -159,7 +161,7 @@ func test_surplus_button_is_only_enabled_with_extra_normal_fish() -> void:
 
 
 func test_rare_variants_are_not_offered_in_bulk() -> void:
-	var rare: Fish = await _hatch("pond_koi", "prismatic")
+	var rare: Fish = await _hatch("pond_wels", "prismatic")
 	_controller.show_card(rare)
 	await wait_frames(2)
 	assert_false(_controller._card._sell_surplus.is_enabled)

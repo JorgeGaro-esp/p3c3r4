@@ -1,0 +1,9 @@
+# mangrove_crab · cría
+[frame]
+v
+[colors]
+b
+[frame]
+w
+[colors]
+b

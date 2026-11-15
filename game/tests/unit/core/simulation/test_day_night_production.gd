@@ -32,8 +32,8 @@ func test_the_starter_fish_is_neutral() -> void:
 
 
 func test_a_nocturnal_fish_produces_more_at_night() -> void:
-	var day: float = _rate("pond_loach", 0.0)
-	var night: float = _rate("pond_loach", 1.0)
+	var day: float = _rate("pond_catfish", 0.0)
+	var night: float = _rate("pond_catfish", 1.0)
 	assert_gt(night, day)
 	assert_almost_eq(
 		night / day, (1.0 + DayCycle.NIGHT_EFFECT) / (1.0 - DayCycle.NIGHT_EFFECT), 0.001
@@ -41,24 +41,24 @@ func test_a_nocturnal_fish_produces_more_at_night() -> void:
 
 
 func test_a_diurnal_fish_produces_more_by_day() -> void:
-	assert_gt(_rate("pond_goldfish", 0.0), _rate("pond_goldfish", 1.0))
+	assert_gt(_rate("pond_salmon", 0.0), _rate("pond_salmon", 1.0))
 
 
 func test_the_lamp_softens_the_night_for_a_diurnal_fish() -> void:
-	var dark: float = _rate("pond_goldfish", 1.0)
-	var lit: float = _rate("pond_goldfish", 1.0, 5)
+	var dark: float = _rate("pond_salmon", 1.0)
+	var lit: float = _rate("pond_salmon", 1.0, 5)
 	assert_gt(lit, dark)
-	assert_almost_eq(lit, _rate("pond_goldfish", 0.0) / (1.0 + DayCycle.NIGHT_EFFECT), 0.001)
+	assert_almost_eq(lit, _rate("pond_salmon", 0.0) / (1.0 + DayCycle.NIGHT_EFFECT), 0.001)
 
 
 func test_the_lamp_never_hurts_a_nocturnal_fish_at_night() -> void:
-	assert_almost_eq(_rate("pond_loach", 1.0, 5), _rate("pond_loach", 1.0), 0.0001)
+	assert_almost_eq(_rate("pond_catfish", 1.0, 5), _rate("pond_catfish", 1.0), 0.0001)
 
 
 func test_one_lamp_level_gives_a_partial_shield() -> void:
-	var dark: float = _rate("pond_goldfish", 1.0)
-	var one: float = _rate("pond_goldfish", 1.0, 1)
-	var five: float = _rate("pond_goldfish", 1.0, 5)
+	var dark: float = _rate("pond_salmon", 1.0)
+	var one: float = _rate("pond_salmon", 1.0, 1)
+	var five: float = _rate("pond_salmon", 1.0, 5)
 	assert_gt(one, dark)
 	assert_lt(one, five)
 
@@ -78,10 +78,10 @@ func test_every_species_stays_within_the_limit_at_any_hour() -> void:
 
 func test_a_mixed_tank_swings_less_than_a_single_nocturnal_one() -> void:
 	var mixed: GameState = GameState.new()
-	for species_id: String in ["pond_loach", "pond_loach", "pond_goldfish", "pond_goldfish"]:
+	for species_id: String in ["pond_catfish", "pond_catfish", "pond_salmon", "pond_salmon"]:
 		mixed.tanks[0].add_fish(Fish.new(species_id))
 	var swing: float = _swing(mixed)
-	assert_lt(swing, _swing(_state_with("pond_loach", 0.0)))
+	assert_lt(swing, _swing(_state_with("pond_catfish", 0.0)))
 
 
 func _swing(state: GameState) -> float:

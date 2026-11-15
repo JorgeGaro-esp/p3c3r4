@@ -1,0 +1,11 @@
+# reef_clownfish · juvenil
+[frame]
+><(|_°|>
+[colors]
+ttbdbedb
+[frame]
+<>(|_°|>
+[colors]
+ttbdbedb
+[anchor]
+eye=5,0

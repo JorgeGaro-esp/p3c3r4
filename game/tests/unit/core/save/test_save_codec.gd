@@ -15,7 +15,7 @@ func _sample_state() -> GameState:
 	state.rng_state = 123456789
 	state.wallet.add(250.0)
 	state.tanks[0].add_fish(Fish.new("pond_guppy"))
-	state.tanks[0].add_fish(Fish.new("pond_minnow"))
+	state.tanks[0].add_fish(Fish.new("pond_carp"))
 	state.mark_production_dirty()
 	return state
 
@@ -151,14 +151,14 @@ func test_format_1_saves_with_test_species_are_migrated() -> void:
 
 func test_unlocked_species_round_trip_and_unknown_ones_are_ignored() -> void:
 	var state: GameState = _sample_state()
-	state.unlocked["pond_tetra"] = true
+	state.unlocked["pond_goldfish"] = true
 	var envelope: Dictionary = _envelope(SaveCodec.encode(state, "0.5.0", 1000))
 	var data: Dictionary = envelope["data"]
 	var listed: Array = data["unlocked"]
 	listed.append("no_such_species")
 	var result: DecodeResult = SaveCodec.decode(_reseal(envelope), _content)
 	assert_true(result.is_ok(), result.reason)
-	assert_true(result.state.is_unlocked("pond_tetra"))
+	assert_true(result.state.is_unlocked("pond_goldfish"))
 	assert_false(result.state.is_unlocked("no_such_species"))
 
 
@@ -207,7 +207,7 @@ func test_life_stage_variant_eggs_and_discoveries_round_trip() -> void:
 	var baby: Fish = state.tanks[0].fish[0]
 	baby.maturity = 0.4
 	baby.variant_id = "golden"
-	state.tanks[0].eggs.append(Egg.new("pond_koi", "albino", 12.5, 0.25))
+	state.tanks[0].eggs.append(Egg.new("pond_wels", "albino", 12.5, 0.25))
 	state.discover("pond_guppy", "golden")
 	var result: DecodeResult = SaveCodec.decode(SaveCodec.encode(state, "0.8.0", 1), _content)
 	assert_true(result.is_ok(), result.reason)
@@ -218,7 +218,7 @@ func test_life_stage_variant_eggs_and_discoveries_round_trip() -> void:
 	var egg: Egg = result.state.tanks[0].eggs[0]
 	assert_eq(
 		[egg.species_id, egg.variant_id, egg.remaining, egg.position_x],
-		["pond_koi", "albino", 12.5, 0.25]
+		["pond_wels", "albino", 12.5, 0.25]
 	)
 	assert_true(result.state.is_discovered("pond_guppy", "golden"))
 	assert_false(result.state.is_discovered("pond_guppy", "albino"))

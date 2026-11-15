@@ -8,7 +8,7 @@ extends RefCounted
 ## panel ocupa la parte nueva, dejando la pecera visible debajo.
 
 ## Ancho de la barra lateral en columnas.
-const SIDEBAR_WIDTH: int = 20
+const SIDEBAR_WIDTH: int = 28
 ## Filas que añade el modo GROW_UP cuando hay sitio.
 const GROW_ROWS: int = 14
 ## Con menos filas nuevas que estas, el panel no cabe encima y se usa REPLACE.

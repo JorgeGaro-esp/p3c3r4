@@ -18,6 +18,16 @@ const SWIM_SPEED_SCALE: float = 0.22
 ## La onda se exagera algo: en un recuadro pequeño la de la pecera apenas se ve.
 const WAVE_GAIN: float = 3.0
 const MAX_WAVE: float = 0.9
+## Marco de la «foto»: esquinas y lados.
+const FRAME_CORNERS: String = "┌┐└┘"
+const FRAME_HORIZONTAL: String = "─"
+const FRAME_VERTICAL: String = "│"
+
+static var _widest_cache: int = -1
+
+## Si dibuja un marco de foto alrededor (el pez nada dentro de él).
+var has_frame: bool = true
+var frame_color: Color = AsciiColors.TEXT_DIM
 
 var _species_id: String = ""
 var _sprite: AsciiSprite = null
@@ -41,7 +51,7 @@ func show_species(def: SpeciesDef, looks: Array[VariantDef.Look], names: PackedS
 	_names = names
 	_frame_duration = maxf(def.frame_duration, 0.05)
 	_palette = def.build_palette()
-	_sprite = _sprite_for(def)
+	_sprite = _fitting_sprite(def)
 	_mirrored = _sprite.mirrored() if _sprite != null else null
 	if changed or _motion == null:
 		_clock = 0.0
@@ -70,6 +80,11 @@ func current_index() -> int:
 	if _looks.is_empty():
 		return -1
 	return int(_clock / VARIANT_SECONDS) % _looks.size()
+
+
+## Ancho del sprite que se enseña ahora (0 sin retrato).
+func shown_width() -> int:
+	return 0 if _sprite == null else _sprite.width
 
 
 ## Si se dibuja la silueta (el pez no se ha descubierto).
@@ -101,37 +116,70 @@ func update(delta: float, _canvas: AsciiCanvas) -> void:
 
 
 func draw(canvas: AsciiCanvas) -> void:
-	if _sprite == null or rect.size.x < _sprite.width or rect.size.y < _sprite.height:
+	if _sprite == null:
+		return
+	_draw_frame(canvas)
+	var area: Rect2i = _inner()
+	if area.size.x < _sprite.width or area.size.y < _sprite.height:
 		return
 	var caption_rows: int = _caption_rows()
 	if _looks.is_empty():
 		var origin: Vector2i = (
-			rect.position
+			area.position
 			+ Vector2i(
-				(rect.size.x - _sprite.width) / 2, (rect.size.y - caption_rows - _sprite.height) / 2
+				(area.size.x - _sprite.width) / 2, (area.size.y - caption_rows - _sprite.height) / 2
 			)
 		)
 		_draw_silhouette(canvas, origin)
 		return
 	_fit_bounds()
-	_draw_sprite(canvas, Vector2(rect.position) + _motion.position)
+	_draw_sprite(canvas, Vector2(area.position) + _motion.position)
 	_draw_caption(canvas)
+
+
+## Zona donde se ve el pez: el rectángulo menos el marco.
+func _inner() -> Rect2i:
+	return rect.grow(-1) if has_frame else rect
+
+
+func _draw_frame(canvas: AsciiCanvas) -> void:
+	if not has_frame or rect.size.x < 3 or rect.size.y < 3:
+		return
+	var left: float = float(rect.position.x)
+	var top: float = float(rect.position.y)
+	var right: float = float(rect.end.x - 1)
+	var bottom: float = float(rect.end.y - 1)
+	var middle: int = rect.size.x - 2
+	canvas.put_string(
+		FRAME_CORNERS[0] + FRAME_HORIZONTAL.repeat(middle) + FRAME_CORNERS[1],
+		Vector2(left, top),
+		frame_color
+	)
+	canvas.put_string(
+		FRAME_CORNERS[2] + FRAME_HORIZONTAL.repeat(middle) + FRAME_CORNERS[3],
+		Vector2(left, bottom),
+		frame_color
+	)
+	for row: int in range(1, rect.size.y - 1):
+		canvas.put_char(FRAME_VERTICAL, Vector2(left, top + float(row)), frame_color)
+		canvas.put_char(FRAME_VERTICAL, Vector2(right, top + float(row)), frame_color)
 
 
 ## Filas que ocupa el nombre de la variante bajo el pez.
 func _caption_rows() -> int:
-	if not _looks.is_empty() and rect.size.y > _sprite.height:
+	if not _looks.is_empty() and _inner().size.y > _sprite.height:
 		return 1
 	return 0
 
 
 ## Ajusta la zona de nado al recuadro y al tamaño del sprite si han cambiado.
 func _fit_bounds() -> void:
+	var inner: Rect2i = _inner()
 	var area: Rect2 = Rect2(
 		0.0,
 		0.0,
-		float(maxi(rect.size.x - _sprite.width, 0)),
-		float(maxi(rect.size.y - _caption_rows() - _sprite.height, 0))
+		float(maxi(inner.size.x - _sprite.width, 0)),
+		float(maxi(inner.size.y - _caption_rows() - _sprite.height, 0))
 	)
 	if area == _bounds:
 		return
@@ -158,8 +206,9 @@ func _draw_sprite(canvas: AsciiCanvas, origin: Vector2) -> void:
 	var look: VariantDef.Look = _looks[current_index()]
 	var lines: PackedStringArray = shown.frames[frame]
 	var color_lines: PackedStringArray = shown.colors[frame]
-	var top: float = float(rect.position.y)
-	var bottom: float = float(rect.end.y - _caption_rows() - 1)
+	var inner: Rect2i = _inner()
+	var top: float = float(inner.position.y)
+	var bottom: float = float(inner.end.y - _caption_rows() - 1)
 	var squash: float = _motion.turn_scale()
 	var half: float = float(shown.width - 1) * 0.5
 	for row: int in range(lines.size()):
@@ -188,19 +237,60 @@ func _draw_sprite(canvas: AsciiCanvas, origin: Vector2) -> void:
 
 func _draw_caption(canvas: AsciiCanvas) -> void:
 	var index: int = current_index()
-	if index < 0 or index >= _names.size() or rect.size.y <= _sprite.height:
+	var inner: Rect2i = _inner()
+	if index < 0 or index >= _names.size() or inner.size.y <= _sprite.height:
 		return
-	var text: String = _names[index]
-	var x: int = rect.position.x + maxi((rect.size.x - text.length()) / 2, 0)
-	canvas.put_string(text, Vector2(x, rect.position.y + rect.size.y - 1), AsciiColors.TEXT_DIM)
+	var text: String = UiText.fit(_names[index], inner.size.x)
+	var x: int = inner.position.x + maxi((inner.size.x - text.length()) / 2, 0)
+	canvas.put_string(text, Vector2(x, inner.end.y - 1), AsciiColors.TEXT_DIM)
 
 
-func _sprite_for(def: SpeciesDef) -> AsciiSprite:
-	if _sprites.has(def.id):
-		return _sprites[def.id]
-	var sprite: AsciiSprite = SpriteLoader.load_file(def.sprite_path)
-	if not sprite.is_valid():
-		push_error("AsciiPortrait: invalid sprite %s: %s" % [def.sprite_path, sprite.errors])
+## El sprite adulto si cabe en el recuadro; si no, el juvenil o la cría, y como último
+## recurso el adulto (se dibuja recortado). Así nunca queda el recuadro vacío.
+func _fitting_sprite(def: SpeciesDef) -> AsciiSprite:
+	var adult: AsciiSprite = _sprite_for(def.sprite_path)
+	if adult == null or _fits(adult):
+		return adult
+	for path: String in [def.juvenile_sprite_path, def.fry_sprite_path]:
+		var smaller: AsciiSprite = _sprite_for(path)
+		if smaller != null and _fits(smaller):
+			return smaller
+	return adult
+
+
+func _fits(sprite: AsciiSprite) -> bool:
+	var area: Rect2i = _inner()
+	return area.size.x >= sprite.width and area.size.y >= sprite.height
+
+
+func _sprite_for(path: String) -> AsciiSprite:
+	if path.is_empty():
 		return null
-	_sprites[def.id] = sprite
+	if _sprites.has(path):
+		return _sprites[path]
+	var sprite: AsciiSprite = SpriteLoader.load_file(path)
+	if not sprite.is_valid():
+		push_error("AsciiPortrait: invalid sprite %s: %s" % [path, sprite.errors])
+		return null
+	_sprites[path] = sprite
 	return sprite
+
+
+## Ancho del sprite adulto más ancho del contenido (se calcula una vez).
+static func widest_fish(content: ContentDB) -> int:
+	if _widest_cache < 0:
+		var defs: Array[SpeciesDef] = []
+		for id: String in content.species_ids():
+			defs.append(content.get_species(id))
+		_widest_cache = widest_sprite(defs)
+	return _widest_cache
+
+
+## Ancho en columnas del sprite adulto más ancho de [param defs].
+static func widest_sprite(defs: Array[SpeciesDef]) -> int:
+	var widest: int = 0
+	for def: SpeciesDef in defs:
+		var sprite: AsciiSprite = SpriteLoader.load_file(def.sprite_path)
+		if sprite.is_valid():
+			widest = maxi(widest, sprite.width)
+	return widest

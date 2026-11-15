@@ -8,6 +8,9 @@ const PRISM_SPEED: float = 0.25
 const ALBINO_TARGET: Color = Color(1.0, 0.93, 0.95)
 const ALBINO_AMOUNT: float = 0.7
 const MELANISTIC_DARKEN: float = 0.65
+## Luminancia mínima de la melánica: sobre el fondo negro tiene que seguir viéndose.
+const MELANISTIC_FLOOR: float = 0.4
+const MELANISTIC_LIFT: Color = Color(0.62, 0.62, 0.7)
 const GOLDEN_BASE: Color = Color(0.95, 0.74, 0.12)
 const GOLDEN_SHINE: float = 0.45
 const PRISM_SATURATION: float = 0.75
@@ -27,6 +30,12 @@ static func tint(
 			var dark: Color = source.darkened(MELANISTIC_DARKEN)
 			var gray: float = dark.get_luminance()
 			var muted: Color = dark.lerp(Color(gray, gray, gray * 1.4), 0.5)
+			var shine: float = muted.get_luminance()
+			if shine < MELANISTIC_FLOOR:
+				var lift: float = (
+					(MELANISTIC_FLOOR - shine) / (MELANISTIC_LIFT.get_luminance() - shine)
+				)
+				muted = muted.lerp(MELANISTIC_LIFT, clampf(lift, 0.0, 1.0))
 			return Color(muted.r, muted.g, clampf(muted.b, 0.0, 1.0), source.a)
 		VariantDef.Look.GOLDEN:
 			var gold: Color = GOLDEN_BASE.lerp(Color.WHITE, luminance * GOLDEN_SHINE)

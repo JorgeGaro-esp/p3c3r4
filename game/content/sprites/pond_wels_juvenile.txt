@@ -1,0 +1,11 @@
+# pond_wels · juvenil
+[frame]
+~~=(_°)>
+[colors]
+ttbbdebb
+[frame]
+-~=(_°)>
+[colors]
+ttbbdebb
+[anchor]
+eye=5,0

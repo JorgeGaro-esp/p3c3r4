@@ -12,7 +12,7 @@ func before_all() -> void:
 
 func test_species_of_a_biome_are_sorted_by_cost() -> void:
 	var ids: PackedStringArray = Encyclopedia.species_of(_content, "reef")
-	assert_eq(ids.size(), 8)
+	assert_eq(ids.size(), 9)
 	var previous: float = 0.0
 	for species_id: String in ids:
 		var cost: float = _content.get_species(species_id).base_cost

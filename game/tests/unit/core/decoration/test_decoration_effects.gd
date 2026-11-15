@@ -62,7 +62,7 @@ func test_rare_variant_decoration_raises_the_multiplier() -> void:
 
 
 func test_loach_needs_a_cave() -> void:
-	var loach: SpeciesDef = _content.get_species("pond_loach")
+	var loach: SpeciesDef = _content.get_species("pond_catfish")
 	assert_false(Unlocks.is_met(loach, _state))
 	_place("cave", 100)
 	assert_true(Unlocks.is_met(loach, _state))

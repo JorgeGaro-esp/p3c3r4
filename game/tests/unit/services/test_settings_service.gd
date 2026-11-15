@@ -42,12 +42,14 @@ func test_changes_are_saved_and_loaded_back() -> void:
 	service.set_strip_rows(15)
 	service.set_screen_index(1)
 	service.set_always_on_top(false)
+	service.set_transparent_background(true)
 	service.set_fps_limit(60)
 	service.set_panel_mode(SettingsData.PanelMode.GROW_UP)
 	assert_true(service.save_now())
 	var other: SettingsService = _make_service()
 	assert_eq(other.data.to_dict(), service.data.to_dict())
 	assert_eq(other.data.strip_rows, 15)
+	assert_true(other.data.transparent_background)
 
 
 func test_setters_clamp_and_ignore_invalid_values() -> void:

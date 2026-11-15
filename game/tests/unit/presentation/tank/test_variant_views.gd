@@ -57,7 +57,7 @@ func test_the_mood_still_desaturates_a_variant() -> void:
 func test_the_egg_field_counts_the_eggs_it_is_given() -> void:
 	var field: EggField = EggField.new()
 	var eggs: Array[Egg] = [
-		Egg.new("pond_guppy", "normal", 10.0), Egg.new("pond_koi", "golden", 3.0)
+		Egg.new("pond_guppy", "normal", 10.0), Egg.new("pond_wels", "golden", 3.0)
 	]
 	field.set_eggs(eggs, 80)
 	assert_eq(field.count(), 2)

@@ -11,7 +11,19 @@ const SPREAD: float = 1.5
 const SWAY_AMPLITUDE: float = 0.25
 const SWAY_SPEED: float = 3.0
 const COLOR: Color = Color(0.93, 0.78, 0.42)
-const GLYPH: String = "·"
+const GLYPH: String = "•"
+## Colores de los copos: cada uno sale de uno al azar.
+const PALETTE: Array[Color] = [
+	Color(1.0, 0.45, 0.45),
+	Color(1.0, 0.7, 0.3),
+	Color(1.0, 0.92, 0.4),
+	Color(0.5, 0.9, 0.5),
+	Color(0.4, 0.85, 1.0),
+	Color(0.7, 0.6, 1.0),
+	Color(1.0, 0.6, 0.85),
+]
+## Tamaño del copo respecto a la letra.
+const FLAKE_SCALE: float = 1.0
 
 ## Fila del fondo: los copos desaparecen al llegar.
 var floor_row: float = 10.0
@@ -30,6 +42,7 @@ func drop(cell: Vector2, rng: RandomNumberGenerator) -> void:
 		flake.y = cell.y - float(index) * 0.6
 		flake.speed = rng.randf_range(FALL_MIN, FALL_MAX)
 		flake.phase = rng.randf_range(0.0, TAU)
+		flake.color = PALETTE[rng.randi_range(0, PALETTE.size() - 1)]
 		_flakes.append(flake)
 
 
@@ -76,7 +89,7 @@ func update(delta: float, _canvas: AsciiCanvas) -> void:
 func draw(canvas: AsciiCanvas) -> void:
 	for flake: Flake in _flakes:
 		var sway: float = sin(_clock * SWAY_SPEED + flake.phase) * SWAY_AMPLITUDE
-		canvas.put_char(GLYPH, Vector2(flake.x + sway, flake.y), COLOR)
+		canvas.put_glyph(GLYPH, Vector2(flake.x + sway, flake.y), flake.color, FLAKE_SCALE)
 
 
 class Flake:
@@ -84,3 +97,4 @@ class Flake:
 	var y: float = 0.0
 	var speed: float = 3.0
 	var phase: float = 0.0
+	var color: Color = COLOR

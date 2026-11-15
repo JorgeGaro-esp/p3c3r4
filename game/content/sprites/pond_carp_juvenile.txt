@@ -1,0 +1,11 @@
+# pond_carp · juvenil
+[frame]
+><(#°)>
+[colors]
+ttbdebb
+[frame]
+<>(#°)>
+[colors]
+ttbdebb
+[anchor]
+eye=4,0

@@ -1,0 +1,11 @@
+# mangrove_archer · juvenil
+[frame]
+><(|°)>· 
+[colors]
+ttbdebbf 
+[frame]
+<>(|°)> ·
+[colors]
+ttbdebb f
+[anchor]
+eye=4,0

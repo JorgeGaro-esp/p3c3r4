@@ -6,7 +6,11 @@ extends UiPanel
 ## lo guarda y avisa; el panel solo se redibuja cuando se le pide con [method refresh].
 
 signal close_requested
+## Pide abrir las Estadísticas (ahora viven dentro de Ajustes).
+signal stats_requested
 signal message(text: String)
+## Pide salir al título; [param delete_slot] borra antes la ranura abierta.
+signal title_requested(delete_slot: bool)
 
 ## Pasos de la confirmación de «Vender todos los peces».
 enum SellStep { IDLE, ASKED, SURE }
@@ -21,17 +25,22 @@ const FIRST_ROW: int = 2
 const CLOSE_BUTTON_WIDTH: int = 16
 const SELL_ALL_WIDTH: int = 30
 const DELETE_WIDTH: int = 30
+const TITLE_BUTTON_WIDTH: int = 22
+const STATS_BUTTON_WIDTH: int = 18
 
 var _frame: AsciiFrame = AsciiFrame.new()
 var _close: AsciiButton = null
+var _stats: AsciiButton = null
 var _sell_all: AsciiButton = null
 var _delete: AsciiButton = null
+var _to_title: AsciiButton = null
 var _delete_step: SellStep = SellStep.IDLE
 var _sell_step: SellStep = SellStep.IDLE
 var _rows: Array[Row] = []
 var _strip: Row = null
 var _screen: Row = null
 var _on_top: Row = null
+var _transparent: Row = null
 var _fps: Row = null
 var _autostart: Row = null
 var _mode: Row = null
@@ -42,6 +51,7 @@ var _motion: Row = null
 var _text_size: Row = null
 var _language: Row = null
 var _tutorial: Row = null
+var _binary: Row = null
 
 
 func _init(root: UiRoot) -> void:
@@ -52,6 +62,7 @@ func _init(root: UiRoot) -> void:
 	_strip = _make_stepper("SETTINGS_STRIP_HEIGHT", _on_strip_less, _on_strip_more)
 	_screen = _make_stepper("SETTINGS_MONITOR", _on_screen_less, _on_screen_more)
 	_on_top = _make_toggle("SETTINGS_ALWAYS_ON_TOP", _on_top_toggled)
+	_transparent = _make_toggle("SETTINGS_TRANSPARENT", _on_transparent_toggled)
 	_fps = _make_stepper("SETTINGS_FPS", _on_fps_less, _on_fps_more)
 	_autostart = _make_toggle("SETTINGS_AUTOSTART", _on_autostart_toggled)
 	_mode = _make_stepper("SETTINGS_PANEL_MODE", _on_mode_toggled, _on_mode_toggled)
@@ -62,10 +73,15 @@ func _init(root: UiRoot) -> void:
 	_text_size = _make_stepper("SETTINGS_TEXT_SIZE", _on_text_less, _on_text_more)
 	_language = _make_stepper("SETTINGS_LANGUAGE", _on_language_less, _on_language_more)
 	_tutorial = _make_toggle("SETTINGS_TUTORIAL", _on_tutorial_toggled)
+	_binary = _make_toggle("SETTINGS_BINARY", _on_binary_toggled)
 	_close = _make_button(_text("UI_CLOSE_PANEL"))
 	_close.activated.connect(func() -> void: close_requested.emit())
+	_stats = _make_button(_text("UI_STATS"), _text("UI_STATS_KEY"))
+	_stats.activated.connect(func() -> void: stats_requested.emit())
 	_delete = _make_button("")
 	_delete.activated.connect(_on_delete_pressed)
+	_to_title = _make_button("")
+	_to_title.activated.connect(func() -> void: title_requested.emit(false))
 	_sell_all = _make_button("")
 	_sell_all.activated.connect(_on_sell_all_pressed)
 	EventBus.fish_removed.connect(func(_tank_index: int, _fish: Fish) -> void: _update_sell_all())
@@ -97,9 +113,13 @@ func layout(area: Rect2i) -> void:
 	var x: int = area.position.x + LABEL_X
 	_close.rect = Rect2i(x, bottom, CLOSE_BUTTON_WIDTH, 1)
 	x += CLOSE_BUTTON_WIDTH + 2
+	_stats.rect = Rect2i(x, bottom, STATS_BUTTON_WIDTH, 1)
+	x += STATS_BUTTON_WIDTH + 2
 	_sell_all.rect = Rect2i(x, bottom, SELL_ALL_WIDTH, 1)
 	x += SELL_ALL_WIDTH + 2
 	_delete.rect = Rect2i(x, bottom, DELETE_WIDTH, 1)
+	x += DELETE_WIDTH + 2
+	_to_title.rect = Rect2i(x, bottom, TITLE_BUTTON_WIDTH, 1)
 	refresh()
 
 
@@ -121,6 +141,7 @@ func refresh() -> void:
 	_strip.more.is_enabled = data.strip_rows < SettingsData.MAX_STRIP_ROWS
 	_screen.value.text = _screen_text(data.screen_index)
 	_on_top.toggle.label = _toggle_text(data.always_on_top)
+	_transparent.toggle.label = _toggle_text(data.transparent_background)
 	_fps.value.text = "%d" % data.fps_limit
 	_fps.less.is_enabled = data.fps_limit > SettingsData.FPS_CHOICES[0]
 	_fps.more.is_enabled = data.fps_limit < SettingsData.FPS_CHOICES[-1]
@@ -147,6 +168,8 @@ func refresh() -> void:
 	_language.less.is_enabled = data.language > 0
 	_language.more.is_enabled = data.language < SettingsData.Language.size() - 1
 	_tutorial.toggle.label = _toggle_text(data.tutorial_enabled)
+	_binary.toggle.label = _toggle_text(data.binary_effect)
+	_to_title.label = _text("SETTINGS_TO_TITLE")
 	_update_sell_all()
 	_update_delete()
 
@@ -172,10 +195,7 @@ func _on_delete_pressed() -> void:
 			_delete_step = SellStep.SURE
 		_:
 			_delete_step = SellStep.IDLE
-			Game.start_new_game()
-			SaveService.save_now()
-			Settings.set_tutorial_step(0)
-			message.emit(_text("SETTINGS_DELETED"))
+			title_requested.emit(true)
 	_update_delete()
 
 
@@ -272,6 +292,10 @@ func _on_top_toggled() -> void:
 	Settings.set_always_on_top(not Settings.data.always_on_top)
 
 
+func _on_transparent_toggled() -> void:
+	Settings.set_transparent_background(not Settings.data.transparent_background)
+
+
 func _on_fps_less() -> void:
 	Settings.set_fps_limit(SettingsData.next_fps(Settings.data.fps_limit, -1))
 
@@ -333,6 +357,10 @@ func _on_language_less() -> void:
 
 func _on_language_more() -> void:
 	Settings.set_language((Settings.data.language + 1) as SettingsData.Language)
+
+
+func _on_binary_toggled() -> void:
+	Settings.set_binary_effect(not Settings.data.binary_effect)
 
 
 func _on_tutorial_toggled() -> void:

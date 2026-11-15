@@ -1,0 +1,9 @@
+# abyss_jellyfish · larva
+[frame]
+o
+[colors]
+b
+[frame]
+•
+[colors]
+b

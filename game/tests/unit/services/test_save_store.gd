@@ -76,3 +76,25 @@ func test_quarantine_keeps_only_the_latest() -> void:
 
 func test_read_of_missing_file_is_empty() -> void:
 	assert_eq(_store.read("nada.json"), "")
+
+
+func test_clear_removes_the_game_and_its_copies_but_not_quarantined_files() -> void:
+	_store.write('{"a": 1}')
+	_store.write('{"a": 2}')
+	_store.quarantine(SaveStore.backup_name(1), 5)
+	_store.clear()
+	assert_true(_store.candidates().is_empty())
+	assert_eq(_store.quarantined().size(), 1)
+
+
+func test_move_to_carries_every_game_file() -> void:
+	_store.write('{"a": 1}')
+	_store.write('{"a": 2}')
+	var target: String = TEST_DIR + "_moved"
+	assert_true(_store.move_to(target))
+	assert_true(_store.candidates().is_empty())
+	var moved: SaveStore = SaveStore.new(target)
+	assert_eq(moved.read(SaveStore.MAIN_FILE), '{"a": 2}')
+	assert_eq(moved.read(SaveStore.backup_name(1)), '{"a": 1}')
+	moved.clear()
+	DirAccess.remove_absolute(target)

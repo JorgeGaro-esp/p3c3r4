@@ -9,5 +9,5 @@ name_key = "ACH_REEF_COMPLETE"
 order = 390
 metric = 3
 biome_id = "reef"
-target = 8.0
+target = 9.0
 reward_percent = 1.0

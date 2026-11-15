@@ -1,0 +1,11 @@
+# pond_catfish · juvenil
+[frame]
+><(_°)>
+[colors]
+ttbdebb
+[frame]
+<>(_°)>
+[colors]
+ttbdebb
+[anchor]
+eye=4,0

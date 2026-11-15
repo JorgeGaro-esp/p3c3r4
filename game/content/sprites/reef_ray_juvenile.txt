@@ -1,0 +1,11 @@
+# reef_ray · juvenil
+[frame]
+~~◄_°►
+[colors]
+ttfdef
+[frame]
+-~◄_°►
+[colors]
+ttfdef
+[anchor]
+eye=4,0

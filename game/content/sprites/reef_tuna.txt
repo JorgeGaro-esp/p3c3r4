@@ -1,0 +1,15 @@
+# reef_tuna · adulto
+[frame]
+    ,^,  
+><=(≡≡°)>
+[colors]
+    fff  
+ttbbddebb
+[frame]
+    ,^,  
+<>=(≡≡°)>
+[colors]
+    fff  
+ttbbddebb
+[anchor]
+eye=6,1

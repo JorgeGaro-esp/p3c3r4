@@ -1,14 +1,14 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://dc388p7mfst4"]
 
-[ext_resource type="Script" path="res://src/presentation/main.gd" id="1_main"]
-[ext_resource type="Script" path="res://src/presentation/ascii/ascii_canvas.gd" id="2_canvas"]
-[ext_resource type="Script" path="res://src/presentation/tank/tank_view.gd" id="3_tank"]
-[ext_resource type="Script" path="res://src/presentation/ui/debug_overlay.gd" id="4_debug"]
-[ext_resource type="Script" path="res://src/presentation/ui/ui_root.gd" id="5_ui"]
-[ext_resource type="Script" path="res://src/presentation/strip_controller.gd" id="6_strip"]
-[ext_resource type="Script" path="res://src/presentation/crt/crt_overlay.gd" id="7_crt"]
+[ext_resource type="Script" uid="uid://dncwwqxbh70tn" path="res://src/presentation/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://c5gbhbittrh3a" path="res://src/presentation/ascii/ascii_canvas.gd" id="2_canvas"]
+[ext_resource type="Script" uid="uid://da1klbakuapm5" path="res://src/presentation/tank/tank_view.gd" id="3_tank"]
+[ext_resource type="Script" uid="uid://bjoruyf8bqa88" path="res://src/presentation/ui/debug_overlay.gd" id="4_debug"]
+[ext_resource type="Script" uid="uid://dyutjaohk7lni" path="res://src/presentation/ui/ui_root.gd" id="5_ui"]
+[ext_resource type="Script" uid="uid://r1fqcfphsn4y" path="res://src/presentation/strip_controller.gd" id="6_strip"]
+[ext_resource type="Script" uid="uid://dcsx2apkupe7a" path="res://src/presentation/crt/crt_overlay.gd" id="7_crt"]
 
-[node name="Main" type="Control"]
+[node name="Main" type="Control" unique_id=103737340]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -18,27 +18,27 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_main")
 
-[node name="AsciiCanvas" type="Node2D" parent="."]
+[node name="AsciiCanvas" type="Node2D" parent="." unique_id=2133487472]
 script = ExtResource("2_canvas")
 
-[node name="TankView" type="Node" parent="."]
+[node name="TankView" type="Node" parent="." unique_id=1862957342]
 script = ExtResource("3_tank")
 canvas_path = NodePath("../AsciiCanvas")
 
-[node name="UiRoot" type="Node" parent="."]
+[node name="UiRoot" type="Node" parent="." unique_id=274992223]
 script = ExtResource("5_ui")
 canvas_path = NodePath("../AsciiCanvas")
 
-[node name="StripController" type="Node" parent="."]
+[node name="StripController" type="Node" parent="." unique_id=1500313330]
 script = ExtResource("6_strip")
 canvas_path = NodePath("../AsciiCanvas")
 tank_path = NodePath("../TankView")
 ui_path = NodePath("../UiRoot")
 
-[node name="DebugOverlay" type="CanvasLayer" parent="."]
+[node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=733388449]
 script = ExtResource("4_debug")
 canvas_path = NodePath("../AsciiCanvas")
 tank_path = NodePath("../TankView")
 
-[node name="CrtOverlay" type="CanvasLayer" parent="."]
+[node name="CrtOverlay" type="CanvasLayer" parent="." unique_id=439187270]
 script = ExtResource("7_crt")

@@ -25,6 +25,9 @@ var is_hovered: bool = false
 var focus_group: int = 0
 ## Tecla que lo activa desde cualquier sitio (KEY_NONE = ninguna).
 var hotkey: Key = KEY_NONE
+## Si recibe la rueda del ratón aunque el cursor esté sobre otra parte del panel
+## (las listas: así se desplazan con el cursor sobre su detalle o su marco).
+var wheel_fallback: bool = false
 
 
 ## Indica si la celda [param cell] cae dentro del componente visible.

@@ -1,19 +1,19 @@
 # abyss_jellyfish · adulto
 [frame]
- .---.
-(__°__)
- |:|:|
+ ___ 
+(_°_)
+|:|:|
 [colors]
- bbbbb
-bbbebbb
- ddddd
+ ddd 
+bdedb
+ddddd
 [frame]
- .---.
-(__°__)
- :|:|:
+ ___ 
+(_°_)
+:|:|:
 [colors]
- bbbbb
-bbbebbb
- ddddd
+ ddd 
+bdedb
+ddddd
 [anchor]
-eye=3,1
+eye=2,1

@@ -51,11 +51,11 @@ func test_prestige_gives_pearls_and_restarts_the_run() -> void:
 
 
 func test_prestige_keeps_the_collection_and_the_tanks() -> void:
-	Game.state.discover("pond_koi", "normal")
+	Game.state.discover("pond_wels", "normal")
 	Game.state.achievements["first_fish"] = true
 	_earn(1.0e7)
 	Game.prestige.reset()
-	assert_true(Game.state.is_discovered("pond_koi", "normal"))
+	assert_true(Game.state.is_discovered("pond_wels", "normal"))
 	assert_true(Game.state.achievements.has("first_fish"))
 
 

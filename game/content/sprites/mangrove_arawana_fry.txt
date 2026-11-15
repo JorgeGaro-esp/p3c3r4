@@ -1,0 +1,9 @@
+# mangrove_arawana · alevin
+[frame]
+~~>
+[colors]
+ttb
+[frame]
+-~>
+[colors]
+ttb

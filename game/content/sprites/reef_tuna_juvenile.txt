@@ -1,0 +1,11 @@
+# reef_tuna · juvenil
+[frame]
+><=(≡°)>
+[colors]
+ttbbdebb
+[frame]
+<>=(≡°)>
+[colors]
+ttbbdebb
+[anchor]
+eye=5,0

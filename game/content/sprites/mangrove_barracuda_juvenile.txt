@@ -1,0 +1,11 @@
+# mangrove_barracuda · juvenil
+[frame]
+><=(=°)>
+[colors]
+ttdbdebb
+[frame]
+<>=(=°)>
+[colors]
+ttdbdebb
+[anchor]
+eye=5,0

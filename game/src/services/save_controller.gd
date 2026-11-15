@@ -12,12 +12,17 @@ const AUTOSAVE_SECONDS: float = 60.0
 ## Mínimo entre dos guardados (los guardados por compra esperan si es antes).
 const MIN_INTERVAL_SECONDS: float = 5.0
 const SETTING_VERSION: String = "application/config/version"
+const SLOTS_DIRECTORY: String = "user://saves"
 
+## Ranura abierta (1 a 3; 0 = ninguna, se está en el título).
+var active_slot: int = 0
 ## Si es falso no se lee ni se escribe nada.
 var enabled: bool = false
 ## Verdadero si el archivo es de una versión más nueva: no se carga ni se pisa.
 var blocked: bool = false
 var store: SaveStore = SaveStore.new()
+## Carpeta que contiene las ranuras. Solo la cambian las pruebas.
+var slots_directory: String = SLOTS_DIRECTORY
 
 var _since_save: float = 0.0
 var _pending: bool = false
@@ -51,6 +56,80 @@ func start() -> String:
 	return load_game()
 
 
+## Carpeta de la ranura [param slot] (1 a 3).
+func slot_directory(slot: int) -> String:
+	return "%s/slot_%d" % [slots_directory, slot]
+
+
+## Prepara las ranuras: la partida de antes de que existieran pasa a la ranura 1.
+func prepare_slots() -> void:
+	var legacy: SaveStore = SaveStore.new(slots_directory)
+	if legacy.candidates().is_empty():
+		return
+	if not SaveStore.new(slot_directory(1)).candidates().is_empty():
+		return
+	legacy.move_to(slot_directory(1))
+
+
+## Resumen de la ranura [param slot] para el título: `exists`, `damaged`, `shells`,
+## `fish`, `time` (segundos de juego) y `prestige`.
+func slot_info(slot: int) -> Dictionary:
+	var slot_store: SaveStore = SaveStore.new(slot_directory(slot))
+	var names: PackedStringArray = slot_store.candidates()
+	if names.is_empty():
+		return {"exists": false}
+	for file_name: String in names:
+		var result: DecodeResult = SaveCodec.decode(slot_store.read(file_name), Game.content)
+		if result.is_ok():
+			return {
+				"exists": true,
+				"damaged": false,
+				"shells": result.state.wallet.shells,
+				"fish": result.state.fish_total(),
+				"time": result.state.sim_time,
+				"prestige": result.state.prestige.count,
+			}
+	return {"exists": true, "damaged": true}
+
+
+## Abre la ranura [param slot]. Con [param fresh] empieza una partida nueva en ella
+## (se borra lo que hubiera). Después hay que recargar la escena, que llama a
+## [method start].
+func open_slot(slot: int, fresh: bool) -> void:
+	if enabled:
+		save_now()
+	enabled = false
+	blocked = false
+	_pending = false
+	active_slot = clampi(slot, 1, SettingsData.SLOT_COUNT)
+	store = SaveStore.new(slot_directory(active_slot))
+	Game.set_paused(false)
+	Game.start_new_game()
+	if fresh:
+		store.clear()
+		_write_state()
+	Settings.use_slot(active_slot, fresh)
+
+
+## Guarda la partida y sale al título (ninguna ranura abierta).
+func close_slot() -> void:
+	save_now()
+	enabled = false
+	blocked = false
+	active_slot = 0
+	Settings.use_slot(0)
+
+
+## Borra la partida de la ranura [param slot]. Si era la abierta, se sale al título.
+func delete_slot(slot: int) -> void:
+	SaveStore.new(slot_directory(slot)).clear()
+	if slot == active_slot:
+		enabled = false
+		blocked = false
+		active_slot = 0
+	Settings.forget_slot(slot)
+
+
 ## Lee la mejor partida disponible y la pone en [Game]. Devuelve la clave del aviso.
 func load_game() -> String:
 	var names: PackedStringArray = store.candidates()
@@ -79,16 +158,7 @@ func load_game() -> String:
 func save_now() -> bool:
 	if not enabled or blocked:
 		return false
-	Game.state.rng_state = Game.rng.state
-	var version: String = str(ProjectSettings.get_setting(SETTING_VERSION, "0.0.0"))
-	var text: String = SaveCodec.encode(Game.state, version, _now())
-	_since_save = 0.0
-	_pending = false
-	if not store.write(text):
-		EventBus.notice_requested.emit("TOAST_SAVE_FAILED")
-		return false
-	saved.emit()
-	return true
+	return _write_state()
 
 
 ## Pide un guardado: inmediato si hace tiempo que no se guarda; si no, en cuanto toque.
@@ -99,6 +169,19 @@ func request_save() -> void:
 		save_now()
 	else:
 		_pending = true
+
+
+func _write_state() -> bool:
+	Game.state.rng_state = Game.rng.state
+	var version: String = str(ProjectSettings.get_setting(SETTING_VERSION, "0.0.0"))
+	var text: String = SaveCodec.encode(Game.state, version, _now())
+	_since_save = 0.0
+	_pending = false
+	if not store.write(text):
+		EventBus.notice_requested.emit("TOAST_SAVE_FAILED")
+		return false
+	saved.emit()
+	return true
 
 
 func _on_minimized_changed(is_minimized: bool) -> void:

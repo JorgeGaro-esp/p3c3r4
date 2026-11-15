@@ -35,10 +35,10 @@ func _species_of(biome_id: String) -> Array[SpeciesDef]:
 	return found
 
 
-func test_each_biome_has_eight_species_of_every_rarity() -> void:
+func test_each_biome_has_its_species_of_every_rarity() -> void:
 	for biome_id: String in BIOMES:
 		var defs: Array[SpeciesDef] = _species_of(biome_id)
-		assert_eq(defs.size(), 8, biome_id)
+		assert_eq(defs.size(), 9 if biome_id == "reef" else 8, biome_id)
 		var rarities: Dictionary = {}
 		for def: SpeciesDef in defs:
 			rarities[def.rarity] = true

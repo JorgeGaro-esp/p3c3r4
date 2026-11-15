@@ -112,9 +112,13 @@ func test_a_dropped_pearl_can_be_collected_with_a_click() -> void:
 	var before: float = Game.state.wallet.shells
 	var pos: Vector2 = _tank.fish_position(fish) + Vector2(1.0, float(1))
 	var hit: bool = false
+	# El pez más pequeño mide pocas columnas: se prueba alrededor de donde cae la perla.
 	for y: int in range(floori(pos.y), _canvas.row_count):
-		if _tank.click_cell(Vector2i(floori(pos.x) + 3, y)) and _tank.pearl_count() == 0:
-			hit = true
+		for x: int in range(floori(pos.x), floori(pos.x) + 6):
+			if _tank.click_cell(Vector2i(x, y)) and _tank.pearl_count() == 0:
+				hit = true
+				break
+		if hit:
 			break
 	_canvas.process_mode = Node.PROCESS_MODE_INHERIT
 	assert_true(hit, "se recogió la perla")
@@ -142,11 +146,13 @@ func test_real_clicks_remove_one_spot_each_even_while_dirt_keeps_growing() -> vo
 	for _round: int in range(Care.MAX_SPOTS):
 		var spots: int = _tank.spot_count()
 		var target: Vector2i = Vector2i(-1, -1)
-		for x: int in range(_canvas.columns):
+		for x: int in range(_tank.camera.world_columns):
 			for y: int in range(_canvas.row_count):
 				if _tank.spot_cell_hit(Vector2i(x, y)):
 					target = Vector2i(x, y)
-		await _click_cell(target)
+		_tank.camera.x = float(clampi(target.x - 10, 0, int(_tank.camera.max_x())))
+		_canvas.camera_x = _tank.camera.x
+		await _click_cell(target - Vector2i(int(_tank.camera.x), 0))
 		assert_eq(_tank.spot_count(), spots - 1)
 	_canvas.process_mode = Node.PROCESS_MODE_INHERIT
 

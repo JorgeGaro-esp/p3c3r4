@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "mangrove_arawana"
+name_key = "SPECIES_MANGROVE_ARAWANA"
+description_key = "SPECIES_MANGROVE_ARAWANA_DESC"
+biome_id = "mangrove"
+rarity = 3
+activity = 2
+base_cost = 560000.0
+base_production = 732.2
+unlock_kind = 3
+unlock_amount = 3.0
+unlock_species_id = "mangrove_archer"
+unlock_tag = ""
+sprite_path = "res://content/sprites/mangrove_arawana.txt"
+palette_roles = PackedStringArray("b", "t", "d", "f", "e")
+palette_colors = PackedColorArray(0.8, 0.85, 0.9, 1, 0.7, 0.78, 0.85, 1, 0.95, 0.8, 0.5, 1, 0.95, 0.8, 0.5, 1, 1, 1, 1, 1)
+growth_seconds = 620.0
+breed_seconds = 860.0
+hatch_seconds = 100.0
+fry_sprite_path = "res://content/sprites/mangrove_arawana_fry.txt"
+juvenile_sprite_path = "res://content/sprites/mangrove_arawana_juvenile.txt"
+style = 1
+speed = 4.0
+amplitude = 0.2
+frequency = 1.0
+frame_duration = 0.45
+wave_number = 3.0
+school_pull = 0.0
+depth_min = 0.0
+depth_max = 0.3
+rest_chance = 0.2
+rest_seconds = 2.0
+temperament = 0.3

@@ -61,6 +61,6 @@ func test_a_new_game_resets_the_stats() -> void:
 
 func test_loading_a_game_registers_its_fish_in_the_dex() -> void:
 	var loaded: GameState = GameState.new()
-	loaded.tanks[0].add_fish(Fish.new("pond_angelfish"))
+	loaded.tanks[0].add_fish(Fish.new("pond_koi"))
 	Game.adopt_state(loaded)
-	assert_true(Game.state.is_discovered("pond_angelfish", "normal"))
+	assert_true(Game.state.is_discovered("pond_koi", "normal"))

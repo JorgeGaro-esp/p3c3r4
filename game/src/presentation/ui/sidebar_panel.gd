@@ -15,7 +15,7 @@ const WINDOW_BUTTON_WIDTH: int = 3
 ## Filas mínimas del panel para que quepa la fila de limpieza (la última es el borde).
 const ROWS_FOR_CLEANLINESS: int = 13
 ## Filas mínimas para dejar una fila en blanco entre las conchas y el reloj.
-const ROWS_FOR_SPACING: int = 10
+const ROWS_FOR_SPACING: int = 11
 const CLEAN_GOOD: int = 60
 const CLEAN_OK: int = 30
 ## Símbolo de cada franja del día (amanecer, día, atardecer, noche).
@@ -46,6 +46,7 @@ func _init(root: UiRoot) -> void:
 	_shells = _make_label("", AsciiColors.AMBER)
 	_rate = _make_label("", AsciiColors.TEXT_DIM)
 	_clock = _make_label("", AsciiColors.WATER)
+	_clock.centered_icon = true
 	_cleanliness = _make_label("", AsciiColors.SEAWEED_LIGHT)
 	_add(_toast)
 	_shop = _make_button(_text("UI_SHOP"), _text("UI_SHOP_KEY"))

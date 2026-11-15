@@ -45,7 +45,7 @@ func test_mute_toggle() -> void:
 func test_sell_wins_over_buy_in_the_same_frame() -> void:
 	EventBus.fish_sold.emit(10.0)
 	EventBus.purchase_made.emit()
-	await wait_process_frames(2)
+	Audio._process(0.0)
 	assert_eq(Audio.last_sound, "sell")
 	assert_eq(Audio.sound_count, 1)
 

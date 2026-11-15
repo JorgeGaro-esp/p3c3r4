@@ -8,6 +8,7 @@ func test_defaults_follow_decisions() -> void:
 	assert_eq(settings.screen_index, SettingsData.PRIMARY_SCREEN, "P10: monitor principal")
 	assert_false(settings.launch_with_windows, "P09: arranque con Windows desactivado")
 	assert_true(settings.always_on_top)
+	assert_false(settings.transparent_background, "fondo negro por defecto")
 	assert_eq(settings.fps_limit, 30)
 
 
@@ -16,6 +17,7 @@ func test_round_trip_keeps_every_field() -> void:
 	original.strip_rows = 16
 	original.screen_index = 2
 	original.always_on_top = false
+	original.transparent_background = true
 	original.fps_limit = 60
 	original.launch_with_windows = true
 	original.panel_mode = SettingsData.PanelMode.GROW_UP
@@ -108,3 +110,36 @@ func test_crt_level_defaults_to_full_and_is_validated() -> void:
 	assert_eq(SettingsData.from_dict({"crt_level": 99}).crt_level, 2)
 	assert_eq(SettingsData.from_dict({"crt_level": "x"}).crt_level, 2)
 	assert_eq(SettingsData.from_dict({"crt_level": -4}).crt_level, 0)
+
+
+func test_an_old_settings_file_gives_its_tutorial_step_to_slot_one() -> void:
+	var data: SettingsData = SettingsData.from_dict({"tutorial_step": 3})
+	assert_eq(data.slot_steps, PackedInt32Array([3, 0, 0]))
+	assert_eq(data.last_slot, 0)
+
+
+func test_slot_steps_and_last_slot_survive_a_round_trip() -> void:
+	var data: SettingsData = SettingsData.new()
+	data.slot_steps = PackedInt32Array([1, 4, 2])
+	data.last_slot = 2
+	var back: SettingsData = SettingsData.from_json(data.to_json())
+	assert_eq(back.slot_steps, PackedInt32Array([1, 4, 2]))
+	assert_eq(back.last_slot, 2)
+
+
+func test_bad_slot_values_are_cleaned() -> void:
+	var data: SettingsData = SettingsData.from_dict(
+		{"slot_steps": [99, "x", -3, 7], "last_slot": 17}
+	)
+	assert_eq(data.slot_steps, PackedInt32Array([Tutorial.DONE, 0, 0]))
+	assert_eq(data.last_slot, SettingsData.SLOT_COUNT)
+
+
+func test_binary_effect_defaults_on_and_round_trips() -> void:
+	var data: SettingsData = SettingsData.new()
+	assert_true(data.binary_effect)
+	data.binary_effect = false
+	var copy: SettingsData = SettingsData.from_dict(data.to_dict())
+	assert_false(copy.binary_effect)
+	var empty: SettingsData = SettingsData.from_dict({})
+	assert_true(empty.binary_effect)

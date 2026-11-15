@@ -1,0 +1,11 @@
+# mangrove_tadpole · juvenil
+[frame]
+~(°
+[colors]
+tbe
+[frame]
+-(°
+[colors]
+tbe
+[anchor]
+eye=2,0

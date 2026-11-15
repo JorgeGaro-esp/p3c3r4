@@ -41,4 +41,4 @@ func handle_click(_cell: Vector2i, _is_double: bool) -> bool:
 
 
 func handle_wheel(_cell: Vector2i, _direction: int) -> bool:
-	return true
+	return false

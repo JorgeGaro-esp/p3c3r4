@@ -76,7 +76,14 @@ static func _round_significant(scaled: float) -> String:
 static func _scientific(magnitude: float, locale: String) -> String:
 	var exponent: int = _exponent10(magnitude)
 	var mantissa: float = magnitude / pow(10.0, float(exponent))
+	# El error de `pow` puede dejar la mantisa en 10 (1e300 daba «10e299»).
+	if mantissa >= 10.0 - 1e-9:
+		mantissa /= 10.0
+		exponent += 1
 	var text: String = _round_significant(mantissa)
+	if text == "10":
+		text = "1"
+		exponent += 1
 	return _localize(text, locale) + "e" + str(exponent)
 
 

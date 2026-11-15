@@ -121,3 +121,24 @@ Todo recurso de terceros (fuente, sonido, música, complemento, sombreador) se a
 - [ ] Registro de licencias completo.
 - [ ] Exportación *release* sin herramientas de depuración.
 - [ ] Sin datos personales en registros ni en el repositorio.
+
+## 9. Revisión de la versión 0.20.0 (Fase 16)
+
+Revisión hecha leyendo el código contra las secciones 3 a 6. Resultado: sin hallazgos que bloqueen la 1.0.
+
+| Comprobación | Resultado |
+|---|---|
+| Solo `JSON.parse_string` / `JSON.new` al cargar; sin `str_to_var`, `bytes_to_var`, `get_var`, `Expression`, `OS.execute` ni red | Cumple. Los únicos `load()` son rutas fijas `res://` (fuente, shader, audio) |
+| Tamaño máximo de 5 MB, versión superior rechazada (`TOO_NEW`), migraciones en cadena | Cumple |
+| Números finitos y recortados a rango (`SaveFields.read_float`), cadenas de id limitadas a 64 caracteres | Cumple |
+| Escritura en `save.tmp`, verificación de lectura, rotación de 3 copias, cuarentena de archivos dañados (máx. 5) | Cumple |
+| Guardado cada 60 s, al cerrar, al minimizar y tras prestigio | Cumple |
+| Registros sin rutas ni datos del sistema (solo `push_warning` / `push_error` con ids de contenido) | Cumple |
+| Ajustes con validación y valores por defecto si el archivo es inválido | Cumple |
+
+## 10. Revisión de rendimiento (Fase 16)
+
+- La ventana minimizada desactiva el lienzo y la pecera y pausa la simulación; al volver se recupera el tiempo con el cálculo sin conexión.
+- El límite de fotogramas es un ajuste del usuario (`Engine.max_fps`).
+- Solo 8 scripts usan `_process`; el resto reacciona a señales.
+- Pendiente de medir por Jorge jugando: uso de CPU con 40 peces y efecto CRT alto (mostrar con F3, la superposición de depuración).

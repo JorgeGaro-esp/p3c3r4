@@ -2,6 +2,232 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado `0.x.0` por fase hasta la `1.0.0`.
 
+## [0.36.0] - 2026-11-15 · Personalización (apodo y favorito)
+
+### Añadido
+- **Apodo**: en la ficha, el botón «Apodo ►» recorre una lista de 20 nombres (Burbuja, Coral, Perla…) y vuelve a «sin apodo». Se guarda con el pez.
+- **Favorito** (◆): un favorito no se puede vender ni entra en «Sobrantes». Se guarda con el pez; las partidas antiguas cargan sin avisos.
+- La ficha crece una fila para los dos botones nuevos.
+
+## [0.35.0] - 2026-11-14 · Pecera con más vida
+
+### Añadido
+- **Carácter ante el cursor** (`temperament` en `SpeciesDef`, de -1 huidizo a 1 curioso): sardinas, anchoas, krill, ranas y renacuajos se apartan del puntero; koi, carpas, peces de colores, payasos y rayas se acercan a mirarlo sin llegar a tocarlo.
+- **Susto por clic**: al soltar comida en el agua, los peces huidizos cercanos salen disparados un momento.
+- **Sueño según la hora**: los diurnos se vuelven lentos, se paran casi siempre y se hunden hacia el fondo de noche; los nocturnos, igual pero de día. Los neutros apenas.
+- Tests en `test_swim_reactions.gd`.
+
+## [0.34.0] - 2026-11-14 · Comportamiento realista
+
+### Añadido
+- **Franja de profundidad por especie** (`depth_min`/`depth_max`): el Siluro, el Rape, la Anguila o la Raya viven cerca del fondo; el Arawana, el Pez arquero y el Cocodrilo junto a la superficie; el resto, en medio.
+- **Paradas** (`rest_chance`/`rest_seconds`): los emboscadores (Siluro, Rape, Pez gota, Cocodrilo) pasan mucho tiempo quietos; el Tiburón, el Atún o el Cachalote nunca paran. La comida los despierta.
+- **Estilo «a saltos»** (`HOP`): la Rana espera posada en el suelo y salta en arco, en vez de flotar.
+- **Más bancos**: Salmón, Atún, Calamar, Pez payaso, Koi y Pez de colores nadan con los de su especie (menos pegados que sardinas y anchoas).
+- `docs/COMPORTAMIENTO.md` con la tabla de todas las especies.
+
+### Cambiado
+- Velocidades y estilos de casi todas las especies (Atún y Salmón crucero constante, Cangrejo y Saltarín a pie, Medusa y Pez gota a la deriva, Calamar a chorros).
+- La ficha del pez crece una fila: los botones de vender ya no se salen por debajo del marco.
+
+## [0.33.0] - 2026-11-14 · Pecera más calmada y Enciclopedia por biomas
+
+### Cambiado
+- **Todos los peces rediseñados con forma de pez**: siguiendo los modelos de Trucha, Sardina, Anguila y Guppy (una o dos filas, cola `><`, cuerpo con textura, ojo fijo), cada especie recibe su toque y su paleta de varios colores: Koi con manchas `◆` rojas, Salmón rosa con rayas plateadas y aleta dorsal, Pez payaso con bandas blancas, Atún azul de vientre plateado, Calamar rosa con tentáculos, Raya `◄ ►`, Tiburón con aleta `▲`, Rana, Pez arquero con chorro, Cocodrilo, Pez linterna con luces amarillas, Rape con señuelo, Calamar gigante rojo, Cachalote… Los juveniles se regeneran con la misma forma.
+- **Ajustes tras probarlos**: aletas dorsales centradas sobre el cuerpo (Pez de colores, Salmón, Atún, Manta raya, Arawana, Cocodrilo, Cachalote); Salmón rojo de cabeza verde; Koi con el dibujo de la Carpa y colores de koi; Siluro y Pez gato con bigotes bajo el hocico y sin "visera"; Anchoa diminuta; Krill rojo; Renacuajo verde pardo; el Cangrejo violinista pasa a **Cangrejo de río** (mismo id, mismo hueco); Saltarín del fango rediseñado con el ojo abultado y aletas pectorales; Barracuda anima solo la cola; Anguila ondula con los rizos del cuerpo; Medusa abisal con cúpula cerrada; Pez gota más plano y sin aletas bajas; Calamar gigante sin parte superior, como el calamar.
+- **Segunda ronda de retoques**: Salmón con aleta `___`, Tiburón con la `▲` más atrás, Arawana con aleta `_____`, Medusa con cúpula `___`, Cachalote con lomo `,-----.` y Krill con el círculo rojizo.
+- Tope de tamaño: ninguna especie pasa de 12 columnas ni de 3 filas.
+- **La ficha del pez va por encima de las pestañas de la pecera**, sin mezclarse con los biomas.
+- **Enciclopedia dividida por biomas**: una pestaña por bioma bajo el título; al abrir una especie desde la ficha se selecciona su bioma.
+- Los peces siguen siendo transparentes (se probó un fondo negro por pez y se descartó, T183).
+
+## [0.32.0] - 2026-11-14 · Enciclopedia 2: Abismo (completa)
+
+### Cambiado
+- **Abismo rediseñado** (8 especies): Pez linterna, Medusa abisal, Pez víbora, Pez gota, Rape abisal, Pez pelícano, Calamar gigante (nuevo diseño ASCII vertical) y Cachalote (legendario, grande). Cada una hereda el hueco de rareza, coste, producción y desbloqueo de la que sustituye.
+- Cada especie con su cría y juvenil propios; ojo fijo y solo se mueven la cola, las aletas o los tentáculos.
+- Formato de guardado 13: hacha→pez víbora, calamar vampiro→pez gota, pez víbora→rape, rape→pez pelícano, pez remo→calamar gigante, calamar gigante→cachalote.
+
+### Eliminado
+- Pez hacha, Calamar vampiro y Pez remo.
+
+## [0.31.0] - 2026-11-14 · Enciclopedia 2: Manglar
+
+### Cambiado
+- **Manglar rediseñado** (8 especies): Renacuajo (diminuto, en bancos), Rana, Cangrejo violinista, Saltarín del fango, Pez arquero, Barracuda, Arawana y Cocodrilo (legendario, grande). Cada una hereda el hueco de rareza, coste, producción y desbloqueo de la que sustituye.
+- Cada especie con su cría y juvenil propios; ojo fijo y solo se mueve la cola, las aletas o las patas.
+- Formato de guardado 12: arquero→renacuajo, cangrejo→rana, gamba→cangrejo, siluro→saltarín, pargo→arquero, saltarín→barracuda, barracuda→arawana, pez sierra→cocodrilo.
+
+### Eliminado
+- Gamba de manglar, Siluro del manglar, Pargo de manglar y Pez sierra.
+
+## [0.30.0] - 2026-11-14 · Enciclopedia 2: Arrecife
+
+### Cambiado
+- **Arrecife rediseñado** (9 especies): Krill (diminuto, la más común, en bancos), Sardina, Anchoa, Pez payaso, Anguila, Atún, Calamar (rediseño ASCII), Manta raya y Tiburón (legendario, grande). Cada una hereda el hueco de rareza, coste, producción y desbloqueo de la que sustituye; el pez payaso se desbloquea con 3 sardinas, el atún con 3 anchoas y la raya con 3 atunes.
+- Cada especie con su cría y juvenil propios (la del calamar, `<:≈`); ojo fijo y solo se mueve la cola o las aletas.
+- Logro «Experto en arrecifes» pide 9 especies.
+- Formato de guardado 11: peces, huevos, desbloqueos y descubrimientos pasan a la especie que ocupa el hueco (damisela→anchoa, mariposa→pez payaso, estrella→anguila, cirujano→atún, caballito→calamar, globo→raya, raya→tiburón).
+
+### Eliminado
+- Damisela azul, Pez mariposa, Estrella de mar, Cirujano azul, Caballito de mar y Pez globo.
+
+## [0.29.1] - 2026-11-14 · Foto de la Enciclopedia para peces grandes
+
+### Corregido
+- Los peces anchos (Siluro, 24 columnas; luego tiburón, cocodrilo, cachalote) no se veían en la foto de la Enciclopedia: la foto se ensancha según el pez más ancho (sin quitar sitio al texto) y, si aun así no cabe, enseña su juvenil o su cría en vez de quedarse vacía.
+
+## [0.29.0] - 2026-11-14 · Enciclopedia 2: Estanque
+
+### Cambiado
+- **Estanque rediseñado** (8 especies): Guppy (diminuto, tamaño de cría), Carpa, Pez de colores, Pez gato, Trucha, Salmón (cabeza verde y cuerpo rojo), Carpa koi y Siluro (gigante, legendario). Cada una hereda el hueco de rareza, coste, producción y desbloqueo de la que sustituye; el Salmón se desbloquea con 3 peces de colores y el Siluro con 3 salmones.
+- **Cada especie tiene su cría y su juvenil propios** (antes eran genéricos).
+- **Animación**: el ojo es siempre el mismo carácter y solo se mueven la cola o las aletas. Cada especie fija su serpenteo (`wave_number`), su velocidad y su estilo; el Guppy tiende a nadar en pequeños bancos.
+- Formato de guardado 10: los peces, huevos, especies desbloqueadas y descubrimientos de las especies que salen pasan a la que ocupa su hueco (pececillo→carpa, tetra→pez de colores, locha→pez gato, caracol→trucha, ángel→salmón).
+
+### Eliminado
+- Pececillo, Tetra neón, Locha, Caracol y Pez ángel (sus archivos `.tres` y sprites).
+
+### Tests
+- `test_species_animation`: el ojo no cambia entre fotogramas y solo se mueven la cola o las aletas; cada especie tiene cría y juvenil propios. Se amplía bioma a bioma.
+- `test_pond_migration`: migración 9 → 10.
+
+## [0.28.0] - 2026-11-14 · Nado más natural
+
+### Añadido
+- `SpeciesDef.wave_number` (cuánto serpentea el cuerpo: 1 rígido, 8 como una anguila) y `SpeciesDef.school_pull` (tendencia a nadar en banco). Cada especie los fija en su `.tres`; por defecto todo queda como antes.
+- **Bancos**: los peces de una especie con `school_pull > 0` tienden hacia el centro de los de su especie, con un desvío propio, y vuelven si se quedan atrás (la comida a la vista tiene prioridad).
+
+### Cambiado
+- El aleteo (cambio de fotograma) va al ritmo del nado: más rápido cuando el pez acelera, más lento cuando flota.
+- Los peces grandes giran más despacio (de 0,3 s a 0,9 s según el ancho del sprite).
+
+### Nota
+- Es la base de la Enciclopedia 2 (`docs/ENCICLOPEDIA2.md`): hasta que las especies nuevas usen estos valores el efecto visible es solo el aleteo y el giro.
+
+## [0.27.1] - 2026-11-14 · Contraste de los peces
+
+### Cambiado
+- Colores de 21 especies aclarados para que se vean sobre el fondo negro: ojos casi blancos (contraste ≥ 10) y el resto de roles con contraste ≥ 4,5 (antes había ojos y colas casi negros).
+- La variante melánica ya no se hunde en el negro: tiene una luminancia mínima.
+- Nuevo test que vigila el contraste de todas las paletas de especie.
+
+## [0.27.0] - 2026-11-14 · Fondo transparente y Estadísticas en Ajustes
+
+### Añadido
+- **Cielo transparente**: las 2 filas sobre el agua se ven transparentes (el pájaro se posa sobre el escritorio). La ventana admite transparencia por píxel.
+- Ajuste **Fondo transparente**: quita el negro de todo lo demás (por defecto desactivado).
+- `docs/PECES.md`: catálogo de las 32 especies (sprite, rareza, coste, producción, tiempos, desbloqueo) con un hueco «Cambios» por pez.
+
+### Cambiado
+- **Estadísticas** pasa de la barra lateral a un botón dentro de **Ajustes** (`Estad[í]sticas`, tecla I con Ajustes abierto). La barra lateral vuelve a tener 4 botones.
+- El efecto CRT respeta el canal alfa de la pantalla (sin él anularía la transparencia).
+
+## [0.26.2] - 2026-11-14 · Cielo sobre el agua
+
+### Cambiado
+- El pájaro ya no aparece bajo el agua: la ventana gana **2 filas de cielo** sobre la superficie y el pájaro se posa con las patas sobre la línea de olas (si vuela, una fila más arriba). La barra lateral y los paneles también aprovechan esas filas.
+- La ficha del pez puede ocupar las filas del cielo, para que quepa igual que antes.
+
+### Nota
+- El cielo sigue siendo negro (no es transparencia real de la ventana).
+
+## [0.26.1] - 2026-11-14 · Transición CRT
+
+### Añadido
+- **Transición de televisión de tubo** (`CrtTransition`, 0,65 s) al abrir, cerrar o cambiar de panel (Tienda, Enciclopedia, Logros, Estadísticas, Ajustes): un punto blanco se estira en una línea con halo, se abre en vertical con un destello blanco azulado que se apaga y la imagen se asienta con líneas de barrido y una banda de refresco que baja. Se apaga con «Reducir movimiento».
+
+### Cambiado
+- Estadísticas vuelve a llevar corchete y tecla rápida: `Estad[í]sticas` / `Stat[i]stics` (tecla I).
+- La Enciclopedia ya no pasa página al abrirse (lo hace la transición CRT); el paso de página queda al cambiar de especie.
+
+## [0.26.0] - 2026-11-14 · Enciclopedia de libro y paneles separados
+
+### Añadido
+- **Enciclopedia como libro:** lomo entre la lista y la ficha (`DexBook`), paso de página al cambiar de especie o abrirla (se apaga con «Reducir movimiento») y lista de variantes en la página derecha.
+- **Foto del pez:** el retrato va dentro de un marco, como una foto de enciclopedia, y centrado en la página (`DexLayout`); con ventanas estrechas pasa a la derecha o desaparece.
+- **Botón «Estadísticas»** en la barra lateral.
+- **F12** hace llegar el pájaro del bioma al momento (si ya hay uno, no hace nada).
+- **Formas de planta** (`WeedForm`, `weed_forms` en cada bioma): tallos, cañas con punta, helechos con hojas, matas bajas y arbustos; cada planta elige una al azar y cada bioma tiene las suyas.
+
+### Cambiado
+- Cada acceso de la barra lateral abre **solo sus pestañas**: Tienda (peces, equipo, decoración, biomas y Gran marea), Enciclopedia, Logros y Estadísticas. Las flechas no saltan a pestañas de otro grupo y el marco lleva el nombre del panel.
+- El símbolo del reloj queda más pegado a la hora.
+- La barra lateral deja una fila en blanco tras las conchas solo con 12 filas o más (con una fila menos caben los cinco botones).
+
+## [0.25.0] - 2026-11-14 · Plantas de colores y pájaros
+
+### Añadido
+- **Pájaros en la superficie** (`BirdVisit`, `BirdView`): cada bioma recibe de vez en cuando (cada 100–260 s; la primera vez a los 25–90 s) la visita de un pájaro que llega volando, se posa 18–40 s y se va: pato en el estanque, gaviota en el arrecife, garza en el manglar y un ave luminosa en el abismo. Solo es decorado.
+- **Paletas de plantas** por bioma (`weed_palette`, `weed_tip_palette`): cada planta y cada remate eligen su color; el arrecife ya no es solo rosa.
+
+### Cambiado
+- El estanque está menos vacío: más plantas (separación 0,6), paleta verde/oliva/turquesa, motas flotantes y fondo de puntitos.
+
+## [0.24.0] - 2026-11-14 · Pulido visual
+
+### Cambiado
+- El fondo de unos y ceros se parece más al de losdelaia.com: dígitos de tamaños y brillos distintos (muchos pequeños y apagados, pocos grandes) y puntitos; `AsciiCanvas.put_glyph` dibuja un carácter a otro tamaño.
+- Las bolitas de comida son «•» de colores aleatorios (rojo, naranja, amarillo, verde, cian, violeta, rosa).
+- El símbolo del reloj (▲ ○ ▼ ●) se centra y se sube a la altura de las cifras.
+- Biomas más variados y vistosos: la arena tiene granos de distinto tono, fila inferior más oscura y piedrecitas o conchas; las plantas son de 2 a 6 segmentos, a veces con compañera, con matices de color y remates en la punta (flores, bulbos); campos nuevos `sand_accents`, `sand_accent_color`, `weed_tips`, `weed_tip_color` en los biomas.
+
+## [0.23.0] - 2026-11-14 · Fase 19 (efecto binario)
+
+### Añadido
+- **Unos y ceros** muy tenues que suben despacio por el fondo de cada pecera (`BinaryDrift`, `BinaryBackdrop`), con densidad y tinte según el bioma.
+- **Estela del puntero** de unos y ceros al mover el ratón sobre la pecera (`BinaryCursor`); no sale con un panel abierto.
+- Ajuste «Unos y ceros» (activo por defecto). «Reducir movimiento» frena el fondo y apaga la estela.
+
+## [0.22.1] - 2026-11-14 · Música lofi
+
+### Cambiado
+- El ambiente de agua baja de volumen (canal −11 → −20 dB) y suma gritos lejanos de gaviota al mismo nivel que las olas.
+- La música de día y de noche se rehace en estilo lofi (piano eléctrico, vibráfono, bajo cálido, pads, batería suave con swing, cinta y vinilo) en lugar de chiptune. `tools/generate_audio.py --music` regenera solo la música.
+
+## [0.22.0] - 2026-11-14 · Fase 18 (cámara y barra lateral ancha)
+
+### Corregido
+- La lista de la tienda conserva el desplazamiento de la rueda al refrescarse (antes volvía a la fila seleccionada).
+
+### Añadido
+- **Cámara de la pecera** (`TankCamera`, `CameraHint`): el mundo mide el doble que la ventana. Se agarra con el **botón derecho** y se desliza; no pasa de los bordes. Flechas ◄ ► en los bordes con más pecera y una barra de posición que aparece al moverla.
+- Los peces nuevos aparecen dentro de lo que ve la cámara; al empezar o cambiar de pecera la cámara se centra en los peces.
+- `AsciiCanvas` tiene `camera_x`: lo que está por debajo de la capa 50 (el mundo) sigue a la cámara y no se pinta fuera de la ventana; la interfaz queda fija.
+
+### Cambiado
+- La barra lateral pasa de 20 a 28 columnas: ya se ven los ingresos por segundo.
+- La versión del título va en la esquina inferior derecha de la ventana.
+- Al decorar, el clic derecho guarda el objeto solo si no se arrastra (el arrastre mueve la cámara).
+
+## [0.21.0] - 2026-11-14 · Fase 17 (título, ranuras y paneles modales)
+
+### Añadido
+- **Pantalla de título** (`TitlePanel`, `AsciiBanner`): logo «P3C3R4» en letras de bloques con degradado y brillo, sobre una pecera de adorno con ocho peces (partida que no se guarda). Botones Continuar, Cargar, Nueva y Salir; Esc vuelve de las listas de ranuras.
+- **Tres ranuras de guardado** (`user://saves/slot_1..3`): Cargar enseña conchas, peces y tiempo de cada una; Nueva en una ranura usada pide una segunda pulsación antes de borrarla; Continuar abre la última.
+- La partida de antes de las ranuras pasa sola a la ranura 1 (`SaveController.prepare_slots`).
+- **Ajustes**: «Volver al título» y «Borrar esta ranura» (triple pulsación; la ranura se borra y se vuelve al título).
+- El tutorial se recuerda **por ranura** (`slot_steps` en los ajustes); una partida nueva lo empieza de cero.
+
+### Cambiado
+- Con la tienda, la enciclopedia o los ajustes abiertos la pecera **no recibe clics** y se cierra la ficha del pez (ya no se superponen).
+- La rueda del ratón desplaza las listas de la tienda y la enciclopedia estando el cursor en cualquier punto del panel, no solo sobre la lista.
+
+## [0.20.0] - 2026-11-14 · Fase 16 (balance y preparación de la 1.0)
+
+### Cambiado
+- Producción base de todas las especies ×0,352 (calibrada con un bot de economía): Arrecife ≈1 h, todas las especies ≈3 h, primer prestigio ≈8 h, segunda vuelta mucho más rápida.
+- Variantes: dorada 1,7 y prismática 0,3 (normal 92) para que lo raro se vea alguna vez.
+
+### Añadido
+- `tests/support/economy_bot.gd`: bot que juega «mirando de vez en cuando».
+- `tests_long/simulation/`: simulación de hitos y `report_economy.gd`; **fuera de la suite normal** por lentitud. Se ejecuta aparte con `-gdir=res://tests_long -ginclude_subdirs`.
+- `export_presets.cfg` para Windows y README del jugador.
+
+### Corregido
+- Cuatro tests de integración no liberaban la escena principal.
+- Test de audio de prioridad venta/compra ya no depende de frames.
+
 ## [0.19.0] - 2026-11-14 · Fase 15 (accesibilidad, idioma y tutorial)
 
 ### Añadido

@@ -1,19 +1,11 @@
 # reef_clownfish · adulto
 [frame]
-  ,-|-,
-><(|(|°>
-  '-|-'
+><(|_°|>
 [colors]
-  ffdff
-ttbdbdeb
-  ffdff
+ttbdbedb
 [frame]
-  ,-|-,
-<>(|(|°>
-  '-|-'
+<>(|_°|>
 [colors]
-  ffdff
-ttbdbdeb
-  ffdff
+ttbdbedb
 [anchor]
-eye=6,1
+eye=5,0

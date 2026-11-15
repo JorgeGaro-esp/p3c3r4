@@ -29,7 +29,8 @@ static func surplus(tank: Tank, species_id: String, variant_id: String) -> Array
 	same.sort_custom(func(a: Fish, b: Fish) -> bool: return a.maturity > b.maturity)
 	var extra: Array[Fish] = []
 	for index: int in range(KEEP_BREEDERS, same.size()):
-		extra.append(same[index])
+		if not same[index].favorite:
+			extra.append(same[index])
 	return extra
 
 

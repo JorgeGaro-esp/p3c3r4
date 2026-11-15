@@ -1,0 +1,11 @@
+# abyss_anglerfish · juvenil
+[frame]
+><(V°)>
+[colors]
+ttbdebb
+[frame]
+<>(V°)>
+[colors]
+ttbdebb
+[anchor]
+eye=4,0

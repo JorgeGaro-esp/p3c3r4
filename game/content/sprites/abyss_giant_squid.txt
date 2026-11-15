@@ -1,23 +1,11 @@
 # abyss_giant_squid · adulto
 [frame]
-   .-^^-.
-  (°  °)
-   /|||\
-   |:|:|
+<(::::°)≈≈≈≈
 [colors]
-   bbbbbb
-  be  eb
-   ddddd
-   ddddd
+tbddddebffff
 [frame]
-   .-^^-.
-  (°  °)
-   \|||/
-   :|:|:
+-(::::°)~≈≈≈
 [colors]
-   bbbbbb
-  be  eb
-   ddddd
-   ddddd
+tbddddebffff
 [anchor]
-eye=3,1
+eye=6,0

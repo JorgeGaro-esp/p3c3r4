@@ -13,7 +13,7 @@ const SILENT_DB: float = -60.0
 const FADE_SECONDS: float = 6.0
 ## Ajuste de cada canal respecto al general, en decibelios.
 const MUSIC_BUS_DB: float = -7.0
-const AMBIENT_BUS_DB: float = -11.0
+const AMBIENT_BUS_DB: float = -20.0
 const SFX_BUS_DB: float = 0.0
 const BUS_MASTER: String = "Master"
 const BUS_MUSIC: String = "Music"

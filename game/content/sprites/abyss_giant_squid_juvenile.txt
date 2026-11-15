@@ -1,0 +1,11 @@
+# abyss_giant_squid · juvenil
+[frame]
+<(:°)≈ 
+[colors]
+tbdebf 
+[frame]
+-(:°)~≈
+[colors]
+tbdebff
+[anchor]
+eye=3,0

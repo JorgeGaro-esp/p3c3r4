@@ -1,0 +1,11 @@
+# mangrove_frog · juvenil
+[frame]
+/(°)>
+[colors]
+fbebd
+[frame]
+\(°)>
+[colors]
+fbebd
+[anchor]
+eye=2,0

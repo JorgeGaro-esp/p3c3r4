@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "reef_sardine"
+name_key = "SPECIES_REEF_SARDINE"
+description_key = "SPECIES_REEF_SARDINE_DESC"
+biome_id = "reef"
+rarity = 0
+activity = 1
+base_cost = 1500.0
+base_production = 2.288
+unlock_kind = 0
+unlock_amount = 0.0
+unlock_species_id = ""
+unlock_tag = ""
+sprite_path = "res://content/sprites/reef_sardine.txt"
+palette_roles = PackedStringArray("b","t","e")
+palette_colors = PackedColorArray(0.72, 0.82, 0.95, 1, 0.55, 0.7, 0.95, 1, 1, 1, 1, 1)
+growth_seconds = 90.0
+breed_seconds = 130.0
+hatch_seconds = 25.0
+fry_sprite_path = "res://content/sprites/reef_sardine_fry.txt"
+juvenile_sprite_path = "res://content/sprites/reef_sardine_juvenile.txt"
+style = 0
+speed = 7.0
+amplitude = 0.2
+frequency = 1.8
+frame_duration = 0.35
+wave_number = 3.0
+school_pull = 0.9
+depth_min = 0.1
+depth_max = 0.8
+rest_chance = 0.0
+rest_seconds = 2.0
+temperament = -0.8

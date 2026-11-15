@@ -1,0 +1,15 @@
+# abyss_blobfish · adulto
+[frame]
+  ,~~~,  
+~(___°_)v
+[colors]
+  fffff  
+tbbbbebbd
+[frame]
+  ,~~~,  
+-(___°_)v
+[colors]
+  fffff  
+tbbbbebbd
+[anchor]
+eye=5,1

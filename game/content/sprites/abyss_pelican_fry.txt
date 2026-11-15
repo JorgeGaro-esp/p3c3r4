@@ -1,0 +1,9 @@
+# abyss_pelican · larva
+[frame]
+~-
+[colors]
+bb
+[frame]
+-~
+[colors]
+bb

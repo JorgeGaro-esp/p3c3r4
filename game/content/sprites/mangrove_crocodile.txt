@@ -1,0 +1,15 @@
+# mangrove_crocodile · adulto
+[frame]
+   ^^^^   
+~=(~~~~°)=
+[colors]
+   ffff   
+ttbddddebb
+[frame]
+   ^^^^   
+-=(~~~~°)=
+[colors]
+   ffff   
+ttbddddebb
+[anchor]
+eye=7,1

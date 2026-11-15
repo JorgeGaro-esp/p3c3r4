@@ -155,10 +155,10 @@ func test_toast_shows_then_fades_out_by_itself() -> void:
 	assert_false(toast.is_active())
 
 
-func test_frame_swallows_clicks_and_wheel() -> void:
+func test_frame_swallows_clicks_but_leaves_the_wheel_to_the_lists() -> void:
 	var frame: AsciiFrame = AsciiFrame.new()
 	assert_true(frame.handle_click(Vector2i.ZERO, false))
-	assert_true(frame.handle_wheel(Vector2i.ZERO, 1))
+	assert_false(frame.handle_wheel(Vector2i.ZERO, 1), "la rueda la atiende la lista del panel")
 
 
 func test_a_second_toast_waits_for_the_first_instead_of_covering_it() -> void:

@@ -41,16 +41,16 @@ func test_fish_count_counts_every_tank() -> void:
 	for _index: int in range(2):
 		_state.tanks[0].add_fish(Fish.new("pond_guppy"))
 	assert_false(Unlocks.is_met(def, _state))
-	_state.tanks[0].add_fish(Fish.new("pond_minnow"))
+	_state.tanks[0].add_fish(Fish.new("pond_carp"))
 	assert_true(Unlocks.is_met(def, _state))
 
 
 func test_species_count_only_counts_that_species() -> void:
-	var def: SpeciesDef = _def(SpeciesDef.UnlockKind.SPECIES_COUNT, 2.0, "pond_tetra")
-	_state.tanks[0].add_fish(Fish.new("pond_tetra"))
+	var def: SpeciesDef = _def(SpeciesDef.UnlockKind.SPECIES_COUNT, 2.0, "pond_goldfish")
+	_state.tanks[0].add_fish(Fish.new("pond_goldfish"))
 	_state.tanks[0].add_fish(Fish.new("pond_guppy"))
 	assert_false(Unlocks.is_met(def, _state))
-	_state.tanks[0].add_fish(Fish.new("pond_tetra"))
+	_state.tanks[0].add_fish(Fish.new("pond_goldfish"))
 	assert_true(Unlocks.is_met(def, _state))
 
 

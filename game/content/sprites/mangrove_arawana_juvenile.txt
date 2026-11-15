@@ -1,0 +1,11 @@
+# mangrove_arawana · juvenil
+[frame]
+><(_°)≈
+[colors]
+ttbdebf
+[frame]
+<>(_°)~
+[colors]
+ttbdebf
+[anchor]
+eye=4,0

@@ -1,0 +1,11 @@
+# reef_anchovy · juvenil
+[frame]
+~°
+[colors]
+te
+[frame]
+-°
+[colors]
+te
+[anchor]
+eye=1,0

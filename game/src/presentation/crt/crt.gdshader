@@ -41,5 +41,9 @@ void fragment() {
 	// Parpadeo muy suave.
 	color *= 1.0 + flicker * sin(TIME * 47.0);
 
-	COLOR = vec4(color, 1.0);
+	// Con el fondo transparente la pantalla trae alfa: se respeta (y el brillo
+	// también ilumina un poco su borde).
+	float alpha = texture(screen_tex, uv).a;
+	alpha = clamp(alpha + dot(halo, vec3(0.33)) * glow, 0.0, 1.0);
+	COLOR = vec4(color, alpha);
 }

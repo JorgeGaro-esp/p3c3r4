@@ -1,0 +1,11 @@
+# abyss_blobfish · juvenil
+[frame]
+~(_°_)v
+[colors]
+tbbebbd
+[frame]
+-(_°_)v
+[colors]
+tbbebbd
+[anchor]
+eye=3,0

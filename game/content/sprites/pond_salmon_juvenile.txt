@@ -1,0 +1,11 @@
+# pond_salmon · juvenil
+[frame]
+><(≈°)>
+[colors]
+ttbbedd
+[frame]
+<>(≈°)>
+[colors]
+ttbbedd
+[anchor]
+eye=4,0

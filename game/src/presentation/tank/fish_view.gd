@@ -16,6 +16,13 @@ const PRISM_SPREAD: float = 0.08
 ## línea vertical, el instante plano del giro.
 const EDGE_ON_SCALE: float = 0.2
 const EDGE_CHARACTER: String = "|"
+## El aleteo (cambio de fotograma) va más rápido cuanto más rápido nada el pez.
+const BEAT_MIN: float = 0.35
+const BEAT_MAX: float = 2.0
+## Segundos de giro: base más lo que añade cada columna del sprite (los grandes giran más despacio).
+const TURN_BASE: float = 0.3
+const TURN_PER_COLUMN: float = 0.02
+const TURN_MAX: float = 0.9
 
 var motion: SwimMotion
 var width: int = 0
@@ -53,6 +60,7 @@ func _init(
 	_left = sprite.mirrored()
 	_frame_count = maxi(sprite.frame_count(), 1)
 	_frame_duration = maxf(new_frame_duration, 0.05)
+	motion.turn_seconds = clampf(TURN_BASE + TURN_PER_COLUMN * float(width), TURN_BASE, TURN_MAX)
 	_cells.append_array(_build_cells(_right, palette))
 	_cells.append_array(_build_cells(_left, palette))
 	if _look != VariantDef.Look.NONE:
@@ -61,7 +69,8 @@ func _init(
 
 func update(delta: float, _canvas: AsciiCanvas) -> void:
 	motion.step(delta)
-	_clock += delta
+	var swim_ratio: float = motion.velocity.length() / maxf(motion.speed, 0.001)
+	_clock += delta * clampf(BEAT_MIN + swim_ratio, BEAT_MIN, BEAT_MAX)
 	_frame_index = int(_clock / _frame_duration) % _frame_count
 	if VariantPalette.is_animated(_look):
 		_animated_clock += delta
@@ -139,6 +148,7 @@ func _build_cells(sprite: AsciiSprite, palette: AsciiPalette) -> Array[FishCells
 		var lines: PackedStringArray = sprite.frames[frame_index]
 		var color_lines: PackedStringArray = sprite.colors[frame_index]
 		for row: int in range(lines.size()):
+			var line: String = lines[row]
 			for column: int in range(lines[row].length()):
 				var character: String = lines[row][column]
 				if character == " ":
@@ -165,6 +175,7 @@ class FishCells:
 	var source_colors: PackedColorArray = PackedColorArray()
 	var base_colors: PackedColorArray = PackedColorArray()
 	var colors: PackedColorArray = PackedColorArray()
+	## Filas con algo dibujado y sus columnas primera y última (para tapar el fondo).
 
 	## Recalcula los colores apagando los de la paleta hacia su gris.
 	func apply_desaturation(amount: float) -> void:

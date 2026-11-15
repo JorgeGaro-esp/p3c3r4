@@ -1,3 +1,5 @@
+# gdlint: disable=max-public-methods
+# (fachada de la pecera: consultas para los tests y acciones de los paneles)
 class_name TankView
 extends Node
 ## Vista de la pecera: monta el entorno (superficie, arena, algas, burbujas) y un
@@ -20,6 +22,8 @@ const BUBBLE_GAP_MAX: float = 1.6
 const LAYER_BACK: int = 0
 const LAYER_FISH: int = 10
 const LAYER_FRONT: int = 20
+## Capa de la estela del puntero: en pantalla, no en el mundo.
+const CURSOR_LAYER: int = 55
 ## A qué distancia, en celdas, un pez hambriento ve la comida.
 const SEEK_RADIUS: float = 30.0
 ## A qué distancia de la boca se come un copo.
@@ -66,7 +70,17 @@ class Look:
 
 var canvas: AsciiCanvas
 
+## Falso mientras hay un panel abierto: la pecera no recibe clics ni arrastres.
+var input_enabled: bool = true:
+	set = _set_input_enabled
+## Cámara horizontal: la pecera puede ser más ancha que la ventana.
+var camera: TankCamera = TankCamera.new()
+
 var _area: Rect2i = Rect2i()
+var _view_area: Rect2i = Rect2i()
+## Verdadero hasta que la cámara se centra por primera vez en los peces.
+var _center_pending: bool = true
+var _camera_hint: CameraHint = CameraHint.new(camera)
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _looks: Dictionary[String, Look] = {}
 var _views: Dictionary[Fish, FishView] = {}
@@ -74,6 +88,12 @@ var _owners: Dictionary[FishView, Fish] = {}
 var _fish: Array[FishView] = []
 var _backdrop: BackdropView = BackdropView.new()
 var _particles: ParticleField = ParticleField.new()
+var _binary: BinaryBackdrop = BinaryBackdrop.new()
+var _cursor: BinaryCursor = BinaryCursor.new()
+## Dónde está el puntero en celdas del mundo y si está sobre la pecera.
+var _pointer_cell: Vector2 = Vector2.ZERO
+var _pointer_inside: bool = false
+var _bird: BirdView = BirdView.new()
 var _surface: SurfaceView = SurfaceView.new()
 var _sand: SandView = SandView.new()
 var _weeds: SeaweedView = SeaweedView.new()
@@ -99,6 +119,9 @@ func _ready() -> void:
 	_rng.seed = SEED
 	_backdrop.layer = LAYER_BACK - 1
 	_particles.layer = LAYER_FISH - 1
+	_binary.layer = LAYER_BACK
+	_bird.layer = LAYER_FRONT + 1
+	_cursor.layer = CURSOR_LAYER
 	_surface.layer = LAYER_FRONT
 	_sand.layer = LAYER_BACK
 	_weeds.layer = LAYER_BACK + 1
@@ -112,6 +135,8 @@ func _ready() -> void:
 	_decor_front.layer = LAYER_FISH + 4
 	for drawable: AsciiDrawable in [
 		_backdrop,
+		_binary,
+		_bird,
 		_particles,
 		_sand,
 		_weeds,
@@ -126,6 +151,8 @@ func _ready() -> void:
 		_spots
 	]:
 		canvas.add_drawable(drawable)
+	canvas.add_drawable(_camera_hint)
+	canvas.add_drawable(_cursor)
 	_load_looks()
 	_biome = Game.content.biomes.get_biome(Game.state.active().biome_id)
 	_events.attach(canvas)
@@ -142,6 +169,8 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_update_care()
+	_update_reactions()
+	_update_schools()
 	_update_equipment(delta)
 	_update_decoration()
 	_events.update()
@@ -154,10 +183,50 @@ func _process(delta: float) -> void:
 	_next_bubble_in = _rng.randf_range(BUBBLE_GAP_MIN, BUBBLE_GAP_MAX)
 
 
+## Sueño según la hora del día y reacción de cada pez al puntero.
+func _update_reactions() -> void:
+	var darkness: float = Game.state.darkness
+	for view: FishView in _fish:
+		var motion: SwimMotion = view.motion
+		motion.set_sleepiness(SwimMotion.sleepiness_for(motion.activity, darkness))
+		if _pointer_inside:
+			motion.react_to_cursor(_pointer_cell, view.anchor_cell("eye"))
+
+
+## Un clic en el agua asusta a los peces cercanos que no son curiosos.
+func _startle_near(cell: Vector2i) -> void:
+	var origin: Vector2 = Vector2(cell) + Vector2(0.5, 0.5)
+	for view: FishView in _fish:
+		view.motion.startle(origin, view.anchor_cell("eye"))
+
+
+## Cada banco (los peces de una especie que tiende a agruparse) sabe dónde está su centro.
+func _update_schools() -> void:
+	var sums: Dictionary[String, Vector2] = {}
+	var counts: Dictionary[String, int] = {}
+	for view: FishView in _fish:
+		if view.motion.school_pull <= 0.0:
+			continue
+		var owner: Fish = _owners[view]
+		sums[owner.species_id] = sums.get(owner.species_id, Vector2.ZERO) + view.motion.position
+		counts[owner.species_id] = counts.get(owner.species_id, 0) + 1
+	for view: FishView in _fish:
+		var owner: Fish = _owners[view]
+		var count: int = counts.get(owner.species_id, 0)
+		if view.motion.school_pull > 0.0 and count > 1:
+			view.motion.set_school_center(sums[owner.species_id] / float(count))
+
+
 ## Se usa `_input` y no `_unhandled_input`: el clic llega después de `UiRoot` (que va
 ## más abajo en el árbol y por tanto recibe antes) y solo si éste no lo consumió.
 func _input(event: InputEvent) -> void:
+	if not input_enabled:
+		return
+	_track_cursor(event)
 	if get_viewport().is_input_handled():
+		return
+	if _handle_pan(event):
+		get_viewport().set_input_as_handled()
 		return
 	if _decorating and _handle_decor_input(event):
 		get_viewport().set_input_as_handled()
@@ -165,13 +234,65 @@ func _input(event: InputEvent) -> void:
 	var button: InputEventMouseButton = event as InputEventMouseButton
 	if button != null:
 		if button.pressed and button.button_index == MOUSE_BUTTON_LEFT:
-			if click_cell(canvas.cell_at(button.position)):
+			if click_cell(canvas.world_cell_at(button.position)):
 				get_viewport().set_input_as_handled()
 		return
 	var motion: InputEventMouseMotion = event as InputEventMouseMotion
 	if motion != null and (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
-		if clean_at(canvas.cell_at(motion.position)):
+		if clean_at(canvas.world_cell_at(motion.position)):
 			get_viewport().set_input_as_handled()
+
+
+## La estela de unos y ceros sigue al puntero mientras está sobre la pecera.
+func _track_cursor(event: InputEvent) -> void:
+	var motion: InputEventMouseMotion = event as InputEventMouseMotion
+	if motion == null:
+		return
+	var cell: Vector2 = motion.position / canvas.cell_size
+	_pointer_inside = _view_area.has_point(Vector2i(cell))
+	if _pointer_inside:
+		_cursor.move_to(cell)
+		_pointer_cell = cell + Vector2(canvas.camera_x, 0.0)
+	else:
+		_cursor.leave()
+
+
+## Botón derecho: agarrar la pecera y deslizarla. Un clic derecho sin arrastrar
+## (al decorar) guarda el objeto que hay bajo el cursor. Devuelve si lo atendió.
+func _handle_pan(event: InputEvent) -> bool:
+	var button: InputEventMouseButton = event as InputEventMouseButton
+	if button != null and button.button_index == MOUSE_BUTTON_RIGHT:
+		if button.pressed:
+			if not _view_area.has_point(canvas.cell_at(button.position)):
+				return false
+			camera.begin_pan()
+			return true
+		if not camera.is_panning:
+			return false
+		var dragged: bool = camera.end_pan()
+		if not dragged and _decorating:
+			_store_at(canvas.world_cell_at(button.position))
+		return true
+	var motion: InputEventMouseMotion = event as InputEventMouseMotion
+	if motion != null and camera.is_panning:
+		camera.drag(motion.relative.x, canvas.cell_size.x)
+		_sync_camera()
+		return true
+	return false
+
+
+func _sync_camera() -> void:
+	canvas.camera_x = camera.x
+	_camera_hint.flash()
+
+
+func _set_input_enabled(value: bool) -> void:
+	input_enabled = value
+	if not value:
+		_cursor.clear()
+		if camera.is_panning:
+			camera.end_pan()
+	_camera_hint.is_shown = value
 
 
 ## Clic del jugador sobre la celda [param cell]. Por orden: limpiar una mancha,
@@ -187,6 +308,7 @@ func click_cell(cell: Vector2i) -> bool:
 		fish_clicked.emit(hit)
 	else:
 		drop_food(cell)
+		_startle_near(cell)
 	return true
 
 
@@ -206,6 +328,11 @@ func clean_at(cell: Vector2i) -> bool:
 func drop_food(cell: Vector2i) -> void:
 	_food.drop(Vector2(cell) + Vector2(0.5, 0.0), _rng)
 	EventBus.food_dropped.emit()
+
+
+## Hace que llegue el pájaro del bioma ahora (tecla F12). Devuelve si llegó uno.
+func summon_bird() -> bool:
+	return _bird.summon()
 
 
 func food_count() -> int:
@@ -249,10 +376,24 @@ func fish_at(cell: Vector2i) -> Fish:
 ## Fija la zona de la rejilla donde vive la pecera (en celdas). Sin zona, ocupa
 ## toda la ventana. La zona cambia cuando aparece la barra lateral o crece la
 ## ventana hacia arriba.
-func set_area(area: Rect2i) -> void:
-	_area = area
+func set_area(area: Rect2i, world_columns: int = 0) -> void:
+	_view_area = area
+	var width: int = maxi(world_columns, area.size.x)
+	var world: Rect2i = Rect2i(area.position, Vector2i(width, area.size.y))
+	camera.configure(area.size.x, width)
+	_camera_hint.set_view(area)
+	if canvas != null:
+		canvas.camera_x = camera.x
+	if world == _area:
+		return
+	_area = world
 	if canvas != null:
 		_on_grid_changed()
+	if _center_pending and camera.is_scrollable():
+		_center_pending = false
+		for view: FishView in _fish:
+			view.motion.scatter()
+		_center_camera_on_fish()
 
 
 ## Vista de un visitante raro de [param species_id] (no es un pez de la partida): un
@@ -307,12 +448,31 @@ func _load_sprite(path: String) -> AsciiSprite:
 	return sprite
 
 
-func _add_view(fish: Fish) -> void:
+func _add_view(fish: Fish, zone: Rect2 = Rect2()) -> void:
 	if not _looks.has(fish.species_id):
 		return
 	var view: FishView = _make_view(fish)
-	view.motion.scatter()
+	view.motion.scatter(zone)
 	_register_view(fish, view)
+
+
+## Lo que ve ahora la cámara, en celdas del mundo.
+func _visible_zone() -> Rect2:
+	return Rect2(
+		Vector2(camera.x + float(_view_area.position.x), float(_view_area.position.y)),
+		Vector2(_view_area.size)
+	)
+
+
+## Pone la cámara sobre el centro de los peces (para que haya algo a la vista).
+func _center_camera_on_fish() -> void:
+	if _fish.is_empty() or not camera.is_scrollable():
+		return
+	var total: float = 0.0
+	for view: FishView in _fish:
+		total += view.motion.position.x
+	camera.center_on(total / float(_fish.size()))
+	canvas.camera_x = camera.x
 
 
 ## Crea la vista de [param fish] con el sprite de su etapa y los colores de su variante.
@@ -322,6 +482,14 @@ func _make_view(fish: Fish) -> FishView:
 	var motion: SwimMotion = SwimMotion.new(
 		_rng, def.style as SwimMotion.Style, def.speed, def.amplitude, def.frequency
 	)
+	motion.wave_number = def.wave_number
+	motion.school_pull = def.school_pull
+	motion.depth_min = def.depth_min
+	motion.depth_max = def.depth_max
+	motion.rest_chance = def.rest_chance
+	motion.rest_seconds = def.rest_seconds
+	motion.temperament = def.temperament
+	motion.activity = def.activity
 	var variant_look: VariantDef.Look = VariantDef.Look.NONE
 	var variant: VariantDef = Game.content.get_variant(fish.variant_id)
 	if variant != null:
@@ -440,7 +608,7 @@ func _on_pearl_spawned(tank_index: int, fish: Fish, value: float) -> void:
 
 func _on_fish_added(tank_index: int, fish: Fish) -> void:
 	if tank_index == Game.state.active_tank and not _views.has(fish):
-		_add_view(fish)
+		_add_view(fish, _visible_zone())
 
 
 func _on_fish_removed(tank_index: int, fish: Fish) -> void:
@@ -470,6 +638,7 @@ func _on_active_tank_changed(_tank_index: int) -> void:
 	_on_grid_changed()
 	for fish: Fish in Game.state.active().fish:
 		_add_view(fish)
+	_center_camera_on_fish()
 
 
 ## Número de partículas flotantes y de caracteres de fondo del bioma actual.
@@ -493,7 +662,14 @@ func _on_grid_changed() -> void:
 			area.size.x, area.position.y, _biome.surface_pattern, _biome.surface_color
 		)
 		_sand.configure(
-			area.size.x, sand_top, SAND_ROWS, _biome.sand_grains, _biome.sand_color, offset
+			area.size.x,
+			sand_top,
+			SAND_ROWS,
+			_biome.sand_grains,
+			_biome.sand_color,
+			offset,
+			_biome.sand_accents,
+			_biome.sand_accent_color
 		)
 		_bubbles.color = _biome.bubble_color
 	else:
@@ -505,6 +681,8 @@ func _on_grid_changed() -> void:
 	)
 	_backdrop.configure(water, _biome, offset)
 	_particles.configure(water, _biome, offset)
+	_binary.configure(water, _biome, offset)
+	_bird.configure(_biome, float(area.position.x), float(area.end.x), area.position.y)
 	_bubbles.surface_row = float(area.position.y + SURFACE_ROWS)
 	_food.floor_row = float(sand_top)
 	_pearls.floor_row = float(sand_top - 1)
@@ -550,7 +728,8 @@ func _bounds_for(fish: FishView) -> Rect2:
 	var top: float = float(area.position.y + SURFACE_ROWS + 1)
 	var bottom: float = float(area.end.y - SAND_ROWS - fish.height)
 	var right: float = float(area.size.x - fish.width)
-	return Rect2(0.0, top, maxf(right, 0.0), maxf(bottom - top, 0.0))
+	var zone: Rect2 = Rect2(0.0, top, maxf(right, 0.0), maxf(bottom - top, 0.0))
+	return fish.motion.band_of(zone)
 
 
 ## Entra o sale del modo decorar.
@@ -644,12 +823,10 @@ func _handle_decor_input(event: InputEvent) -> bool:
 	var button: InputEventMouseButton = event as InputEventMouseButton
 	var handled: bool = false
 	if button != null and button.pressed:
-		var cell: Vector2i = canvas.cell_at(button.position)
+		var cell: Vector2i = canvas.world_cell_at(button.position)
 		match button.button_index:
 			MOUSE_BUTTON_LEFT:
 				handled = decor_click(cell)
-			MOUSE_BUTTON_RIGHT:
-				handled = _store_at(cell)
 			MOUSE_BUTTON_WHEEL_UP:
 				_cycle_held(-1)
 				handled = true
@@ -739,7 +916,7 @@ func _update_decoration() -> void:
 	if def == null:
 		_decor_front.clear_ghost()
 		return
-	var cell: Vector2i = canvas.cell_at(get_viewport().get_mouse_position())
+	var cell: Vector2i = canvas.world_cell_at(get_viewport().get_mouse_position())
 	if not _in_water(cell):
 		_decor_front.clear_ghost()
 		return

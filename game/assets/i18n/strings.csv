@@ -36,18 +36,18 @@ FISH_SATIETY,Saciedad %d %%,Fullness %d %%
 TOAST_PEARL,¡Perla! +%s ¢,Pearl! +%s ¢
 SPECIES_POND_GUPPY,Guppy,Guppy
 SPECIES_POND_GUPPY_DESC,Pequeño y nervioso. Cualquier estanque empieza con uno.,Small and jittery. Every pond starts with one.
-SPECIES_POND_MINNOW,Pececillo,Minnow
-SPECIES_POND_MINNOW_DESC,Plateado y veloz; va siempre en dirección a ninguna parte.,Silvery and fast; always heading nowhere in particular.
-SPECIES_POND_TETRA,Tetra neón,Neon tetra
-SPECIES_POND_TETRA_DESC,Una raya azul brillante recorre su costado.,A bright blue stripe runs along its side.
-SPECIES_POND_LOACH,Locha,Loach
-SPECIES_POND_LOACH_DESC,Larga y ondulante; se mueve como una cinta en el agua.,Long and wavy; it moves like a ribbon in the water.
-SPECIES_POND_SNAIL,Caracol,Snail
-SPECIES_POND_SNAIL_DESC,Lento pero constante. Recorre el fondo sin prisa.,Slow but steady. It wanders the bottom without hurry.
-SPECIES_POND_GOLDFISH,Pez dorado,Goldfish
+SPECIES_POND_CARP,Carpa,Carp
+SPECIES_POND_CARP_DESC,Grande y tranquila; remueve el fondo buscando algo que comer.,Big and calm; it stirs the bottom looking for something to eat.
+SPECIES_POND_GOLDFISH,Pez de colores,Goldfish
 SPECIES_POND_GOLDFISH_DESC,Aletas de seda y una memoria mejor de lo que dicen.,Silky fins and a better memory than people say.
-SPECIES_POND_ANGELFISH,Pez ángel,Angelfish
-SPECIES_POND_ANGELFISH_DESC,Elegante y tranquilo; flota como si no pesara.,Elegant and calm; it floats as if weightless.
+SPECIES_POND_CATFISH,Pez gato,Catfish
+SPECIES_POND_CATFISH_DESC,Husmea el fondo con sus bigotes cuando cae la noche.,It sniffs the bottom with its whiskers when night falls.
+SPECIES_POND_TROUT,Trucha,Trout
+SPECIES_POND_TROUT_DESC,Rápida y moteada; solo le gusta el agua fresca y limpia.,"Fast and spotted; it only likes fresh, clean water."
+SPECIES_POND_SALMON,Salmón,Salmon
+SPECIES_POND_SALMON_DESC,Cabeza verde y cuerpo rojo; siempre nada contra la corriente.,Green head and red body; it always swims against the current.
+SPECIES_POND_WELS,Siluro,Wels catfish
+SPECIES_POND_WELS_DESC,El gigante del estanque. Nadie sabe cuántos años tiene.,The giant of the pond. Nobody knows how old it is.
 SPECIES_POND_KOI,Carpa koi,Koi carp
 SPECIES_POND_KOI_DESC,La joya del estanque. Dicen que trae buena suerte.,The jewel of the pond. They say it brings good luck.
 RARITY_COMMON,Común,Common
@@ -86,6 +86,9 @@ FISH_STAGE_VARIANT,%s · %s ×%d,%s · %s ×%d
 FISH_SELL,Vender +%s,Sell +%s
 FISH_SELL_SURPLUS,Sobrantes %d +%s,Extras %d +%s
 FISH_SELL_CONFIRM,¿Seguro?,Sure?
+FISH_RENAME,Apodo ►,Nickname ►
+FISH_FAVORITE_ON,◆ Favorito,◆ Favorite
+FISH_FAVORITE_OFF,◇ Favorito,◇ Favorite
 TOAST_SOLD,Vendido: +%s ¢,Sold: +%s ¢
 TOAST_VARIANT_NEW,¡Variante nueva! %s (%s),New variant! %s (%s)
 SETTINGS_SELL_ALL,Vender todos los peces,Sell all fish
@@ -188,22 +191,24 @@ BIOME_POND,Estanque,Pond
 BIOME_POND_DESC,Agua dulce y tranquila entre juncos. Donde empieza todo.,Calm fresh water among reeds. Where it all begins.
 BIOME_REEF,Arrecife,Reef
 BIOME_REEF_DESC,Coral y colores vivos. Peces tropicales que piden más cuidados.,Coral and bright colours. Tropical fish that ask for more care.
+SPECIES_REEF_KRILL,Krill,Krill
+SPECIES_REEF_KRILL_DESC,"Diminuto y rosado; nunca va solo, siempre en nube.","Tiny and pink; never alone, always in a cloud."
+SPECIES_REEF_SARDINE,Sardina,Sardine
+SPECIES_REEF_SARDINE_DESC,Plateada y rápida; se mueve con el banco como un solo cuerpo.,Silvery and quick; it moves with the school like a single body.
+SPECIES_REEF_ANCHOVY,Anchoa,Anchovy
+SPECIES_REEF_ANCHOVY_DESC,Delgada y nerviosa; da vueltas en bancos enormes.,Slim and jumpy; it circles in huge schools.
 SPECIES_REEF_CLOWNFISH,Pez payaso,Clownfish
 SPECIES_REEF_CLOWNFISH_DESC,Naranja con franjas blancas. Se esconde entre los tentáculos.,Orange with white bands. It hides among the tentacles.
-SPECIES_REEF_DAMSEL,Damisela azul,Blue damselfish
-SPECIES_REEF_DAMSEL_DESC,Pequeña y chispeante. Defiende su rincón con descaro.,Small and sparkling. It defends its corner boldly.
-SPECIES_REEF_BUTTERFLY,Pez mariposa,Butterflyfish
-SPECIES_REEF_BUTTERFLY_DESC,Delicado y amarillo. Picotea entre las grietas del coral.,Delicate and yellow. It pecks between the cracks in the coral.
-SPECIES_REEF_STARFISH,Estrella de mar,Starfish
-SPECIES_REEF_STARFISH_DESC,Camina despacio por el fondo. Necesita un coral cerca.,It walks slowly along the bottom. It needs coral nearby.
-SPECIES_REEF_TANG,Cirujano azul,Blue tang
-SPECIES_REEF_TANG_DESC,Un nadador elegante con una espina en la cola.,An elegant swimmer with a spine on its tail.
-SPECIES_REEF_SEAHORSE,Caballito de mar,Seahorse
-SPECIES_REEF_SEAHORSE_DESC,Flota en vertical y se agarra a las anémonas.,It floats upright and clings to anemones.
-SPECIES_REEF_PUFFER,Pez globo,Pufferfish
-SPECIES_REEF_PUFFER_DESC,Se hincha cuando se asusta. Mejor no molestarlo.,It puffs up when scared. Better not to bother it.
+SPECIES_REEF_EEL,Anguila,Eel
+SPECIES_REEF_EEL_DESC,Larga y serpenteante; vive escondida entre el coral.,Long and winding; it lives hidden among the coral.
+SPECIES_REEF_TUNA,Atún,Tuna
+SPECIES_REEF_TUNA_DESC,Un torpedo azul que no se detiene nunca.,A blue torpedo that never stops.
+SPECIES_REEF_SQUID,Calamar,Squid
+SPECIES_REEF_SQUID_DESC,Aletas atrás y tentáculos delante; pasa como una flecha.,Fins behind and tentacles ahead; it shoots past like an arrow.
 SPECIES_REEF_RAY,Manta raya,Manta ray
-SPECIES_REEF_RAY_DESC,Planea como si volara. La reina del arrecife.,It glides as if flying. The queen of the reef.
+SPECIES_REEF_RAY_DESC,Planea como si volara sobre el arrecife.,It glides as if flying over the reef.
+SPECIES_REEF_SHARK,Tiburón,Shark
+SPECIES_REEF_SHARK_DESC,El rey del arrecife. Todo el mundo se aparta.,The king of the reef. Everyone gets out of the way.
 DECOR_BRAIN_CORAL,Coral cerebro,Brain coral
 DECOR_BRAIN_CORAL_DESC,Un coral redondo y rugoso. La estrella de mar lo busca.,A round and bumpy coral. Starfish look for it.
 DECOR_SEA_FAN,Abanico de mar,Sea fan
@@ -218,38 +223,38 @@ BIOME_MANGROVE,Manglar,Mangrove
 BIOME_MANGROVE_DESC,Raíces enredadas y agua turbia. Criaturas que viven entre el barro.,Tangled roots and murky water. Creatures that live in the mud.
 BIOME_ABYSS,Abismo,Abyss
 BIOME_ABYSS_DESC,Oscuridad total salpicada de luz propia. Los peces más raros del océano.,Total darkness dotted with their own light. The ocean's rarest fish.
-SPECIES_MANGROVE_ARCHER,Pez arquero,Archerfish
-SPECIES_MANGROVE_ARCHER_DESC,Escupe chorros de agua para derribar insectos.,Spits jets of water to knock down insects.
-SPECIES_MANGROVE_CRAB,Cangrejo violinista,Fiddler crab
-SPECIES_MANGROVE_CRAB_DESC,Agita su pinza enorme entre las raíces.,Waves its huge claw among the roots.
-SPECIES_MANGROVE_SHRIMP,Gamba de manglar,Mangrove shrimp
-SPECIES_MANGROVE_SHRIMP_DESC,"Pequeña y esquiva, se esconde en el fango.","Small and elusive, it hides in the silt."
-SPECIES_MANGROVE_CATFISH,Siluro,Catfish
-SPECIES_MANGROVE_CATFISH_DESC,Sus bigotes rastrean el fondo embarrado.,Its whiskers feel along the muddy bottom.
-SPECIES_MANGROVE_SNAPPER,Pargo de manglar,Mangrove snapper
-SPECIES_MANGROVE_SNAPPER_DESC,Nace entre las raíces y se hace grande aquí.,"Born among the roots, it grows big here."
+SPECIES_MANGROVE_TADPOLE,Renacuajo,Tadpole
+SPECIES_MANGROVE_TADPOLE_DESC,Diminuto y todo cola; nada en nubes entre las raíces.,Tiny and all tail; it swims in clouds among the roots.
+SPECIES_MANGROVE_FROG,Rana,Frog
+SPECIES_MANGROVE_FROG_DESC,Salta entre las raíces y canta cuando cae la tarde.,It hops among the roots and sings when evening falls.
+SPECIES_MANGROVE_CRAB,Cangrejo de río,Crayfish
+SPECIES_MANGROVE_CRAB_DESC,Camina por el fondo blandiendo sus pinzas.,Walks along the bottom brandishing its claws.
 SPECIES_MANGROVE_MUDSKIPPER,Saltarín del fango,Mudskipper
 SPECIES_MANGROVE_MUDSKIPPER_DESC,Sale del agua y se arrastra sobre el barro.,Leaves the water and crawls over the mud.
+SPECIES_MANGROVE_ARCHER,Pez arquero,Archerfish
+SPECIES_MANGROVE_ARCHER_DESC,Escupe chorros de agua para derribar insectos.,Spits jets of water to knock down insects.
 SPECIES_MANGROVE_BARRACUDA,Barracuda,Barracuda
 SPECIES_MANGROVE_BARRACUDA_DESC,Rápida y dentuda. Patrulla el borde del manglar.,Fast and toothy. Patrols the mangrove edge.
-SPECIES_MANGROVE_SAWFISH,Pez sierra,Sawfish
-SPECIES_MANGROVE_SAWFISH_DESC,Su rostro aserrado es leyenda del manglar.,Its toothed snout is a mangrove legend.
+SPECIES_MANGROVE_ARAWANA,Arawana,Arowana
+SPECIES_MANGROVE_ARAWANA_DESC,Escamas de plata y bigotes; salta fuera del agua a por su presa.,Silver scales and barbels; it leaps out of the water after its prey.
+SPECIES_MANGROVE_CROCODILE,Cocodrilo,Crocodile
+SPECIES_MANGROVE_CROCODILE_DESC,"El rey del manglar. Espera inmóvil, como un tronco.","The king of the mangrove. It waits motionless, like a log."
 SPECIES_ABYSS_LANTERN,Pez linterna,Lanternfish
 SPECIES_ABYSS_LANTERN_DESC,Miles de puntitos de luz en el flanco.,Thousands of tiny lights along its flank.
 SPECIES_ABYSS_JELLYFISH,Medusa abisal,Deep jellyfish
 SPECIES_ABYSS_JELLYFISH_DESC,"Flota sin rumbo, translúcida y morada.","Drifts aimlessly, translucent and purple."
-SPECIES_ABYSS_HATCHET,Pez hacha,Hatchetfish
-SPECIES_ABYSS_HATCHET_DESC,Plateado y plano como la hoja de un hacha.,Silvery and flat as an axe blade.
-SPECIES_ABYSS_SQUID,Calamar vampiro,Vampire squid
-SPECIES_ABYSS_SQUID_DESC,Se envuelve en su manto como en una capa.,Wraps itself in its mantle like a cloak.
 SPECIES_ABYSS_VIPERFISH,Pez víbora,Viperfish
 SPECIES_ABYSS_VIPERFISH_DESC,Colmillos tan largos que no le caben en la boca.,Fangs so long they do not fit in its mouth.
+SPECIES_ABYSS_BLOBFISH,Pez gota,Blobfish
+SPECIES_ABYSS_BLOBFISH_DESC,Blando y con cara de pena; la presión lo mantiene entero.,Soft and sad-faced; the pressure holds it together.
 SPECIES_ABYSS_ANGLERFISH,Rape abisal,Anglerfish
 SPECIES_ABYSS_ANGLERFISH_DESC,Un farol en la frente atrae a sus presas.,A lantern on its brow lures its prey.
-SPECIES_ABYSS_OARFISH,Pez remo,Oarfish
-SPECIES_ABYSS_OARFISH_DESC,Largo como una serpiente de mar de leyenda.,Long as a legendary sea serpent.
+SPECIES_ABYSS_PELICAN,Pez pelícano,Pelican eel
+SPECIES_ABYSS_PELICAN_DESC,Casi todo boca y cola; traga lo que encuentre.,Nearly all mouth and tail; it swallows whatever it finds.
 SPECIES_ABYSS_GIANT_SQUID,Calamar gigante,Giant squid
 SPECIES_ABYSS_GIANT_SQUID_DESC,Ojos como platos. Casi nadie lo ha visto vivo.,Eyes like plates. Almost nobody has seen one alive.
+SPECIES_ABYSS_SPERM_WHALE,Cachalote,Sperm whale
+SPECIES_ABYSS_SPERM_WHALE_DESC,Baja a oscuras a cazar calamares gigantes.,It dives into the dark to hunt giant squid.
 DECOR_MANGROVE_ROOT,Raíz de mangle,Mangrove root
 DECOR_MANGROVE_ROOT_DESC,Raíces zancudas que sostienen todo el manglar.,Stilt roots that hold up the whole mangrove.
 DECOR_MUD_MOUND,Montículo de fango,Mud mound
@@ -454,6 +459,7 @@ FINAL_LINE_3,"Pero el mar es grande, y la marea vuelve.","But the sea is vast, a
 FINAL_LINE_4,Gracias por cuidar de todos ellos.,Thank you for looking after them all.
 FINAL_CLOSE,Seguirás nadando en el modo infinito.,You will keep swimming in endless mode.
 FINAL_HINT,Esc o clic para seguir,Esc or click to continue
+SETTINGS_TRANSPARENT,Fondo transparente,Transparent background
 SETTINGS_REDUCE_MOTION,Reducir movimiento,Reduce motion
 SETTINGS_TEXT_SIZE,Tamaño del texto,Text size
 SETTINGS_TEXT_SIZE_0,Pequeño,Small
@@ -464,8 +470,9 @@ SETTINGS_LANGUAGE_0,Del sistema,System default
 SETTINGS_LANGUAGE_1,Español,Español
 SETTINGS_LANGUAGE_2,English,English
 SETTINGS_TUTORIAL,Tutorial,Tutorial
-SETTINGS_DELETE,Borrar partida,Delete game
-SETTINGS_DELETE_ASK,¿Borrar TODA la partida?,Delete the WHOLE game?
+SETTINGS_BINARY,Unos y ceros,Binary effect
+SETTINGS_DELETE,Borrar esta ranura,Delete this slot
+SETTINGS_DELETE_ASK,¿Borrar la ranura entera?,Delete the whole slot?
 SETTINGS_DELETE_SURE,¡Pulsa otra vez para BORRAR!,Press again to DELETE!
 SETTINGS_DELETED,Partida nueva empezada,New game started
 TUTORIAL_TITLE,Tutorial %d/%d,Tutorial %d/%d
@@ -475,3 +482,21 @@ TUTORIAL_1,"Cuando un pez suelte una perla (◦), haz clic en ella para cobrarla
 TUTORIAL_2,Abre la Tienda y compra un pez nuevo con tus conchas.,Open the Shop and buy a new fish with your shells.
 TUTORIAL_3,"Haz clic en un pez para ver su ficha: producción, felicidad y venta.","Click a fish to see its card: output, happiness and selling."
 TUTORIAL_4,"Atajos: D decora, L logros, 1-8 cambia de pecera, M silencia. ¡A coleccionar!","Shortcuts: D decorate, L achievements, 1-8 switch tank, M mute. Happy collecting!"
+TITLE_TAGLINE,Una pecera ASCII incremental en tu escritorio,An incremental ASCII aquarium on your desktop
+TITLE_CONTINUE,CONTINUAR,CONTINUE
+TITLE_LOAD,CARGAR,LOAD
+TITLE_NEW,NUEVA,NEW
+TITLE_QUIT,SALIR,QUIT
+TITLE_BACK,VOLVER,BACK
+TITLE_LOAD_HEADER,Cargar partida,Load game
+TITLE_NEW_HEADER,Nueva partida: elige ranura,New game: choose a slot
+TITLE_SLOT,Ranura %d,Slot %d
+TITLE_SLOT_EMPTY,vacía,empty
+TITLE_SLOT_DAMAGED,dañada,damaged
+TITLE_SLOT_STATS,%s conchas · %d peces · %s,%s shells · %d fish · %s
+TITLE_OVERWRITE,¿Borrar la ranura %d y empezar? Pulsa otra vez,Erase slot %d and start? Press again
+TITLE_LAST,Última partida: ranura %d,Last game: slot %d
+SETTINGS_TO_TITLE,Volver al título,Back to title
+DEX_VARIANTS,Variantes,Variants
+UI_STATS,Estad[í]sticas,Stat[i]stics
+UI_STATS_KEY,I,I

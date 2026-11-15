@@ -1,19 +1,15 @@
 # abyss_anglerfish · adulto
 [frame]
-    ,o
-><(VVV°)>
-  '--'
+    ,o  
+><(VV°)>
 [colors]
-    fd
-ttbdddebb
-  ffff
+    fd  
+ttbddebb
 [frame]
-    ,*
-<>(VVV°)>
-  '--'
+    ,o  
+<>(VV°)>
 [colors]
-    fd
-ttbdddebb
-  ffff
+    fd  
+ttbddebb
 [anchor]
-eye=6,1
+eye=5,1

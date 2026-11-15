@@ -1,0 +1,15 @@
+# mangrove_frog · adulto
+[frame]
+  (°)>
+_/(_)\
+[colors]
+  bebb
+dffdff
+[frame]
+  (°)>
+-\(_)/
+[colors]
+  bebb
+fffdff
+[anchor]
+eye=3,0

@@ -1,0 +1,11 @@
+# abyss_pelican · juvenil
+[frame]
+~-~-~(° )>
+[colors]
+tttttbe bb
+[frame]
+-~-~-(° )>
+[colors]
+tttttbe bb
+[anchor]
+eye=6,0

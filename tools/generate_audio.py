@@ -115,7 +115,7 @@ def reverb(x, tail=1.8, mix=0.25, brightness=2500.0):
 
 
 def place(buf, start_s, sound, gain=1.0):
-    i = int(start_s * SR)
+    i = max(int(start_s * SR), 0)
     if i >= len(buf):
         return
     end = min(i + len(sound), len(buf))
@@ -267,6 +267,37 @@ def sfx_error():
 # --------------------------------------------------------------------------
 # Ambiente: agua y burbujas (bucle sin costuras)
 # --------------------------------------------------------------------------
+def gull_call(length):
+    """Un graznido de gaviota: glissando descendente con armónicos y un temblor."""
+    k = int(length * SR)
+    tt = np.arange(k) / SR
+    f0 = RNG.uniform(1500.0, 1900.0)
+    glide = f0 * (1.0 - 0.38 * (tt / length) ** 0.8)
+    glide = glide * (1.0 + 0.025 * np.sin(2 * math.pi * 38.0 * tt))
+    phase = np.cumsum(glide) / SR
+    call = (
+        np.sin(2 * math.pi * phase)
+        + 0.55 * np.sin(2 * math.pi * 2.0 * phase)
+        + 0.3 * np.sin(2 * math.pi * 3.0 * phase)
+    )
+    env = np.minimum(tt / 0.04, 1.0) * np.exp(-tt * (2.2 / length))
+    env[-int(0.03 * SR):] *= np.linspace(1.0, 0.0, int(0.03 * SR))
+    return bandpass(call * env, 700.0, 5000.0)
+
+
+def gulls(dur):
+    """Tres pequeñas bandadas de gritos (2 a 4) repartidas por el bucle, lejanas."""
+    out = np.zeros(int(dur * SR))
+    for centre in (0.18, 0.5, 0.82):
+        t = centre * dur + RNG.uniform(-1.0, 1.0)
+        for _ in range(int(RNG.integers(2, 5))):
+            length = RNG.uniform(0.28, 0.5)
+            call = gull_call(length) * RNG.uniform(0.7, 1.0)
+            place(out, t, call, 1.0)
+            t += length + RNG.uniform(0.1, 0.35)
+    return reverb(out, 1.4, 0.3, 3000.0)[: len(out)]
+
+
 def ambient_water(dur=24.0):
     n = int(dur * SR)
     base = lowpass(noise(dur), 700, 2)
@@ -284,7 +315,13 @@ def ambient_water(dur=24.0):
         blip = chirp * np.exp(-tt * (28.0 / length)) * RNG.uniform(0.12, 0.3)
         start = int(RNG.uniform(0, dur - 0.2) * SR)
         bubbles[start:start + k] += blip
-    out = water + bubbles
+    water_part = water + bubbles
+    birds = gulls(dur)
+    # Las gaviotas suenan al mismo nivel que las olas (misma energía en sus tramos activos).
+    active = np.abs(birds) > 0.02 * np.max(np.abs(birds))
+    water_level = np.sqrt(np.mean(water_part**2))
+    bird_level = np.sqrt(np.mean(birds[active] ** 2)) + 1e-9
+    out = water_part + birds * (water_level / bird_level)
     shift = int(SR * 0.37)
     # Fundido cruzado para que el final enlace con el principio.
     fade = int(SR * 1.2)
@@ -339,77 +376,149 @@ MELODY = [
 ]
 
 
+def ep_tone(midi, dur, vel=1.0):
+    """Piano eléctrico tipo Rhodes: FM suave con «diente» que se apaga y un poco de coro."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    out = np.zeros(n)
+    for cents, gain in ((-4.0, 0.5), (4.0, 0.5)):
+        f = midi_hz(midi) * 2.0 ** (cents / 1200.0)
+        ph = 2 * math.pi * f * t
+        index = (0.9 + 1.6 * vel) * np.exp(-t * 7.0) + 0.25
+        out += gain * np.sin(ph + index * np.sin(ph))
+    out += 0.12 * vel * np.sin(2 * math.pi * midi_hz(midi) * 4.0 * t) * np.exp(-t * 22.0)
+    env = np.exp(-t * (1.4 if dur > 1.0 else 2.2))
+    env *= np.minimum(t / 0.004, 1.0)
+    release = min(int(0.25 * SR), n)
+    env[n - release:] *= np.linspace(1.0, 0.0, release)
+    return out * env * vel
+
+
+def vibes_tone(midi, dur, vel=1.0):
+    """Vibráfono: sinusoide con armónico campana que decae y trémolo lento."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    f = midi_hz(midi)
+    out = np.sin(2 * math.pi * f * t) + 0.35 * np.sin(2 * math.pi * f * 4.0 * t) * np.exp(-t * 6.0)
+    out *= 1.0 + 0.12 * np.sin(2 * math.pi * 4.6 * t)
+    env = np.exp(-t * 1.3) * np.minimum(t / 0.006, 1.0)
+    release = min(int(0.3 * SR), n)
+    env[n - release:] *= np.linspace(1.0, 0.0, release)
+    return out * env * vel
+
+
+def warm_bass(midi, dur):
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    f = midi_hz(midi)
+    out = np.sin(2 * math.pi * f * t) + 0.25 * np.sin(2 * math.pi * f * 2.0 * t)
+    env = np.minimum(t / 0.015, 1.0) * np.exp(-t * 1.1)
+    release = min(int(0.2 * SR), n)
+    env[n - release:] *= np.linspace(1.0, 0.0, release)
+    return lowpass(out * env, 520.0)
+
+
+def pad_tone(midi, dur):
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    out = np.zeros(n)
+    for cents in (-9.0, 0.0, 8.0):
+        f = midi_hz(midi) * 2.0 ** (cents / 1200.0)
+        out += 2.0 * ((f * t) % 1.0) - 1.0
+    env = np.minimum(t / 1.1, 1.0)
+    release = min(int(1.2 * SR), n)
+    env[n - release:] *= np.linspace(env[n - release], 0.0, release)
+    return lowpass(out * env / 3.0, 1000.0)
+
+
+def lofi_kick():
+    n = int(0.28 * SR)
+    t = np.arange(n) / SR
+    body = np.sin(2 * math.pi * np.cumsum(95.0 * np.exp(-t * 20.0) + 46.0) / SR)
+    return lowpass(body * np.exp(-t * 11.0), 300.0)
+
+
+def lofi_snare():
+    n = int(0.22 * SR)
+    t = np.arange(n) / SR
+    hiss = lowpass(bandpass(noise(0.22), 900, 4200), 3600.0) * np.exp(-t * 17.0)
+    knock = np.sin(2 * math.pi * 185.0 * t) * np.exp(-t * 28.0) * 0.5
+    return hiss + knock
+
+
+def lofi_hat(open_hat=False):
+    d = 0.16 if open_hat else 0.05
+    n = int(d * SR)
+    t = np.arange(n) / SR
+    return lowpass(highpass(noise(d), 5500), 9000.0) * np.exp(-t * (16.0 if open_hat else 60.0))
+
+
 def render_music(bpm, transpose, night):
+    """Lofi suave: Rhodes, bajo cálido, colchón de pads y batería polvorienta con swing."""
     beat = 60.0 / bpm
     bars = len(PROGRESSION)
     loop_s = bars * 4 * beat
-    tail_s = 3.0
+    tail_s = 3.5
     total = np.zeros(int((loop_s + tail_s) * SR))
-    swing = 0.0 if night else 0.06 * beat
-    layers = {k: np.zeros_like(total) for k in ("bass", "arp", "lead", "drums")}
+    swing = (0.0 if night else 0.14) * beat
+    layers = {k: np.zeros_like(total) for k in ("bass", "keys", "pad", "lead", "drums")}
+    rng = np.random.default_rng(7 if night else 3)
     for bar, name in enumerate(PROGRESSION):
         root, chord = CHORDS[name]
         t0 = bar * 4 * beat
-        # Bajo: raíz en 1 y quinta/octava en 3 (triángulo).
-        for b, m in ((0.0, root), (2.0, root + (7 if bar % 2 == 0 else 12))):
-            dur = 1.8 * beat
-            tone = note_tone("triangle", m + transpose, dur, 0.5, 0.01, 0.2, 0.7, 0.3)
-            place(layers["bass"], t0 + b * beat, tone, 0.9)
-        # Arpegio de corcheas (pulso 25 %), subiendo y bajando.
-        order = [0, 1, 2, 3, 2, 1, 2, 1] if not night else [0, 2, 1, 3]
-        step = 0.5 * beat if not night else 1.0 * beat
-        count = int(4 * beat / step)
-        for i in range(count):
-            m = chord[order[i % len(order)]] + 12 + transpose
-            when = t0 + i * step + (swing if (i % 2 == 1 and not night) else 0.0)
-            tone = note_tone("square", m, step * 1.6, 0.25, 0.004, 0.12, 0.35, 0.25)
-            place(layers["arp"], when, tone, 0.28 if not night else 0.22)
-        # Batería suave (solo de día).
+        # Colchón de pads: acorde completo de compás entero.
+        for m in chord:
+            place(layers["pad"], t0, pad_tone(m - 12 + transpose, 4.2 * beat), 0.17 if night else 0.11)
+        # Bajo: raíz en 1 y una nota de paso corta (solo de día).
+        place(layers["bass"], t0, warm_bass(root + 12 + transpose, 2.6 * beat), 0.9)
         if not night:
-            for b in (0.0, 2.0):
-                kick_n = int(0.18 * SR)
-                tt = np.arange(kick_n) / SR
-                kick = np.sin(2 * math.pi * np.cumsum(120.0 * np.exp(-tt * 18.0) + 42.0) / SR)
-                kick *= np.exp(-tt * 16.0)
-                place(layers["drums"], t0 + b * beat, kick, 0.55)
-            for b in (1.0, 3.0):
-                sn = bandpass(noise(0.14), 1200, 5000) * np.exp(-np.arange(int(0.14 * SR)) / SR * 22.0)
-                place(layers["drums"], t0 + b * beat + swing * 0.5, sn, 0.22)
+            place(layers["bass"], t0 + (2.5 * beat + swing), warm_bass(root + 19 + transpose, 1.2 * beat), 0.6)
+        # Acordes de piano eléctrico, rasgueados, con síncopa (de noche, un solo golpe lento).
+        hits = ((0.0, 1.0), (2.5, 0.7)) if not night else ((0.0, 0.8),)
+        for pos, vel in hits:
+            when = t0 + pos * beat + (swing if pos % 1.0 else 0.0)
+            for i, m in enumerate(chord):
+                jitter = rng.uniform(0.0, 0.012)
+                v = vel * (0.78 + 0.07 * i) * rng.uniform(0.9, 1.0)
+                place(layers["keys"], when + i * 0.022 + jitter,
+                      ep_tone(m + transpose, 2.4 * beat if pos == 0.0 else 1.5 * beat, v), 0.2)
+        # Batería (solo de día): kick flojo, caja polvorienta en 2 y 4, hats con swing.
+        if not night:
+            for pos, vel in ((0.0, 1.0), (2.5, 0.7)):
+                when = t0 + pos * beat + (swing if pos % 1.0 else 0.0)
+                place(layers["drums"], when + rng.uniform(-0.006, 0.006), lofi_kick(), 0.5 * vel)
+            for pos in (1.0, 3.0):
+                place(layers["drums"], t0 + pos * beat + rng.uniform(0.0, 0.016), lofi_snare(), 0.20)
             for i in range(8):
-                hat = highpass(noise(0.04), 6000) * np.exp(-np.arange(int(0.04 * SR)) / SR * 70.0)
                 when = t0 + i * 0.5 * beat + (swing if i % 2 == 1 else 0.0)
-                place(layers["drums"], when, hat, 0.10 if i % 2 == 0 else 0.065)
-    # Melodía: pulso 12,5 % con vibrato suave (día) o triángulo (noche).
+                vel = (0.10 if i % 2 == 0 else 0.06) * rng.uniform(0.7, 1.15)
+                place(layers["drums"], when + rng.uniform(-0.005, 0.005), lofi_hat(i == 7), vel)
+    # Melodía: vibráfono de día, vibráfono muy suave una octava más grave de noche.
     for bar, b, m, d in MELODY:
-        t0 = bar * 4 * beat + b * beat
-        dur = d * beat
-        if night:
-            tone = note_tone("triangle", m - 12 + transpose, dur * 1.1, 0.5, 0.15, 0.3, 0.7, 0.5,
-                             (4.5, 0.12))
-            place(layers["lead"], t0, tone, 0.55)
-        else:
-            tone = note_tone("square", m + transpose, dur * 1.05, 0.125, 0.04, 0.2, 0.6, 0.35,
-                             (5.0, 0.18))
-            place(layers["lead"], t0, tone, 0.34)
-    arp = echo(layers["arp"], beat * 0.75, 0.45, 0.5, 4)
-    lead = echo(layers["lead"], beat * 1.5, 0.38, 0.45, 3)
-    cutoff = 2600.0 if night else 4800.0
+        t0 = bar * 4 * beat + b * beat + (swing * 0.4 if (b % 1.0) else 0.0)
+        shift = -12 if night else 0
+        tone = vibes_tone(m + shift + transpose, min(d * beat * 1.1, 4.0 * beat), 0.75 if night else 1.0)
+        place(layers["lead"], t0 + rng.uniform(0.0, 0.01), tone, 0.26 if night else 0.3)
+    keys = echo(layers["keys"], beat * 0.75, 0.4, 0.35, 3)
+    lead = echo(layers["lead"], beat * 1.5, 0.45, 0.5, 3)
     mix = (
-        layers["bass"] * 1.0
-        + lowpass(arp, cutoff)
-        + lowpass(lead, cutoff + 1200.0)
+        layers["bass"] * 1.05
+        + lowpass(keys, 3400.0 if not night else 2200.0)
+        + lowpass(lead, 4200.0 if not night else 2600.0)
+        + layers["pad"]
         + layers["drums"]
     )
-    mix = reverb(mix, 2.4 if night else 1.8, 0.35 if night else 0.28)
-    mix = lowpass(mix, 7000 if not night else 4200)
-    mix = np.tanh(mix * 1.15)
-    # Crepitar de vinilo suave.
-    if not night:
-        crackle = np.zeros_like(mix)
-        for _ in range(int(loop_s * 5)):
-            i = int(RNG.uniform(0, len(mix) - 30))
-            crackle[i:i + 3] += RNG.uniform(0.01, 0.035) * RNG.choice([-1, 1])
-        mix += highpass(crackle, 1500)
+    mix = reverb(mix, 2.6 if night else 2.0, 0.3 if night else 0.22, 2200.0)
+    mix = lowpass(mix, 5200 if not night else 3600)
+    mix = np.tanh(mix * 1.2)
+    # Ruido de cinta y crepitar de vinilo.
+    hiss = lowpass(noise((len(mix) + 4) / SR), 3000.0) * 0.0035
+    mix = mix + hiss[: len(mix)]
+    crackle = np.zeros_like(mix)
+    for _ in range(int(loop_s * (6 if not night else 3))):
+        i = int(RNG.uniform(0, len(mix) - 30))
+        crackle[i:i + 3] += RNG.uniform(0.01, 0.04) * RNG.choice([-1, 1])
+    mix += highpass(crackle, 1500)
     # Cierre sin costuras: la cola de reverberación se suma al principio.
     loop_n = int(loop_s * SR)
     out = mix[:loop_n].copy()
@@ -417,16 +526,22 @@ def render_music(bpm, transpose, night):
     # Vaivén de cinta (ciclos enteros por bucle para no romper la unión).
     cycles = max(int(round(loop_s * 0.22)), 1)
     t = np.arange(loop_n) / loop_n
-    delay = 14.0 * np.sin(2 * math.pi * cycles * t)
-    idx = np.clip(np.arange(loop_n) + delay, 0, loop_n - 1)
+    delay = 16.0 * np.sin(2 * math.pi * cycles * t)
     wrapped = np.concatenate([out, out, out])
     idx3 = np.arange(loop_n) + loop_n + delay
     out = np.interp(idx3, np.arange(len(wrapped)), wrapped)
-    del idx
     return normalize(out - np.mean(out), 0.55 if not night else 0.5)
 
 
 def main():
+    import sys
+    if "--ambient" in sys.argv:
+        write_wav("ambient_water.wav", ambient_water())
+        return
+    if "--music" in sys.argv:
+        write_wav("music_day.wav", render_music(bpm=76, transpose=0, night=False))
+        write_wav("music_night.wav", render_music(bpm=60, transpose=-5, night=True))
+        return
     write_wav("sfx_click.wav", fade_edges(sfx_click()))
     write_wav("sfx_buy.wav", fade_edges(sfx_buy()))
     write_wav("sfx_sell.wav", fade_edges(sfx_sell()))
@@ -440,8 +555,8 @@ def main():
     write_wav("sfx_final.wav", sfx_final())
     write_wav("sfx_error.wav", fade_edges(sfx_error()))
     write_wav("ambient_water.wav", ambient_water())
-    write_wav("music_day.wav", render_music(bpm=72, transpose=0, night=False))
-    write_wav("music_night.wav", render_music(bpm=58, transpose=-5, night=True))
+    write_wav("music_day.wav", render_music(bpm=76, transpose=0, night=False))
+    write_wav("music_night.wav", render_music(bpm=60, transpose=-5, night=True))
 
 
 if __name__ == "__main__":

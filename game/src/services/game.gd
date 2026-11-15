@@ -17,6 +17,17 @@ const START_SHELLS: float = 20.0
 const ACHIEVEMENT_CHECK_SECONDS: float = 0.5
 const DEFAULT_SEED: int = 20261113
 const START_FISH: PackedStringArray = ["pond_guppy", "pond_guppy"]
+## Peces que nadan detrás de la pantalla de título (una partida que no se guarda).
+const TITLE_FISH: PackedStringArray = [
+	"pond_guppy",
+	"pond_carp",
+	"pond_goldfish",
+	"pond_catfish",
+	"pond_trout",
+	"pond_salmon",
+	"pond_koi",
+	"pond_wels",
+]
 
 var state: GameState = GameState.new()
 var content: ContentDB = ContentDB.new()
@@ -92,6 +103,14 @@ func start_new_game(seed_value: int = DEFAULT_SEED) -> void:
 			fresh.tanks[0].add_fish(Fish.new(species_id))
 	rng.seed = seed_value
 	_replace_state(fresh)
+
+
+## Partida de adorno para el título: una pecera con varios peces. No se guarda.
+func start_title_demo() -> void:
+	start_new_game()
+	for species_id: String in TITLE_FISH:
+		if content.has_species(species_id):
+			_add_fish(0, species_id)
 
 
 ## Sustituye la partida por una cargada de disco y continúa su secuencia aleatoria.
@@ -231,7 +250,7 @@ func remove_decoration(placed: PlacedDecoration) -> bool:
 ## no está en ella.
 func sell_fish(fish: Fish) -> float:
 	var tank: Tank = state.active()
-	if not tank.fish.has(fish):
+	if not tank.fish.has(fish) or fish.favorite:
 		return -1.0
 	var value: float = Selling.value_of(fish, content)
 	tank.remove_fish(fish)

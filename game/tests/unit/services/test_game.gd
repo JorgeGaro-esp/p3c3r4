@@ -51,14 +51,14 @@ func test_buy_fails_when_the_tank_is_full() -> void:
 func test_buying_announces_the_fish_and_the_new_production() -> void:
 	Game.state.wallet.add(100.0)
 	watch_signals(EventBus)
-	Game.buy_fish("pond_minnow")
+	Game.buy_fish("pond_carp")
 	assert_signal_emitted(EventBus, "fish_added")
 
 
 func test_production_signal_follows_a_purchase() -> void:
 	Game.state.wallet.add(100.0)
 	var before: float = Game.state.production_rate
-	Game.buy_fish("pond_minnow")
+	Game.buy_fish("pond_carp")
 	Game._publish_changes()
 	assert_gt(Game.state.production_rate, before)
 
@@ -79,11 +79,11 @@ func test_pause_stops_the_loop() -> void:
 
 func test_locked_species_cannot_be_bought_until_the_condition_is_met() -> void:
 	Game.state.wallet.add(100000.0)
-	assert_false(Game.state.is_unlocked("pond_tetra"))
-	assert_eq(Game.buy_fish("pond_tetra"), GameService.BuyResult.LOCKED)
+	assert_false(Game.state.is_unlocked("pond_goldfish"))
+	assert_eq(Game.buy_fish("pond_goldfish"), GameService.BuyResult.LOCKED)
 	Game._publish_changes()
-	assert_true(Game.state.is_unlocked("pond_tetra"))
-	assert_eq(Game.buy_fish("pond_tetra"), GameService.BuyResult.OK)
+	assert_true(Game.state.is_unlocked("pond_goldfish"))
+	assert_eq(Game.buy_fish("pond_goldfish"), GameService.BuyResult.OK)
 
 
 func test_unlocking_is_announced_once() -> void:
@@ -96,8 +96,8 @@ func test_unlocking_is_announced_once() -> void:
 
 func test_new_game_starts_with_only_the_basic_species_unlocked() -> void:
 	assert_true(Game.state.is_unlocked("pond_guppy"))
-	assert_true(Game.state.is_unlocked("pond_minnow"))
-	assert_false(Game.state.is_unlocked("pond_koi"))
+	assert_true(Game.state.is_unlocked("pond_carp"))
+	assert_false(Game.state.is_unlocked("pond_wels"))
 
 
 func test_a_species_stays_unlocked_after_selling_the_fish_that_unlocked_it() -> void:
@@ -105,7 +105,7 @@ func test_a_species_stays_unlocked_after_selling_the_fish_that_unlocked_it() -> 
 	Game._publish_changes()
 	Game.debug_remove_fish(500)
 	Game._publish_changes()
-	assert_true(Game.state.is_unlocked("pond_tetra"))
+	assert_true(Game.state.is_unlocked("pond_goldfish"))
 
 
 func test_feeding_a_full_fish_changes_nothing() -> void:

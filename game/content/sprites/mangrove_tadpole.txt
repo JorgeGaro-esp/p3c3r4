@@ -1,0 +1,11 @@
+# mangrove_tadpole · adulto
+[frame]
+~~(°
+[colors]
+ttbe
+[frame]
+-~(°
+[colors]
+ttbe
+[anchor]
+eye=3,0

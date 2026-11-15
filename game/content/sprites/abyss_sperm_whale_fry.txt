@@ -1,0 +1,9 @@
+# abyss_sperm_whale · cría
+[frame]
+~=>
+[colors]
+tbb
+[frame]
+-=>
+[colors]
+tbb

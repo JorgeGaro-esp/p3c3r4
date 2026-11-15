@@ -28,6 +28,8 @@ func before_each() -> void:
 
 
 func after_each() -> void:
+	_main.queue_free()
+	await wait_process_frames(2)
 	Game.start_new_game(Game.DEFAULT_SEED)
 	TranslationServer.set_locale(_previous_locale)
 	get_tree().root.size = _previous_size
@@ -55,8 +57,8 @@ func test_tabs_are_hidden_until_a_second_tank_exists() -> void:
 
 func test_switching_tanks_swaps_the_fish_and_the_look() -> void:
 	_open_reef()
-	Game.buy_fish("reef_clownfish")
-	Game.buy_fish("reef_clownfish")
+	Game.buy_fish("reef_krill")
+	Game.buy_fish("reef_krill")
 	await wait_frames(2)
 	assert_eq(_tank.fish_count(), 2)
 	assert_eq(_tank._biome.id, "reef")
@@ -65,7 +67,7 @@ func test_switching_tanks_swaps_the_fish_and_the_look() -> void:
 	await wait_frames(2)
 	assert_eq(_tank._biome.id, "pond")
 	assert_eq(_tank.fish_count(), 2, "dos guppies del estanque")
-	assert_eq(_tank._ambience_count(), 0)
+	assert_gt(_tank._ambience_count(), 0, "el estanque también tiene motas y fondo")
 
 
 func test_clicking_a_tab_changes_the_active_tank() -> void:
@@ -96,7 +98,7 @@ func test_number_keys_switch_tanks() -> void:
 func test_switching_is_instant_and_leaves_no_stray_views() -> void:
 	_open_reef()
 	for _index: int in range(10):
-		Game.buy_fish("reef_clownfish")
+		Game.buy_fish("reef_krill")
 	for _round: int in range(6):
 		Game.biomes.set_active(0)
 		Game.biomes.set_active(1)
@@ -106,7 +108,7 @@ func test_switching_is_instant_and_leaves_no_stray_views() -> void:
 
 func test_unspent_pearls_are_paid_out_when_leaving_a_tank() -> void:
 	_open_reef()
-	Game.buy_fish("reef_clownfish")
+	Game.buy_fish("reef_krill")
 	var fish: Fish = Game.state.tanks[1].fish[0]
 	EventBus.pearl_spawned.emit(1, fish, 40.0)
 	await wait_frames(2)
@@ -122,12 +124,12 @@ func test_the_shop_lists_only_the_species_of_the_active_biome() -> void:
 	await wait_frames(2)
 	var shop: ShopPanel = _controller._shop
 	assert_true(shop.species_ids().has("pond_guppy"))
-	assert_false(shop.species_ids().has("reef_clownfish"))
+	assert_false(shop.species_ids().has("reef_krill"))
 	_open_reef()
 	await wait_frames(2)
-	assert_true(shop.species_ids().has("reef_clownfish"))
+	assert_true(shop.species_ids().has("reef_krill"))
 	assert_false(shop.species_ids().has("pond_guppy"))
-	assert_eq(shop.species_ids().size(), 8)
+	assert_eq(shop.species_ids().size(), 9)
 
 
 func test_the_shop_decor_tab_hides_other_biomes_objects() -> void:

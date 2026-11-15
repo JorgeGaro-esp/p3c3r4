@@ -14,6 +14,10 @@ var maturity: float = LifeStage.ADULT_FROM
 var happiness: float = 100.0
 ## Saciedad de 0 (hambriento) a 100 (lleno). Baja con el tiempo.
 var hunger: float = Care.MAX_HUNGER
+## Apodo elegido por el jugador (vacío si no tiene).
+var nickname: String = ""
+## Un favorito no se vende por error ni entra en la venta de sobrantes.
+var favorite: bool = false
 
 
 func _init(new_species_id: String = "") -> void:
@@ -41,6 +45,8 @@ func to_dict() -> Dictionary:
 		"maturity": maturity,
 		"happiness": happiness,
 		"hunger": hunger,
+		"nickname": nickname,
+		"favorite": favorite,
 	}
 
 
@@ -75,4 +81,7 @@ static func from_dict(source: Variant, content: ContentDB, warnings: PackedStrin
 	fish.hunger = SaveFields.read_float(
 		data, "hunger", Care.MAX_HUNGER, 0.0, Care.MAX_HUNGER, warnings
 	)
+	fish.nickname = SaveFields.read_string(data, "nickname", "", warnings)
+	if data.get("favorite", false) is bool:
+		fish.favorite = data.get("favorite", false)
 	return fish

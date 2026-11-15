@@ -1,0 +1,11 @@
+# pond_trout · juvenil
+[frame]
+><(·°>
+[colors]
+ttbdeb
+[frame]
+<>(·°>
+[colors]
+ttbdeb
+[anchor]
+eye=4,0

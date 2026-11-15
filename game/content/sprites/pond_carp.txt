@@ -1,0 +1,11 @@
+# pond_carp · adulto
+[frame]
+><(###°)>
+[colors]
+ttbdddebb
+[frame]
+<>(###°)>
+[colors]
+ttbdddebb
+[anchor]
+eye=6,0

@@ -1,0 +1,9 @@
+# mangrove_frog · cría
+[frame]
+-o
+[colors]
+tb
+[frame]
+~o
+[colors]
+tb

@@ -104,7 +104,7 @@ func _rich_state() -> GameState:
 	tank.equipment["filter"] = 3
 	tank.cleanliness = 10.0
 	state.decoration_stock["statue"] = 2
-	state.unlocked["pond_koi"] = true
+	state.unlocked["pond_wels"] = true
 	state.discover("pond_guppy", "normal")
 	state.stats.add(GameStats.FISH_BOUGHT, 7.0)
 	state.achievements["first_fish"] = true
@@ -125,7 +125,7 @@ func test_a_new_run_keeps_what_was_agreed() -> void:
 	var fresh: GameState = Prestige.next_run(_rich_state(), _content, 20.0, [], 7)
 	var statues: int = fresh.decoration_stock.get("statue", 0)
 	assert_eq(statues, 2)
-	assert_true(fresh.is_unlocked("pond_koi"))
+	assert_true(fresh.is_unlocked("pond_wels"))
 	assert_true(fresh.is_discovered("pond_guppy", "normal"))
 	assert_eq(fresh.stats.value(GameStats.FISH_BOUGHT), 7.0)
 	assert_true(fresh.achievements.has("first_fish"))

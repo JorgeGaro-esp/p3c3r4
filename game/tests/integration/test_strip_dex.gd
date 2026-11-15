@@ -38,7 +38,8 @@ func _press(keycode: Key) -> void:
 	key.keycode = keycode
 	key.pressed = true
 	Input.parse_input_event(key)
-	await wait_frames(2)
+	Input.flush_buffered_events()
+	await wait_frames(3)
 
 
 func test_the_e_key_opens_the_dex_tab_and_closes_it() -> void:
@@ -57,12 +58,22 @@ func test_the_sidebar_button_opens_the_dex() -> void:
 	assert_eq(_controller._shop.current_tab(), ShopPanel.DEX_TAB)
 
 
-func test_the_dex_lists_every_species_cheapest_first() -> void:
+func test_the_dex_lists_the_species_of_one_biome_cheapest_first() -> void:
 	await _press(KEY_E)
 	await wait_frames(2)
 	var ids: PackedStringArray = _controller._shop.dex_ids()
-	assert_eq(ids.size(), Game.content.species_ids().size())
-	assert_eq(ids, Encyclopedia.species_of(Game.content))
+	assert_eq(ids, Encyclopedia.species_of(Game.content, "pond"))
+
+
+func test_every_species_is_in_the_tab_of_its_biome() -> void:
+	await _press(KEY_E)
+	var total: int = 0
+	for biome_id: String in Game.content.biomes.ids():
+		_controller._shop.select_dex_species(Encyclopedia.species_of(Game.content, biome_id)[0])
+		var ids: PackedStringArray = _controller._shop.dex_ids()
+		assert_eq(ids, Encyclopedia.species_of(Game.content, biome_id), biome_id)
+		total += ids.size()
+	assert_eq(total, Game.content.species_ids().size())
 
 
 func test_unknown_species_are_hidden_and_found_ones_are_shown() -> void:
@@ -83,13 +94,13 @@ func test_a_new_fish_fills_its_entry_at_once() -> void:
 	await _press(KEY_E)
 	await wait_frames(2)
 	var shop: ShopPanel = _controller._shop
-	shop.select_dex_species("pond_minnow")
+	shop.select_dex_species("pond_carp")
 	assert_eq(shop._name.text, "???")
-	Game.state.unlocked["pond_minnow"] = true
-	Game.buy_fish("pond_minnow")
+	Game.state.unlocked["pond_carp"] = true
+	Game.buy_fish("pond_carp")
 	await wait_frames(2)
-	shop.select_dex_species("pond_minnow")
-	assert_eq(shop._name.text, tr("SPECIES_POND_MINNOW"))
+	shop.select_dex_species("pond_carp")
+	assert_eq(shop._name.text, tr("SPECIES_POND_CARP"))
 
 
 func test_the_dex_tab_cannot_buy_anything() -> void:
@@ -140,7 +151,7 @@ func test_the_portrait_body_ripples_like_in_the_tank() -> void:
 	shop.select_dex_species("pond_guppy")
 	var portrait: AsciiPortrait = shop.portrait()
 	var offsets: Array[float] = []
-	for _step: int in range(8):
+	for _step: int in range(30):
 		portrait.update(0.1, null)
 		offsets.append(portrait.tail_offset())
 	var lowest: float = offsets.min()

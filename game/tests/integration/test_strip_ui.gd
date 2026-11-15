@@ -51,7 +51,8 @@ func _click_cell(cell: Vector2i) -> void:
 	event.pressed = true
 	event.position = (Vector2(cell) + Vector2(0.5, 0.5)) * _canvas.cell_size
 	Input.parse_input_event(event)
-	await wait_frames(2)
+	Input.flush_buffered_events()
+	await wait_frames(3)
 
 
 func _press(code: Key) -> void:
@@ -59,7 +60,8 @@ func _press(code: Key) -> void:
 	event.keycode = code
 	event.pressed = true
 	Input.parse_input_event(event)
-	await wait_frames(2)
+	Input.flush_buffered_events()
+	await wait_frames(3)
 
 
 func _find_button(label_text: String) -> AsciiButton:
@@ -190,7 +192,7 @@ func _find_label_starting_with(prefix: String) -> AsciiLabel:
 func test_fish_in_the_tank_match_the_model() -> void:
 	assert_eq(_tank.fish_count(), Game.state.fish_total())
 	Game.state.wallet.add(100.0)
-	Game.buy_fish("pond_minnow")
+	Game.buy_fish("pond_carp")
 	await wait_frames(2)
 	assert_eq(_tank.fish_count(), Game.state.fish_total())
 	Game.debug_remove_fish(2)
@@ -260,7 +262,10 @@ func test_clicking_a_fish_opens_its_card_and_escape_closes_it() -> void:
 	var position: Vector2 = _tank.fish_position(fish)
 	var cell: Vector2i = Vector2i(floori(position.x) + 1, floori(position.y))
 	assert_eq(_tank.fish_at(cell), fish, "hit test %s %s" % [position, cell])
-	await _click_cell(cell)
+	# La pecera es más ancha que la ventana: la cámara se coloca para ver al pez.
+	_tank.camera.x = float(clampi(cell.x - 10, 0, int(_tank.camera.max_x())))
+	_canvas.camera_x = _tank.camera.x
+	await _click_cell(cell - Vector2i(int(_tank.camera.x), 0))
 	_canvas.process_mode = Node.PROCESS_MODE_INHERIT
 	assert_eq(_controller.card_fish(), fish)
 	assert_true("Guppy" in _visible_label_texts())

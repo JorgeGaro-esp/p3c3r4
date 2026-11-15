@@ -1,0 +1,11 @@
+# reef_anchovy · adulto
+[frame]
+~°>
+[colors]
+teb
+[frame]
+-°>
+[colors]
+teb
+[anchor]
+eye=1,0

@@ -14,6 +14,8 @@ enum PanelMode { REPLACE, GROW_UP }
 enum Language { AUTO, SPANISH, ENGLISH }
 
 const FORMAT_VERSION: int = 1
+## Ranuras de guardado.
+const SLOT_COUNT: int = 3
 ## Altura de la franja en filas de texto (P01: ajustable, 12 por defecto).
 const DEFAULT_STRIP_ROWS: int = 12
 const MIN_STRIP_ROWS: int = 10
@@ -40,6 +42,8 @@ const MAX_FILE_BYTES: int = 65536
 var strip_rows: int = DEFAULT_STRIP_ROWS
 var screen_index: int = PRIMARY_SCREEN
 var always_on_top: bool = true
+## Fondo negro transparente (el cielo sobre el agua siempre lo es).
+var transparent_background: bool = false
 var fps_limit: int = DEFAULT_FPS
 ## Arrancar con Windows (P09): desactivado por defecto.
 var launch_with_windows: bool = false
@@ -55,7 +59,14 @@ var text_size: int = DEFAULT_TEXT_SIZE
 var language: Language = Language.AUTO
 ## Tutorial: activado y paso por el que va ([constant Tutorial.DONE] = terminado).
 var tutorial_enabled: bool = true
+## Unos y ceros flotando en el fondo y en la estela del puntero.
+var binary_effect: bool = true
+## Paso del tutorial de la ranura abierta (es un reflejo de [member slot_steps]).
 var tutorial_step: int = 0
+## Paso del tutorial de cada ranura de guardado.
+var slot_steps: PackedInt32Array = PackedInt32Array([0, 0, 0])
+## Última ranura de guardado abierta (0 = ninguna todavía).
+var last_slot: int = 0
 
 
 ## Convierte el texto de un archivo en ajustes. Nunca falla: ante un texto
@@ -86,6 +97,7 @@ static func from_dict(raw: Variant) -> SettingsData:
 		source, "screen_index", PRIMARY_SCREEN, PRIMARY_SCREEN, MAX_SCREEN_INDEX
 	)
 	result.always_on_top = _read_bool(source, "always_on_top", true)
+	result.transparent_background = _read_bool(source, "transparent_background", false)
 	result.fps_limit = _read_choice(source, "fps_limit", DEFAULT_FPS, FPS_CHOICES)
 	result.launch_with_windows = _read_bool(source, "launch_with_windows", false)
 	var mode: int = _read_int(source, "panel_mode", PanelMode.REPLACE, 0, PanelMode.size() - 1)
@@ -101,7 +113,10 @@ static func from_dict(raw: Variant) -> SettingsData:
 	var lang: int = _read_int(source, "language", Language.AUTO, 0, Language.size() - 1)
 	result.language = lang as Language
 	result.tutorial_enabled = _read_bool(source, "tutorial_enabled", true)
+	result.binary_effect = _read_bool(source, "binary_effect", true)
 	result.tutorial_step = _read_int(source, "tutorial_step", 0, 0, Tutorial.DONE)
+	result.slot_steps = _read_slot_steps(source, result.tutorial_step)
+	result.last_slot = _read_int(source, "last_slot", 0, 0, SLOT_COUNT)
 	return result
 
 
@@ -121,6 +136,7 @@ func to_dict() -> Dictionary:
 		"strip_rows": strip_rows,
 		"screen_index": screen_index,
 		"always_on_top": always_on_top,
+		"transparent_background": transparent_background,
 		"fps_limit": fps_limit,
 		"launch_with_windows": launch_with_windows,
 		"panel_mode": int(panel_mode),
@@ -132,13 +148,37 @@ func to_dict() -> Dictionary:
 		"text_size": text_size,
 		"language": int(language),
 		"tutorial_enabled": tutorial_enabled,
+		"binary_effect": binary_effect,
 		"tutorial_step": tutorial_step,
+		"slot_steps": Array(slot_steps),
+		"last_slot": last_slot,
 	}
 
 
 ## Serializa a texto JSON.
 func to_json() -> String:
 	return JSON.stringify(to_dict(), "\t")
+
+
+## Pasos del tutorial por ranura. Un archivo antiguo (sin la lista) cuenta su único
+## paso como el de la ranura 1, donde se migra la partida de entonces.
+static func _read_slot_steps(source: Dictionary, legacy_step: int) -> PackedInt32Array:
+	var steps: PackedInt32Array = PackedInt32Array()
+	steps.resize(SLOT_COUNT)
+	var raw: Variant = source.get("slot_steps", null)
+	if typeof(raw) != TYPE_ARRAY:
+		steps[0] = legacy_step
+		return steps
+	var items: Array = raw
+	for index: int in range(mini(items.size(), SLOT_COUNT)):
+		var item: Variant = items[index]
+		if typeof(item) == TYPE_INT:
+			var whole: int = item
+			steps[index] = clampi(whole, 0, Tutorial.DONE)
+		elif typeof(item) == TYPE_FLOAT:
+			var decimal: float = item
+			steps[index] = clampi(roundi(decimal), 0, Tutorial.DONE)
+	return steps
 
 
 static func _read_int(source: Dictionary, key: String, fallback: int, low: int, high: int) -> int:

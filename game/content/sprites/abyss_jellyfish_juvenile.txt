@@ -1,0 +1,15 @@
+# abyss_jellyfish · juvenil
+[frame]
+(°)
+|:|
+[colors]
+beb
+ddd
+[frame]
+(°)
+:|:
+[colors]
+beb
+ddd
+[anchor]
+eye=1,0

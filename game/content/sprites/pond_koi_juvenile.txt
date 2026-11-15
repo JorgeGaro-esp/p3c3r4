@@ -1,0 +1,11 @@
+# pond_koi · juvenil
+[frame]
+><(#°)>
+[colors]
+ttbdebb
+[frame]
+<>(#°)>
+[colors]
+ttbdebb
+[anchor]
+eye=4,0

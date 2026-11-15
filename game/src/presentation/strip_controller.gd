@@ -13,6 +13,11 @@ enum Kind { NONE, SHOP, SETTINGS, FINAL }
 const BASE_FONT_PX: int = 17
 ## Filas que se suponen disponibles cuando aún no hay pantalla que medir.
 const UNLIMITED_ROWS: int = 1000
+## Cuántas ventanas de ancho mide el mundo de la pecera (se recorre con la cámara).
+const WORLD_SCREENS: int = 2
+## Filas de cielo sobre la superficie del agua (el pájaro se posa ahí). Se suman a las
+## filas de la franja; la barra lateral y los paneles también las aprovechan.
+const SKY_ROWS: int = 2
 
 @export var canvas_path: NodePath
 @export var tank_path: NodePath
@@ -30,6 +35,10 @@ var _final: FinalPanel
 var _card: FishCard
 var _tank_tabs: TankTabs
 var _hint: TutorialHint
+var _crt: CrtTransition = CrtTransition.new()
+var _effect_area: Rect2i = Rect2i()
+var _title: TitlePanel
+var _title_active: bool = false
 var _language: String = ""
 var _last_step_time: float = 0.0
 var _open: Kind = Kind.NONE
@@ -75,7 +84,10 @@ func _ready() -> void:
 	_on_settings_changed()
 	EventBus.notice_requested.connect(_on_notice_requested)
 	if uses_saves:
-		_on_notice_requested(SaveService.start())
+		if SaveService.active_slot == 0:
+			_show_title()
+		else:
+			_on_notice_requested(SaveService.start())
 
 
 func _process(delta: float) -> void:
@@ -90,12 +102,16 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if key.ctrl_pressed and key.keycode == KEY_Q:
 		Platform.request_quit()
+	elif _title_active and key.keycode != KEY_M:
+		return
 	elif key.keycode == KEY_D and not key.ctrl_pressed:
 		toggle_decorating()
 	elif key.keycode == KEY_M and not key.ctrl_pressed:
 		_on_mute_pressed()
 	elif key.keycode == KEY_L and not key.ctrl_pressed:
 		open_achievements()
+	elif key.keycode == KEY_F12:
+		_tank.summon_bird()
 	elif key.keycode >= KEY_1 and key.keycode <= KEY_8 and not key.ctrl_pressed:
 		Game.biomes.set_active(key.keycode - KEY_1)
 
@@ -124,6 +140,22 @@ func open_achievements() -> void:
 	open_shop_tab(ShopPanel.ACHIEVEMENTS_TAB)
 
 
+## Abre las Estadísticas (pestaña de la tienda), o las cierra si ya estaban a la vista.
+func open_stats() -> void:
+	open_shop_tab(ShopPanel.STATS_TAB)
+
+
+## Abre la tienda (sus pestañas de compra), o la cierra si ya estaba a la vista.
+func open_shop() -> void:
+	if _open == Kind.SHOP and _shop.group() == ShopPanel.Group.SHOP:
+		close_panel()
+		return
+	if _tank.is_decorating():
+		_tank.set_decorating(false)
+	open_panel(Kind.SHOP)
+	_shop.show_group(ShopPanel.Group.SHOP)
+
+
 ## Abre la tienda en la pestaña [param tab], o la cierra si ya estaba a la vista.
 func open_shop_tab(tab: int) -> void:
 	if _open == Kind.SHOP and _shop.current_tab() == tab:
@@ -145,16 +177,22 @@ func toggle_panel(kind: Kind) -> void:
 
 func open_panel(kind: Kind) -> void:
 	_open = kind
+	_tank.input_enabled = kind == Kind.NONE
+	if kind != Kind.NONE:
+		_card.show_fish(null)
 	_apply_window()
 	_apply_layout()
+	_crt.play(_effect_area)
 
 
 func close_panel() -> void:
 	if _open == Kind.NONE:
 		return
 	_open = Kind.NONE
+	_tank.input_enabled = true
 	_apply_window()
 	_apply_layout()
+	_crt.play(_effect_area)
 
 
 ## Panel abierto ahora.
@@ -184,7 +222,9 @@ func _on_fish_clicked(fish: Fish) -> void:
 
 
 func _on_escape() -> void:
-	if _tank.is_decorating():
+	if _title_active:
+		_title.escape()
+	elif _tank.is_decorating():
 		_tank.set_decorating(false)
 	elif _card.fish() != null:
 		close_card()
@@ -279,12 +319,19 @@ func _build_panels() -> void:
 	_card = FishCard.new(_ui)
 	_tank_tabs = TankTabs.new(_ui)
 	_hint = TutorialHint.new(_ui)
+	_ui.add_widget(_crt, UiRoot.LAYER_WIDGET + 30)
+	_crt.is_shown = true
+	_title = TitlePanel.new(_ui)
+	_title.slot_chosen.connect(_on_slot_chosen)
+	_title.quit_requested.connect(Platform.request_quit)
+	_settings_panel.title_requested.connect(_leave_to_title)
 	_card.close_requested.connect(close_card)
 	_sidebar.set_active(true)
-	_sidebar.shop_pressed.connect(toggle_panel.bind(Kind.SHOP))
+	_sidebar.shop_pressed.connect(open_shop)
 	_sidebar.settings_pressed.connect(toggle_panel.bind(Kind.SETTINGS))
 	_sidebar.dex_pressed.connect(open_dex)
 	_sidebar.achievements_pressed.connect(open_achievements)
+	_settings_panel.stats_requested.connect(open_stats)
 	_sidebar.minimize_pressed.connect(Platform.minimize)
 	_sidebar.close_pressed.connect(Platform.request_quit)
 	_shop.close_requested.connect(close_panel)
@@ -311,13 +358,48 @@ func _on_production_changed(rate: float) -> void:
 
 func _on_settings_changed() -> void:
 	if Settings.effective_language() != _language:
-		get_tree().reload_current_scene.call_deferred()
+		_reload_scene.call_deferred()
 		return
+	if _title_active:
+		_title.refresh()
 	_update_tutorial()
 	Platform.set_always_on_top(Settings.data.always_on_top)
 	_apply_window()
 	_apply_layout()
 	_settings_panel.refresh()
+
+
+## Enseña la pantalla de título: una pecera de adorno y el cuadro con las ranuras.
+func _show_title() -> void:
+	SaveService.prepare_slots()
+	Game.start_title_demo()
+	Game.set_paused(true)
+	_title_active = true
+	_tank.input_enabled = false
+	_title.open()
+	_apply_layout()
+
+
+func _on_slot_chosen(slot: int, fresh: bool) -> void:
+	SaveService.open_slot(slot, fresh)
+	_reload_scene.call_deferred()
+
+
+## Recarga la escena principal (si hay una: los tests la montan a mano).
+func _reload_scene() -> void:
+	if get_tree().current_scene != null:
+		get_tree().reload_current_scene()
+
+
+## Sale de la partida al título (desde Ajustes). Sin guardados (tests) no hace nada.
+func _leave_to_title(delete_slot: bool) -> void:
+	if not uses_saves:
+		return
+	if delete_slot:
+		SaveService.delete_slot(SaveService.active_slot)
+	else:
+		SaveService.close_slot()
+	_reload_scene.call_deferred()
 
 
 ## Calcula el tamaño de fuente y las filas totales y coloca la ventana.
@@ -332,36 +414,65 @@ func _apply_window() -> void:
 	var usable: Rect2i = Platform.usable_rect(screen)
 	_available_rows = StripLayout.fit_rows(UNLIMITED_ROWS, usable.size.y, _canvas.cell_size.y)
 	var rows: int = PanelLayout.total_rows(
-		data.strip_rows, data.panel_mode, _open != Kind.NONE, _available_rows
+		data.strip_rows + SKY_ROWS, data.panel_mode, _open != Kind.NONE, _available_rows
 	)
 	Platform.place_strip(data.screen_index, rows, _canvas.cell_size.y)
 
 
 ## Reparte las celdas de la ventana entre pecera, barra lateral y panel.
 func _apply_layout() -> void:
+	_canvas.solid_background = not Settings.data.transparent_background
+	if _title_active:
+		_layout_title()
+		return
 	var data: SettingsData = Settings.data
 	var is_open: bool = _open != Kind.NONE
-	var wanted: int = PanelLayout.total_rows(
-		data.strip_rows, data.panel_mode, is_open, _available_rows
-	)
+	var base_rows: int = data.strip_rows + SKY_ROWS
+	var wanted: int = PanelLayout.total_rows(base_rows, data.panel_mode, is_open, _available_rows)
 	var mode: SettingsData.PanelMode = PanelLayout.effective_mode(
-		data.panel_mode, data.strip_rows, wanted, is_open
+		data.panel_mode, base_rows, wanted, is_open
 	)
 	var layout: PanelLayout = PanelLayout.compute(
-		_canvas.columns, _canvas.row_count, data.strip_rows, mode, is_open
+		_canvas.columns, _canvas.row_count, base_rows, mode, is_open
 	)
-	_tank.set_area(layout.tank_rect)
+	var sky: int = mini(SKY_ROWS, layout.tank_rect.size.y - 1)
+	var panel_area: Rect2i = layout.panel_rect
+	var with_sky: Rect2i = layout.tank_rect
+	layout.tank_rect = Rect2i(
+		layout.tank_rect.position + Vector2i(0, sky),
+		layout.tank_rect.size - Vector2i(0, sky),
+	)
+	_effect_area = panel_area if is_open else layout.tank_rect
+	var covered_sky: bool = layout.panel_rect.has_area() and layout.panel_rect.intersects(with_sky)
+	_canvas.sky = (
+		Rect2i(with_sky.position, Vector2i(with_sky.size.x, sky))
+		if sky > 0 and not covered_sky
+		else Rect2i()
+	)
+	_tank.set_area(layout.tank_rect, _canvas.columns * WORLD_SCREENS)
 	_sidebar.layout(layout.sidebar_rect)
 	_place_panel(_shop, Kind.SHOP, layout.panel_rect)
 	_place_panel(_settings_panel, Kind.SETTINGS, layout.panel_rect)
 	_place_panel(_final, Kind.FINAL, layout.panel_rect)
-	_place_card(layout.tank_rect)
+	_place_card(with_sky)
 	_place_hint(layout.tank_rect)
 	_tank_tabs.layout(layout.tank_rect)
 	var covered: bool = (
 		layout.panel_rect.has_area() and layout.panel_rect.intersects(layout.tank_rect)
 	)
 	_tank_tabs.update_visibility(not covered)
+
+
+func _layout_title() -> void:
+	var full: Rect2i = Rect2i(0, 0, _canvas.columns, _canvas.row_count)
+	_canvas.sky = Rect2i()
+	_tank.set_area(full)
+	_sidebar.set_active(false)
+	_card.set_active(false)
+	_hint.set_active(false)
+	_tank_tabs.update_visibility(false)
+	_title.set_active(true)
+	_title.layout(full)
 
 
 func _place_panel(panel: UiPanel, kind: Kind, area: Rect2i) -> void:

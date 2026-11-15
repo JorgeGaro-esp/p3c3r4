@@ -14,7 +14,7 @@ func _two_tank_state() -> GameState:
 	state.wallet.add(50.0)
 	var reef: Tank = Tank.new()
 	reef.biome_id = "reef"
-	reef.add_fish(Fish.new("reef_clownfish"))
+	reef.add_fish(Fish.new("reef_krill"))
 	state.tanks.append(reef)
 	state.active_tank = 1
 	return state
@@ -40,7 +40,7 @@ func test_two_tanks_and_the_active_one_survive_a_round_trip() -> void:
 	assert_eq(result.state.tanks.size(), 2)
 	assert_eq(result.state.active_tank, 1)
 	assert_eq(result.state.active().biome_id, "reef")
-	assert_eq(result.state.tanks[1].count_of("reef_clownfish"), 1)
+	assert_eq(result.state.tanks[1].count_of("reef_krill"), 1)
 
 
 func test_an_out_of_range_active_tank_is_clamped() -> void:

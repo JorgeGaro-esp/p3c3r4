@@ -79,3 +79,10 @@ func test_select_on_an_empty_list_does_nothing() -> void:
 	model.select(2)
 	model.move(1)
 	assert_eq(model.selected, -1)
+
+
+func test_configure_keeps_a_wheel_scroll_away_from_the_selection() -> void:
+	var model: ListModel = _model(20, 5)
+	model.scroll_by(8)
+	model.configure(20, 5)
+	assert_eq(model.scroll, 8)

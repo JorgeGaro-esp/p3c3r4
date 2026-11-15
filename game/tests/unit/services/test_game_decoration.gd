@@ -71,11 +71,11 @@ func test_cost_counts_placed_and_stored_objects() -> void:
 
 
 func test_placing_a_cave_unlocks_the_loach() -> void:
-	assert_false(Game.state.is_unlocked("pond_loach"))
+	assert_false(Game.state.is_unlocked("pond_catfish"))
 	Game.buy_decoration("cave")
 	Game.place_decoration("cave", 300, 0, WIDTH, WATER)
 	await wait_process_frames(2)
-	assert_true(Game.state.is_unlocked("pond_loach"))
+	assert_true(Game.state.is_unlocked("pond_catfish"))
 
 
 func test_placing_a_production_object_updates_the_rate() -> void:

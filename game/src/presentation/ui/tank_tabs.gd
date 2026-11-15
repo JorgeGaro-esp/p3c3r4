@@ -9,7 +9,8 @@ var _area: Rect2i = Rect2i()
 
 func _init(root: UiRoot) -> void:
 	super(root)
-	_add(_tabs)
+	# Por debajo de la ficha del pez, que se dibuja encima sin mezclarse.
+	_add(_tabs, UiRoot.LAYER_PANEL)
 	_tabs.tab_changed.connect(_on_tab_changed)
 	EventBus.active_tank_changed.connect(_on_state_changed)
 	EventBus.tank_unlocked.connect(_on_state_changed)

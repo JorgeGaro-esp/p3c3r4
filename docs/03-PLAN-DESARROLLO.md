@@ -364,7 +364,75 @@
 
 ---
 
-## Fase 17 · (Futuro) Versión web y publicación
+## Fase 17 · Título, ranuras de guardado y paneles modales
+
+Petición de Jorge tras la Fase 16 (2026-11-14). Referencia visual: la pantalla de título de «Rusty's Retirement».
+
+1. Pantalla de título con logo ASCII y pecera de adorno detrás (Continuar, Cargar, Nueva, Salir).
+2. Tres ranuras de guardado, con la partida anterior migrada a la 1, y tutorial por ranura.
+3. En Ajustes: volver al título y borrar la ranura abierta.
+4. Paneles modales: la pecera no recibe entrada con un panel abierto; la ficha del pez se cierra.
+5. Rueda del ratón en las listas de la tienda y la enciclopedia.
+
+Aceptación: al abrir el juego se ve el título; cada ranura guarda por separado; no se puede tocar la pecera con un panel abierto; la rueda desplaza las listas.
+
+Después vendrá un pulido de diseño, música e interfaces por peticiones de Jorge.
+
+## Fase 18 · Cámara de la pecera y barra lateral ancha
+
+Petición de Jorge tras ver el título (2026-11-14).
+
+1. Versión del título en la esquina de la ventana.
+2. Barra lateral más ancha para que se vean los ingresos por segundo.
+3. Pecera de doble ancho con cámara horizontal que se arrastra con el botón derecho.
+
+Aceptación: los ingresos se leen enteros; al arrastrar con el botón derecho se descubre más pecera sin mover la interfaz; los peces nuevos aparecen a la vista.
+
+## Fase 19 · Efecto binario (unos y ceros)
+
+Petición de Jorge (2026-11-14), inspirada en losdelaia.com: más sabor artístico con letras y números.
+
+1. Fondo de cada pecera con 1 y 0 gris muy oscuro que suben despacio y se desvanecen (variación por bioma).
+2. Estela de 1 y 0 que deja el puntero al moverse sobre la pecera, muy sutil.
+3. Interruptor en Ajustes; «Reducir movimiento» frena el fondo y apaga la estela.
+
+Aceptación: casi imperceptible a simple vista pero se nota al fijarse; la estela no sale con un panel abierto ni sobre la interfaz.
+
+## Fase 20 · Pecera con más vida (hecha, 0.35.0)
+
+Petición de Jorge (2026-11-14): «añade todas esas ideas» tras la lluvia de ideas. Se entrega por fases, una por entrega.
+
+1. Peces que reaccionan al cursor (huidizos / curiosos) y se asustan con los clics.
+2. Sueño visible: ritmo día/noche según la actividad de cada especie.
+
+## Fase 21 · Personalización
+
+1. Poner nombre a un pez y marcarlo como favorito (cambia el formato de guardado).
+2. Copiar la pecera como texto o captura.
+3. Temas de color ASCII para la interfaz.
+4. Variantes de dibujo además de las de color.
+
+## Fase 22 · Retención sin presión
+
+1. Recompensa suave por ausencia, con tope.
+2. Metas diarias suaves, sin rachas que castiguen.
+3. Modo foco / pomodoro.
+
+## Fase 23 · Comodidad
+
+1. Deshacer una venta durante unos segundos y vender por lotes con filtro.
+2. Búsqueda en la Enciclopedia.
+3. Arrancar con Windows y ocultarse con un juego a pantalla completa.
+
+## Fase 24 · Interacciones entre especies
+
+Payaso con anémona, camarón limpiador, presas que huyen del tiburón sin morir.
+
+## Fase 25 · Temporadas y quinto bioma
+
+Eventos según la fecha real y un bioma nuevo.
+
+## Fase 26 · (Futuro) Versión web y publicación
 
 Sin detallar hasta que Jorge lo decida. Incluiría: exportación HTML5, adaptación de `Platform` a un lienzo apaisado, exportar e importar partidas, página en itch.io, y, para Steam, página de tienda, firma de código e integración con sus servicios.
 

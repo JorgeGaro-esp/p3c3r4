@@ -19,6 +19,7 @@ var model: ListModel = ListModel.new()
 func _init() -> void:
 	is_focusable = true
 	focus_on_click = true
+	wheel_fallback = true
 
 
 ## Cambia el rectángulo y reajusta las filas visibles.

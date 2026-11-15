@@ -1,19 +1,19 @@
 # mangrove_mudskipper · adulto
 [frame]
-   °°
-~-<(==)>
-   /\
+     (°) 
+~-=(===)>
+    /\   
 [colors]
-   ee
-ttbbbbbb
-   ff
+     beb 
+ttbbbbbbb
+    ff   
 [frame]
-   °°
--~<(==)>
-   \/
+     (°) 
+-~=(===)>
+    \/   
 [colors]
-   ee
-ttbbbbbb
-   ff
+     beb 
+ttbbbbbbb
+    ff   
 [anchor]
-eye=3,0
+eye=6,0

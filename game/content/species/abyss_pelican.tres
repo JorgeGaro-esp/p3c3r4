@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "abyss_pelican"
+name_key = "SPECIES_ABYSS_PELICAN"
+description_key = "SPECIES_ABYSS_PELICAN_DESC"
+biome_id = "abyss"
+rarity = 2
+activity = 0
+base_cost = 2100000.0
+base_production = 2710.0
+unlock_kind = 4
+unlock_amount = 1.0
+unlock_species_id = ""
+unlock_tag = "lure"
+sprite_path = "res://content/sprites/abyss_pelican.txt"
+palette_roles = PackedStringArray("b", "t", "d", "e")
+palette_colors = PackedColorArray(0.5, 0.45, 0.75, 1, 0.55, 0.5, 0.8, 1, 0.7, 0.65, 0.9, 1, 1, 1, 1, 1)
+growth_seconds = 820.0
+breed_seconds = 1100.0
+hatch_seconds = 105.0
+fry_sprite_path = "res://content/sprites/abyss_pelican_fry.txt"
+juvenile_sprite_path = "res://content/sprites/abyss_pelican_juvenile.txt"
+style = 1
+speed = 3.0
+amplitude = 0.35
+frequency = 1.0
+frame_duration = 0.5
+wave_number = 7.0
+school_pull = 0.0
+depth_min = 0.3
+depth_max = 0.9
+rest_chance = 0.3
+rest_seconds = 3.0
+temperament = 0.2

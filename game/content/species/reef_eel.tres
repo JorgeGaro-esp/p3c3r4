@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "reef_eel"
+name_key = "SPECIES_REEF_EEL"
+description_key = "SPECIES_REEF_EEL_DESC"
+biome_id = "reef"
+rarity = 1
+activity = 1
+base_cost = 9000.0
+base_production = 12.32
+unlock_kind = 4
+unlock_amount = 1.0
+unlock_species_id = ""
+unlock_tag = "coral"
+sprite_path = "res://content/sprites/reef_eel.txt"
+palette_roles = PackedStringArray("b","t","d","f","e")
+palette_colors = PackedColorArray(0.55, 0.8, 0.5, 1, 0.45, 0.7, 0.4, 1, 0.9, 0.85, 0.4, 1, 0.55, 0.8, 0.5, 1, 1, 1, 0.6, 1)
+growth_seconds = 180.0
+breed_seconds = 240.0
+hatch_seconds = 45.0
+fry_sprite_path = "res://content/sprites/reef_eel_fry.txt"
+juvenile_sprite_path = "res://content/sprites/reef_eel_juvenile.txt"
+style = 1
+speed = 2.5
+amplitude = 0.35
+frequency = 1.1
+frame_duration = 0.5
+wave_number = 7.0
+school_pull = 0.0
+depth_min = 0.7
+depth_max = 1.0
+rest_chance = 0.5
+rest_seconds = 4.0
+temperament = -0.4

@@ -1,0 +1,11 @@
+# abyss_viperfish · juvenil
+[frame]
+><(o°)E
+[colors]
+ttbdebf
+[frame]
+<>(o°)E
+[colors]
+ttbdebf
+[anchor]
+eye=4,0

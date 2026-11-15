@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "mangrove_tadpole"
+name_key = "SPECIES_MANGROVE_TADPOLE"
+description_key = "SPECIES_MANGROVE_TADPOLE_DESC"
+biome_id = "mangrove"
+rarity = 0
+activity = 0
+base_cost = 12000.0
+base_production = 18.3
+unlock_kind = 0
+unlock_amount = 0.0
+unlock_species_id = ""
+unlock_tag = ""
+sprite_path = "res://content/sprites/mangrove_tadpole.txt"
+palette_roles = PackedStringArray("b", "t", "e")
+palette_colors = PackedColorArray(0.55, 0.62, 0.3, 1, 0.5, 0.55, 0.28, 1, 1, 1, 0.6, 1)
+growth_seconds = 300.0
+breed_seconds = 450.0
+hatch_seconds = 70.0
+fry_sprite_path = "res://content/sprites/mangrove_tadpole_fry.txt"
+juvenile_sprite_path = "res://content/sprites/mangrove_tadpole_juvenile.txt"
+style = 0
+speed = 3.5
+amplitude = 0.2
+frequency = 2.0
+frame_duration = 0.3
+wave_number = 4.0
+school_pull = 0.8
+depth_min = 0.0
+depth_max = 0.5
+rest_chance = 0.2
+rest_seconds = 1.5
+temperament = -0.6

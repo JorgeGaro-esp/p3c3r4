@@ -1,3 +1,5 @@
+# gdlint: disable=max-public-methods
+# (fachada de setters: un método por ajuste, por eso pasa de 20)
 class_name SettingsService
 extends Node
 ## Servicio de ajustes del usuario (autoload `Settings`).
@@ -16,6 +18,8 @@ const SAVE_DELAY_SECONDS: float = 0.5
 var data: SettingsData = SettingsData.new()
 ## Archivo de ajustes. Solo lo cambian las pruebas.
 var storage_path: String = DEFAULT_PATH
+## Ranura de guardado abierta (1 a 3; 0 = ninguna: se está en el título).
+var active_slot: int = 0
 
 var _save_timer: Timer = Timer.new()
 var _system_language: String = "en"
@@ -79,6 +83,12 @@ func set_screen_index(index: int) -> void:
 func set_always_on_top(enabled: bool) -> void:
 	if enabled != data.always_on_top:
 		data.always_on_top = enabled
+		_commit()
+
+
+func set_transparent_background(enabled: bool) -> void:
+	if enabled != data.transparent_background:
+		data.transparent_background = enabled
 		_commit()
 
 
@@ -157,6 +167,13 @@ func set_language(language: SettingsData.Language) -> void:
 		_commit()
 
 
+## Enciende o apaga los unos y ceros del fondo y del puntero.
+func set_binary_effect(enabled: bool) -> void:
+	if enabled != data.binary_effect:
+		data.binary_effect = enabled
+		_commit()
+
+
 ## Activa o apaga el tutorial; al activarlo vuelve a empezar desde el primer paso.
 func set_tutorial_enabled(enabled: bool) -> void:
 	if enabled == data.tutorial_enabled:
@@ -164,6 +181,7 @@ func set_tutorial_enabled(enabled: bool) -> void:
 	data.tutorial_enabled = enabled
 	if enabled:
 		data.tutorial_step = 0
+		_remember_step()
 	_commit()
 
 
@@ -172,7 +190,39 @@ func set_tutorial_step(step: int) -> void:
 	var value: int = clampi(step, 0, Tutorial.DONE)
 	if value != data.tutorial_step:
 		data.tutorial_step = value
+		_remember_step()
 		_commit()
+
+
+## Pasa a la ranura de guardado [param slot] (1 a 3; 0 = ninguna). Con
+## [param fresh] su tutorial empieza de cero.
+func use_slot(slot: int, fresh: bool = false) -> void:
+	active_slot = clampi(slot, 0, SettingsData.SLOT_COUNT)
+	if active_slot == 0:
+		return
+	if fresh:
+		data.slot_steps[active_slot - 1] = 0
+	data.tutorial_step = data.slot_steps[active_slot - 1]
+	data.last_slot = active_slot
+	_commit()
+
+
+## Borra lo que se recuerda de la ranura [param slot] (su tutorial).
+func forget_slot(slot: int) -> void:
+	if slot < 1 or slot > SettingsData.SLOT_COUNT:
+		return
+	data.slot_steps[slot - 1] = 0
+	if data.last_slot == slot:
+		data.last_slot = 0
+	if active_slot == slot:
+		active_slot = 0
+		data.tutorial_step = 0
+	_commit()
+
+
+func _remember_step() -> void:
+	if active_slot > 0:
+		data.slot_steps[active_slot - 1] = data.tutorial_step
 
 
 ## Código de idioma que se usa ahora (`es` o `en`).

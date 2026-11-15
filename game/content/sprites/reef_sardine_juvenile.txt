@@ -1,0 +1,11 @@
+# reef_sardine · juvenil
+[frame]
+><(°>
+[colors]
+ttbeb
+[frame]
+<>(°>
+[colors]
+ttbeb
+[anchor]
+eye=3,0

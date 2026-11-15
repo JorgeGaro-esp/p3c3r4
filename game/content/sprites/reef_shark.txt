@@ -1,0 +1,15 @@
+# reef_shark · adulto
+[frame]
+      ▲   
+><==(~~°)>
+[colors]
+      f   
+ttbbbddebb
+[frame]
+      ▲   
+<>==(~~°)>
+[colors]
+      f   
+ttbbbddebb
+[anchor]
+eye=7,1

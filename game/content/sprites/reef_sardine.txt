@@ -1,0 +1,11 @@
+# reef_sardine · adulto
+[frame]
+><(((°>
+[colors]
+ttbbbeb
+[frame]
+<>(((°>
+[colors]
+ttbbbeb
+[anchor]
+eye=5,0

@@ -18,16 +18,16 @@ func _fish(species_id: String, variant_id: String, maturity: float) -> Fish:
 
 
 func test_an_adult_sells_for_half_its_base_cost_times_the_variant() -> void:
-	var base: float = _content.get_species("pond_goldfish").base_cost
-	assert_eq(Selling.value_of(_fish("pond_goldfish", "normal", 1.0), _content), floorf(base * 0.5))
-	assert_eq(Selling.value_of(_fish("pond_goldfish", "golden", 1.0), _content), floorf(base * 7.5))
-	assert_eq(Selling.value_of(_fish("pond_goldfish", "prismatic", 1.0), _content), base * 25.0)
+	var base: float = _content.get_species("pond_salmon").base_cost
+	assert_eq(Selling.value_of(_fish("pond_salmon", "normal", 1.0), _content), floorf(base * 0.5))
+	assert_eq(Selling.value_of(_fish("pond_salmon", "golden", 1.0), _content), floorf(base * 7.5))
+	assert_eq(Selling.value_of(_fish("pond_salmon", "prismatic", 1.0), _content), base * 25.0)
 
 
 func test_young_fish_sell_for_less() -> void:
-	var adult: float = Selling.value_of(_fish("pond_koi", "normal", 1.0), _content)
-	var juvenile: float = Selling.value_of(_fish("pond_koi", "normal", 0.5), _content)
-	var fry: float = Selling.value_of(_fish("pond_koi", "normal", 0.0), _content)
+	var adult: float = Selling.value_of(_fish("pond_wels", "normal", 1.0), _content)
+	var juvenile: float = Selling.value_of(_fish("pond_wels", "normal", 0.5), _content)
+	var fry: float = Selling.value_of(_fish("pond_wels", "normal", 0.0), _content)
 	assert_lt(fry, juvenile)
 	assert_lt(juvenile, adult)
 	assert_eq(juvenile, adult * 0.5)
@@ -58,7 +58,7 @@ func test_surplus_only_looks_at_the_same_species_and_variant() -> void:
 	for _index: int in range(3):
 		tank.add_fish(_fish("pond_guppy", "normal", 1.0))
 	tank.add_fish(_fish("pond_guppy", "golden", 1.0))
-	tank.add_fish(_fish("pond_minnow", "normal", 1.0))
+	tank.add_fish(_fish("pond_carp", "normal", 1.0))
 	assert_eq(Selling.surplus(tank, "pond_guppy", "normal").size(), 1)
 	assert_eq(Selling.surplus(tank, "pond_guppy", "golden").size(), 0)
-	assert_eq(Selling.surplus(tank, "pond_minnow", "normal").size(), 0)
+	assert_eq(Selling.surplus(tank, "pond_carp", "normal").size(), 0)

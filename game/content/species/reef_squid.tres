@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "reef_squid"
+name_key = "SPECIES_REEF_SQUID"
+description_key = "SPECIES_REEF_SQUID_DESC"
+biome_id = "reef"
+rarity = 2
+activity = 2
+base_cost = 32000.0
+base_production = 42.24
+unlock_kind = 4
+unlock_amount = 1.0
+unlock_species_id = ""
+unlock_tag = "anemone"
+sprite_path = "res://content/sprites/reef_squid.txt"
+palette_roles = PackedStringArray("b", "t", "d", "f", "e")
+palette_colors = PackedColorArray(1, 0.6, 0.7, 1, 0.95, 0.5, 0.65, 1, 1, 0.8, 0.85, 1, 1, 0.75, 0.8, 1, 1, 1, 1, 1)
+growth_seconds = 260.0
+breed_seconds = 380.0
+hatch_seconds = 65.0
+fry_sprite_path = "res://content/sprites/reef_squid_fry.txt"
+juvenile_sprite_path = "res://content/sprites/reef_squid_juvenile.txt"
+style = 0
+speed = 4.5
+amplitude = 0.25
+frequency = 0.9
+frame_duration = 0.4
+wave_number = 2.5
+school_pull = 0.4
+depth_min = 0.2
+depth_max = 0.8
+rest_chance = 0.3
+rest_seconds = 2.0
+temperament = 0.2

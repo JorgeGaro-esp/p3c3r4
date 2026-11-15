@@ -3,7 +3,7 @@ extends GutTest
 
 const SAMPLES: int = 200000
 const IDS: PackedStringArray = ["normal", "albino", "melanistic", "golden", "prismatic"]
-const EXPECTED: Array[float] = [0.93, 0.04, 0.02, 0.009, 0.001]
+const EXPECTED: Array[float] = [0.92, 0.04, 0.02, 0.017, 0.003]
 const MULTIPLIERS: Array[float] = [1.0, 3.0, 5.0, 15.0, 50.0]
 
 var _content: ContentDB = null
@@ -89,7 +89,13 @@ func test_albino_is_lighter_and_melanistic_darker() -> void:
 	var albino: Color = VariantPalette.tint(source, VariantDef.Look.ALBINO)
 	var dark: Color = VariantPalette.tint(source, VariantDef.Look.MELANISTIC)
 	assert_gt(albino.get_luminance(), source.get_luminance())
-	assert_lt(dark.get_luminance(), source.get_luminance() * 0.6)
+	assert_lt(dark.get_luminance(), source.get_luminance())
+
+
+func test_melanistic_stays_visible_on_black() -> void:
+	for source: Color in [Color(0.9, 0.4, 0.2), Color(0.2, 0.2, 0.25), Color(0.05, 0.05, 0.05)]:
+		var dark: Color = VariantPalette.tint(source, VariantDef.Look.MELANISTIC)
+		assert_gte(dark.get_luminance(), VariantPalette.MELANISTIC_FLOOR - 0.001, "%s" % source)
 
 
 func test_golden_is_warm_whatever_the_source_colour() -> void:

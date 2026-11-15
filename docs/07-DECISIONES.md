@@ -24,7 +24,7 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | D16 | Color | Color por especie sobre fondo negro, con efecto CRT |
 | D17 | Sprites | De una línea y multilínea |
 | D18 | Interfaz | También en ASCII |
-| D19 | Audio | Ambiente acuático y efectos suaves, más música chiptune |
+| D19 | Audio | Ambiente acuático y efectos suaves, más música (chiptune al principio; lofi desde 0.22.1, T154) |
 | D20 | Título | "P3C3R4" es provisional |
 | D21 | Alcance | La primera versión jugable es la completa |
 | D22 | Idiomas del juego | Español e inglés |
@@ -204,6 +204,53 @@ Cada decisión lleva un identificador para poder citarla. Las de la sección A l
 | T139 | El idioma se guarda en ajustes y al cambiarlo se recarga la escena principal (los textos se escriben al crear los paneles); el estado vive en el autoload `Game` y no se pierde | Evita reescribir cada texto de cada panel |
 | T140 | El tutorial son cuadros que avanzan con acciones reales y su progreso vive en los ajustes del usuario, no en la partida; borrar la partida lo reinicia | No repetir el tutorial tras prestigio ni cargas |
 | T133 | Los símbolos del reloj son `▲ ○ ▼ ●` (de la tabla de `AsciiCharset`) | `☀ ☾ ◐` no están en la fuente y se veían como `*` |
+| T141 | Producción base de especies ×0,352 y variantes dorada 1,7 / prismática 0,3 (normal 92) | Un bot «mixto» dio hitos: Arrecife 0,97 h, Abismo 2,3 h, todas las especies 2,9 h, prestigio ≈8 h, segunda vuelta 4,4 h (objetivos del plan mantenidos por Jorge) |
+| T142 | La simulación larga vive en `tests_long/` y no en la suite por defecto | Se ralentiza al ejecutarse tras los tests de integración; Jorge prefiere validar jugando |
+| T143 | El Pecedex completo exige suerte de prestigio: el bot llegó a ≈85–100 de 160 a 40–120 h | Limitación del bot; se comprobará jugando |
+| T144 | Revisión de seguridad y rendimiento de la 1.0 hecha por lectura de código y registrada en el doc 06, secciones 9 y 10 | Sin hallazgos bloqueantes; la medición real de CPU queda para las sesiones de Jorge |
+| T145 | Tres ranuras en `user://saves/slot_N/`; cada una conserva el esquema de copias rotativas de siempre; los ajustes (`settings.json`) siguen siendo globales | Respuesta de Jorge (título con Continuar/Cargar/Nueva y 3 ranuras) |
+| T146 | El título es un cuadro sobre la pecera dentro de la misma escena; sin ranura abierta (`SaveService.active_slot == 0`) se muestra y no se guarda nada; elegir ranura recarga la escena | Reutiliza el mecanismo del cambio de idioma; los tests no leen ni pisan guardados reales |
+| T147 | El progreso del tutorial vive en los ajustes pero por ranura (`slot_steps`); borrar o empezar una ranura lo reinicia | Respuesta de Jorge; no cambia el formato de guardado (sigue en 9) |
+| T148 | Mientras hay un panel abierto la pecera no recibe entrada (`TankView.input_enabled`) y la ficha del pez se cierra; la rueda va a la primera lista visible si el cursor no está sobre ella | Petición de Jorge: paneles superpuestos y rueda que no respondía |
+| T149 | Borrar desde Ajustes borra la ranura abierta (triple pulsación) y vuelve al título, en vez de empezar una partida nueva en el sitio | Respuesta de Jorge |
+| T150 | El mundo de la pecera mide 2 ventanas de ancho (`StripController.WORLD_SCREENS`) y se recorre con una cámara horizontal agarrada con el botón derecho; la interfaz no se mueve | Petición de Jorge: ver que la pecera es más grande que lo que se ve |
+| T151 | La cámara es un desplazamiento del lienzo (`AsciiCanvas.camera_x`) para las capas menores de 50; los clics del mundo usan `world_cell_at` y los de la interfaz `cell_at` | No hay que tocar cada dibujo; los caracteres fuera de la ventana no se pintan |
+| T152 | Las decoraciones guardan su posición en milésimas del ancho del mundo, así que al ensancharlo las de partidas antiguas se reparten por el mundo doble | Sin cambio de formato de guardado; se puede recolocar decorando |
+| T153 | La barra lateral mide 28 columnas | Con 20 se tapaban los ingresos por segundo |
+| T154 | La música (día y noche) pasa de chiptune a **lofi**: piano eléctrico tipo Rhodes, vibráfono, bajo cálido, pads, batería polvorienta con swing, ruido de cinta y vinilo. Sigue generada por código (`python tools/generate_audio.py --music` solo regenera la música); los efectos no cambian | Feedback: el chiptune sonaba a mazmorra; referencias de Jorge (Dire Dire Docks, Lake Lamode): acuático, cálido, suave |
+| T155 | Fondo de unos y ceros (`BinaryBackdrop`, capa 0) y estela del puntero (`BinaryCursor`, capa 55, en pantalla) sobre la lógica pura `BinaryDrift` | Efecto sutil sin tocar la simulación; la estela no sigue a la cámara |
+| T156 | Opacidad máxima 26 % el fondo (densidad 0,09) y 13 % la estela (corta: 0,55 s, 14 glifos como máximo), color gris azulado que toma un poco del bioma; densidad y velocidad varían con el bioma | «Muy muy sutil» (Jorge) |
+| T157 | Ajuste `binary_effect` (activo por defecto); «Reducir movimiento» frena el fondo a 0,3× y apaga la estela; la estela solo sale con el ratón moviéndose sobre la pecera y sin panel abierto | Accesibilidad y no ensuciar la interfaz |
+| T158 | El fondo binario usa dígitos de 0,55× a 1,5× el tamaño de letra (mayoría pequeños) y puntitos, con brillo propio (35–100 %); densidad 0,07 | Referencia: losdelaia.com, que mezcla tamaños y brillos |
+| T159 | `AsciiCanvas.put_glyph` dibuja un carácter escalado manteniendo su centro; sirve para efectos y comida | La fuente es una sola, sin otro tamaño de rejilla |
+| T160 | Las bolitas de comida son «•» con color al azar de una paleta de 7 | Petición de Jorge |
+| T161 | El primer carácter del reloj se dibuja con `put_glyph` subido 0,11 de la letra | Los símbolos geométricos de DejaVu quedan más bajos que las cifras |
+| T162 | Los biomas añaden acentos de arena y remates de plantas (datos en `BiomeDef`); arena y plantas varían de tono con semilla fija | Más variedad visual sin cambiar el guardado |
+| T163 | Los pájaros son solo decorado: `BirdVisit` (lógica pura) y `BirdView` (dibujo), sin tocar la partida ni el guardado; el dibujo de cada bioma (`bird_*`) vive en `BiomeDef` con las filas separadas por `|`, mirando a la derecha (se espeja al venir de la derecha) | Fácil de añadir un pájaro nuevo desde los datos |
+| T164 | Visita cada 100–260 s, posado 18–40 s, vuelo a 11 celdas/s; al abrir o cambiar de pecera la primera visita tarda 25–90 s | Un evento «de vez en cuando» que no cansa |
+| T165 | Cada planta elige color de `weed_palette` (la sombra es la luz oscurecida un 38 %) y su remate de `weed_tip_palette` | Más color por bioma sin perder la identidad de cada uno |
+| T166 | Las pestañas de la tienda se agrupan (`ShopPanel.Group`): tienda (0-3 y Gran marea), Enciclopedia, Logros y Estadísticas; `AsciiTabs.set_visible_tabs` oculta las demás y `select_tab` cambia de grupo solo si se pide por código | Petición de Jorge: cada botón abre solo lo suyo |
+| T167 | La Gran marea se queda en el grupo de la tienda (se compra con perlas) y Estadísticas tiene botón propio en la barra lateral (sin tecla rápida) | Sin ese botón no habría forma de abrirlas |
+| T168 | El detalle de la Enciclopedia se reparte con `DexLayout` (lógica pura): foto centrada desde 76 celdas de detalle, a la derecha desde 44 y sin foto por debajo | Cabe en ventanas de distinto ancho |
+| T169 | El efecto de libro (`DexBook`) es solo dibujo: lomo `││` con `┬`/`┴`, paso de página que descubre la ficha de izquierda a derecha en 0,32 s y lista de variantes; usa solo caracteres permitidos | No hay `╭╮` ni `╤` en la tabla de arte |
+| T170 | `WeedForm` lee formas `tipo|caracteres` (`stalk`, `reed`, `fern`, `tuft`, `bush`) de `BiomeDef.weed_forms`; sin formas, solo tallos de `weed_chars` | Más variedad de silueta sin tocar el guardado |
+| T171 | F12 llama al pájaro del bioma (`TankView.summon_bird`) | Para ver el evento sin esperar |
+| T172 | `CrtTransition` (widget solo de dibujo, capa sobre los paneles) se lanza desde `StripController` al abrir, cerrar o cambiar de panel; usa solo caracteres permitidos (`█`, `▄`, `▀`) | Petición de Jorge: transición al estilo de las teles CRT |
+| T173 | `SKY_ROWS = 2` filas de cielo sobre la pecera (la ventana crece 2 filas; `tank_rect` baja 2); `BirdView` apoya las patas en la fila de olas; la ficha usa el área con cielo | Petición de Jorge: pájaro sobre la superficie, no bajo el agua |
+| T174 | Transparencia por píxel (`display/window/per_pixel_transparency`, `transparent_background`); `AsciiCanvas` pinta el fondo negro salvo el cielo (`sky`) y salvo con el ajuste `transparent_background`; el shader CRT conserva el alfa | Petición de Jorge: cielo y fondo transparentes |
+| T175 | Estadísticas deja la barra lateral y se abre desde un botón de Ajustes (`stats_requested`) | Petición de Jorge |
+| T176 | Contraste mínimo sobre negro en las paletas de especie (4,5; ojos 10) vigilado por test; melánica con `MELANISTIC_FLOOR` | Petición de Jorge: ojos oscuros no se distinguen |
+| T177 | Variedad de nado por datos (`wave_number`, `school_pull`) y no por código por especie; el banco se calcula en `TankView._update_schools` (centro de la especie) y `SwimMotion` solo lo sigue; el giro dura según el ancho del sprite | Enciclopedia 2: «todos nadan igual», bancos de sardinas y krill |
+| T178 | Estanque: ids estables donde la especie se mantiene (`pond_guppy`, `pond_goldfish`, `pond_koi`); las que salen se migran por hueco (`SaveMigrations.POND_REPLACEMENTS`, formato 10); regla de arte «ojo fijo, solo cola/aletas» vigilada por test por bioma | Enciclopedia 2 |
+| T179 | La foto de la Enciclopedia se dimensiona con el sprite adulto más ancho (`DexLayout.wanted_portrait_width`, recortada para dejar `MIN_TEXT_COLUMN` al texto) y `AsciiPortrait` cae al juvenil/cría si el adulto no cabe | Jorge: el Siluro no se veía en la Enciclopedia |
+| T180 | Arrecife con 9 especies (hueco extra para el Krill, la más barata); migración 10→11 en un solo paso porque `reef_ray` y `reef_clownfish` conservan id pero cambian de hueco (`REEF_REPLACEMENTS`) | Enciclopedia 2 |
+| T181 | Manglar: migración 11→12 de un solo paso por hueco (`MANGROVE_REPLACEMENTS`); arquero, cangrejo, saltarín y barracuda conservan id pero cambian de hueco | Enciclopedia 2 |
+| T182 | Abismo: migración 12→13 de un solo paso (`ABYSS_REPLACEMENTS`); el calamar gigante conserva id pero pasa a épico y el cachalote ocupa el hueco legendario. Con esto Enciclopedia 2 queda completa | Enciclopedia 2 |
+| T183 | Se descarta rellenar de negro tras cada pez (opaco): los peces siguen transparentes y el desorden se ataca con diseño. Tope de tamaño de sprite: comunes ≤ 9×3, raros ≤ 12×3, legendarios ≤ 14×3; solo glifos que tiene DejaVu Sans Mono (el japonés queda descartado: la fuente no lo trae y ocupa doble celda). La ficha del pez (`LAYER_PANEL + 5`) queda sobre las pestañas de la pecera; Enciclopedia por pestañas de bioma (`_dex_tabs`) | Jorge: la pecera se ve caótica; pide diseños más condensados, simples, con carisma y reconocibles |
+| T184 | El comportamiento se define por datos en `SpeciesDef` (estilo, velocidad, banco, franja de profundidad, paradas) y no por código por especie; `SwimMotion.band_of` recorta la zona de nado y `HOP` es un estilo más. Tabla en `docs/COMPORTAMIENTO.md` | Jorge: peces más lentos o rápidos, en banco, quietos o en tierra, lo más realista posible |
+| T185 | Las reacciones al cursor y el sueño son visuales y por datos (`temperament`, `activity` + oscuridad del día): no tocan el guardado ni la economía. Solo los huidizos se asustan con el clic; los dormidos ignoran el cursor | Jorge: «añade todas esas ideas», primera fase: más vida |
+| T186 | Los apodos se eligen de una lista (`FishNames`) porque la interfaz ASCII no tiene campo de texto; el favorito bloquea la venta y los sobrantes. Copiar la pecera como texto y los temas de color quedan para la siguiente entrega de la fase 21 | Jorge: «sigue» |
+
 
 ## Cómo añadir decisiones
 

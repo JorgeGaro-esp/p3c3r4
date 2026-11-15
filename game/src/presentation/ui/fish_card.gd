@@ -11,9 +11,10 @@ signal close_requested
 enum Pending { NONE, ONE, SURPLUS }
 
 const WIDTH: int = 34
-const HEIGHT: int = 9
+const HEIGHT: int = 11
 const MARGIN: int = 1
 const SELL_BUTTON_WIDTH: int = 14
+const NAME_BUTTON_WIDTH: int = 14
 
 var _fish: Fish = null
 var _pending: Pending = Pending.NONE
@@ -28,11 +29,13 @@ var _bar: AsciiProgress = AsciiProgress.new()
 var _close: AsciiButton = null
 var _sell: AsciiButton = null
 var _sell_surplus: AsciiButton = null
+var _rename: AsciiButton = null
+var _favorite: AsciiButton = null
 
 
 func _init(root: UiRoot) -> void:
 	super(root)
-	_add(_frame, UiRoot.LAYER_PANEL)
+	_add(_frame, UiRoot.LAYER_PANEL + 5)
 	_name = _make_label("", AsciiColors.AMBER)
 	_rarity = _make_label("")
 	_variant = _make_label("")
@@ -44,6 +47,10 @@ func _init(root: UiRoot) -> void:
 	_close.activated.connect(func() -> void: close_requested.emit())
 	_sell = _make_button("")
 	_sell_surplus = _make_button("")
+	_rename = _make_button("")
+	_favorite = _make_button("")
+	_rename.activated.connect(_on_rename_pressed)
+	_favorite.activated.connect(_on_favorite_pressed)
 	_sell.activated.connect(_on_sell_pressed)
 	_sell_surplus.activated.connect(_on_sell_surplus_pressed)
 	EventBus.shells_changed.connect(func(_shells: float) -> void: _update_texts())
@@ -88,6 +95,10 @@ func layout(area: Rect2i) -> void:
 	_sell_surplus.rect = Rect2i(
 		left + SELL_BUTTON_WIDTH + 1, top + 8, maxi(inner - SELL_BUTTON_WIDTH - 1, 1), 1
 	)
+	_rename.rect = Rect2i(left, top + 9, NAME_BUTTON_WIDTH, 1)
+	_favorite.rect = Rect2i(
+		left + NAME_BUTTON_WIDTH + 1, top + 9, maxi(inner - NAME_BUTTON_WIDTH - 1, 1), 1
+	)
 
 
 func refresh() -> void:
@@ -106,8 +117,23 @@ func _on_fish_removed(_tank_index: int, removed: Fish) -> void:
 		_update_texts()
 
 
-func _on_sell_pressed() -> void:
+func _on_rename_pressed() -> void:
 	if _fish == null:
+		return
+	_fish.nickname = FishNames.next(_fish.nickname)
+	_update_texts()
+
+
+func _on_favorite_pressed() -> void:
+	if _fish == null:
+		return
+	_fish.favorite = not _fish.favorite
+	_pending = Pending.NONE
+	_update_texts()
+
+
+func _on_sell_pressed() -> void:
+	if _fish == null or _fish.favorite:
 		return
 	if _pending != Pending.ONE:
 		_pending = Pending.ONE
@@ -148,6 +174,10 @@ func _update_texts() -> void:
 		return
 	var rate: float = Economy.fish_rate(def.base_production, _fish.happiness)
 	_name.text = _text(def.name_key)
+	if not _fish.nickname.is_empty():
+		_name.text = "%s (%s)" % [_fish.nickname, _text(def.name_key)]
+	if _fish.favorite:
+		_name.text = "◆ " + _name.text
 	_rarity.text = "%s %s" % [def.rarity_symbol(), _text(RarityStyle.name_key(def.rarity))]
 	if def.activity == SpeciesDef.Activity.DIURNAL:
 		_rarity.text += " · " + _text("ACTIVITY_DIURNAL")
@@ -186,6 +216,9 @@ func _update_sell_buttons() -> void:
 	_sell.label = _text("FISH_SELL") % NumberFormat.compact(value, locale)
 	if _pending == Pending.ONE:
 		_sell.label = _text("FISH_SELL_CONFIRM")
+	_sell.is_enabled = not _fish.favorite
+	_rename.label = _text("FISH_RENAME")
+	_favorite.label = _text("FISH_FAVORITE_ON") if _fish.favorite else _text("FISH_FAVORITE_OFF")
 	var extra: Array[Fish] = _surplus()
 	_sell_surplus.is_enabled = not extra.is_empty()
 	_sell_surplus.label = ""

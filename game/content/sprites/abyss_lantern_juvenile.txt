@@ -1,0 +1,11 @@
+# abyss_lantern · juvenil
+[frame]
+><(o°)>
+[colors]
+ttbdebb
+[frame]
+<>(o°)>
+[colors]
+ttbdebb
+[anchor]
+eye=4,0

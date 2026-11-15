@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "reef_tuna"
+name_key = "SPECIES_REEF_TUNA"
+description_key = "SPECIES_REEF_TUNA_DESC"
+biome_id = "reef"
+rarity = 2
+activity = 1
+base_cost = 20000.0
+base_production = 27.46
+unlock_kind = 3
+unlock_amount = 3.0
+unlock_species_id = "reef_anchovy"
+unlock_tag = ""
+sprite_path = "res://content/sprites/reef_tuna.txt"
+palette_roles = PackedStringArray("b", "t", "d", "f", "e")
+palette_colors = PackedColorArray(0.4, 0.6, 0.95, 1, 0.3, 0.5, 0.9, 1, 0.85, 0.9, 1, 1, 0.35, 0.55, 0.9, 1, 1, 1, 1, 1)
+growth_seconds = 220.0
+breed_seconds = 320.0
+hatch_seconds = 55.0
+fry_sprite_path = "res://content/sprites/reef_tuna_fry.txt"
+juvenile_sprite_path = "res://content/sprites/reef_tuna_juvenile.txt"
+style = 1
+speed = 8.5
+amplitude = 0.1
+frequency = 1.2
+frame_duration = 0.3
+wave_number = 2.0
+school_pull = 0.6
+depth_min = 0.1
+depth_max = 0.7
+rest_chance = 0.0
+rest_seconds = 2.0
+temperament = -0.2

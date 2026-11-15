@@ -1,0 +1,9 @@
+# abyss_blobfish · cría
+[frame]
+(.)
+[colors]
+bbb
+[frame]
+(,)
+[colors]
+bbb

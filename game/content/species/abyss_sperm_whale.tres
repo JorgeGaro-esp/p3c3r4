@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpeciesDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/species_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = "abyss_sperm_whale"
+name_key = "SPECIES_ABYSS_SPERM_WHALE"
+description_key = "SPECIES_ABYSS_SPERM_WHALE_DESC"
+biome_id = "abyss"
+rarity = 4
+activity = 0
+base_cost = 14000000.0
+base_production = 17950.0
+unlock_kind = 1
+unlock_amount = 300000000.0
+unlock_species_id = ""
+unlock_tag = ""
+sprite_path = "res://content/sprites/abyss_sperm_whale.txt"
+palette_roles = PackedStringArray("b", "t", "d", "f", "e")
+palette_colors = PackedColorArray(0.65, 0.72, 0.85, 1, 0.55, 0.62, 0.78, 1, 0.8, 0.85, 0.95, 1, 0.6, 0.68, 0.82, 1, 1, 1, 1, 1)
+growth_seconds = 1200.0
+breed_seconds = 1600.0
+hatch_seconds = 130.0
+fry_sprite_path = "res://content/sprites/abyss_sperm_whale_fry.txt"
+juvenile_sprite_path = "res://content/sprites/abyss_sperm_whale_juvenile.txt"
+style = 1
+speed = 3.0
+amplitude = 0.15
+frequency = 0.5
+frame_duration = 0.6
+wave_number = 2.0
+school_pull = 0.0
+depth_min = 0.2
+depth_max = 0.8
+rest_chance = 0.0
+rest_seconds = 2.0
+temperament = 0.0

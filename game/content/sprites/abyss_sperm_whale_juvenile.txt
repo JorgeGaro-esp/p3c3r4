@@ -1,0 +1,11 @@
+# abyss_sperm_whale · juvenil
+[frame]
+><=(~° )
+[colors]
+tttbde b
+[frame]
+<>=(~° )
+[colors]
+tttbde b
+[anchor]
+eye=5,0
