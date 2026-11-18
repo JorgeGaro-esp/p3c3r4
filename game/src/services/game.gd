@@ -368,9 +368,13 @@ func debug_add_fish(count: int) -> void:
 	for _index: int in range(count):
 		if state.active().is_full():
 			return
-		var species_id: String = ids[state.active().fish.size() % ids.size()]
-		if state.active().accepts_species(content.get_species(species_id)):
-			_add_fish(state.active_tank, species_id)
+		# Se salta lo que no cabe (legendarias ya presentes) y se prueba la siguiente especie.
+		var start: int = state.active().fish.size() % ids.size()
+		for offset: int in range(ids.size()):
+			var species_id: String = ids[(start + offset) % ids.size()]
+			if state.active().accepts_species(content.get_species(species_id)):
+				_add_fish(state.active_tank, species_id)
+				break
 
 
 ## Herramienta de desarrollo (Mayús+F4): quita los últimos peces.
