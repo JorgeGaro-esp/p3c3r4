@@ -3,5 +3,9 @@
 **
 [colors]
 be
+[frame]
++*
+[colors]
+be
 [anchor]
 eye=1,0

@@ -1,0 +1,11 @@
+# pond_pike · juvenil
+[frame]
+}>::°>
+[colors]
+ttddeb
+[frame]
+}<::°>
+[colors]
+ttddeb
+[anchor]
+eye=4,0

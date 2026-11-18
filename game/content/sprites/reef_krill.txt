@@ -3,5 +3,9 @@
 ,
 [colors]
 b
+[frame]
+.
+[colors]
+b
 [anchor]
 eye=0,0

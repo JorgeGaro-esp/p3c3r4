@@ -1,0 +1,11 @@
+# pond_betta · juvenil
+[frame]
+|}(°)>
+[colors]
+ttbebb
+[frame]
+|)(°)>
+[colors]
+ttbebb
+[anchor]
+eye=3,0
