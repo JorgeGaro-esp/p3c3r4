@@ -1,0 +1,11 @@
+# pond_betta · adulto
+[frame]
+|}><•>
+[colors]
+ttbbeb
+[frame]
+|)><•>
+[colors]
+ttbbeb
+[anchor]
+eye=4,0

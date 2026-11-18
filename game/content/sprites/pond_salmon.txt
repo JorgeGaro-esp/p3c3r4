@@ -1,15 +1,15 @@
 # pond_salmon · adulto
 [frame]
-   ___  
-><(≈≈°)>
+    ,,
+><((((•`>
 [colors]
-   fff  
-ttbbbedd
+    ff
+ttbbbbedd
 [frame]
-   ___  
-<>(≈≈°)>
+    ,,
+<>((((•`>
 [colors]
-   fff  
-ttbbbedd
+    ff
+ttbbbbedd
 [anchor]
-eye=5,1
+eye=6,1

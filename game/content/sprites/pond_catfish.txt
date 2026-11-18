@@ -1,15 +1,19 @@
 # pond_catfish · adulto
 [frame]
-><(__°)>
-     ~~~
+   .\
+><(|(•>
+    '
 [colors]
-ttbddebb
-     fff
+   dd
+ttbdbeb
+    f
 [frame]
-<>(__°)>
-     ---
+   .\
+<>(|(•>
+    '
 [colors]
-ttbddebb
-     fff
+   dd
+ttbdbeb
+    f
 [anchor]
-eye=5,0
+eye=5,1

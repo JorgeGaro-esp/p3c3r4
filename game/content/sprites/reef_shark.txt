@@ -1,15 +1,35 @@
-# reef_shark · adulto
+# reef_shark · adulto (v2, caricatura alargada)
 [frame]
-      ▲   
-><==(~~°)>
+            |\              
+            | \             
+|\       __.|  \'-.___      
+| \___.-'    ||      o '-.  
+| /'-.___________    .vvvvv)
+|/        ''--------------' 
+               \/           
 [colors]
-      f   
-ttbbbddebb
+            ff              
+            f f             
+tt       bbbf  fbbbbbb      
+t ttttbbb    dd      e bbb  
+t tttbbbbbbbbbbbb    ddddddb
+tt        bbbbbbbbbbbbbbbbb 
+               ff           
 [frame]
-      ▲   
-<>==(~~°)>
+            |\              
+            | \             
+|\       __.|  \'-.___      
+| \___.-'    ||      o '-.  
+| /'-.___________    .vvvvv)
+|/        ''--------------' 
+               \/           
 [colors]
-      f   
-ttbbbddebb
+            ff              
+            f f             
+tt       bbbf  fbbbbbb      
+t ttttbbb    dd      e bbb  
+t tttbbbbbbbbbbbb    ddddddb
+tt        bbbbbbbbbbbbbbbbb 
+               ff           
 [anchor]
-eye=7,1
+eye=21,3

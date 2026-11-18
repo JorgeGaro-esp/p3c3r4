@@ -1,11 +1,11 @@
 # pond_koi · adulto
 [frame]
-><(###°)>
+><###•>
 [colors]
-ttbdddebb
+tbdddeb
 [frame]
-<>(###°)>
+<>###•>
 [colors]
-ttbdddebb
+tbdddeb
 [anchor]
-eye=6,0
+eye=5,0

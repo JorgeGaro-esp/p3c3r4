@@ -1,11 +1,11 @@
 # reef_squid · adulto
 [frame]
-<(::°)≈≈≈
+<[=:≈≈≈
 [colors]
-tbddebfff
+tbbdfff
 [frame]
--(::°)~~~
+-[=:~~~
 [colors]
-tbddebfff
+tbbdfff
 [anchor]
-eye=4,0
+eye=3,0

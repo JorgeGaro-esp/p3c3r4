@@ -1,11 +1,11 @@
 # pond_trout · adulto
 [frame]
-><(:°)>
+><::::•>
 [colors]
-ttbbebb
+ttddddeb
 [frame]
-<>(:°)>
+<>::::•>
 [colors]
-ttbbebb
+ttddddeb
 [anchor]
-eye=4,0
+eye=6,0

@@ -1,11 +1,7 @@
 # reef_krill · adulto
 [frame]
-~°
+,
 [colors]
-te
-[frame]
--°
-[colors]
-te
+b
 [anchor]
-eye=1,0
+eye=0,0

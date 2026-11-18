@@ -1,15 +1,19 @@
 # pond_wels · adulto
 [frame]
-~~=(_____°)>
-        ≈≈≈≈
+    ^^^^^^^^^^
+><((((((((((((•==>
+         ,/
 [colors]
-ttbbdddddebb
-        ffff
+    dddddddddd
+ttbbbbbbbbbbbbeddd
+         ff
 [frame]
--~=(_____°)>
-        ~~~~
+    ^^^^^^^^^^
+<>((((((((((((•==>
+         ,/
 [colors]
-ttbbdddddebb
-        ffff
+    dddddddddd
+ttbbbbbbbbbbbbeddd
+         ff
 [anchor]
-eye=9,0
+eye=14,1

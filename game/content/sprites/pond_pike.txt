@@ -1,0 +1,15 @@
+# pond_pike · adulto
+[frame]
+    ,
+}><::::•>
+[colors]
+    f
+tttddddeb
+[frame]
+    ,
+}<>::::•>
+[colors]
+    f
+tttddddeb
+[anchor]
+eye=7,1

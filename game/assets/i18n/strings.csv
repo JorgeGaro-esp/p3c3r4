@@ -36,20 +36,24 @@ FISH_SATIETY,Saciedad %d %%,Fullness %d %%
 TOAST_PEARL,¡Perla! +%s ¢,Pearl! +%s ¢
 SPECIES_POND_GUPPY,Guppy,Guppy
 SPECIES_POND_GUPPY_DESC,Pequeño y nervioso. Cualquier estanque empieza con uno.,Small and jittery. Every pond starts with one.
+SPECIES_POND_BETTA,Betta,Betta
+SPECIES_POND_BETTA_DESC,Orgulloso y solitario: de un solo vistazo deja claro de quién es el estanque.,Proud and solitary: one glance tells you whose pond it is.
 SPECIES_POND_CARP,Carpa,Carp
 SPECIES_POND_CARP_DESC,Grande y tranquila; remueve el fondo buscando algo que comer.,Big and calm; it stirs the bottom looking for something to eat.
 SPECIES_POND_GOLDFISH,Pez de colores,Goldfish
 SPECIES_POND_GOLDFISH_DESC,Aletas de seda y una memoria mejor de lo que dicen.,Silky fins and a better memory than people say.
-SPECIES_POND_CATFISH,Pez gato,Catfish
-SPECIES_POND_CATFISH_DESC,Husmea el fondo con sus bigotes cuando cae la noche.,It sniffs the bottom with its whiskers when night falls.
+SPECIES_POND_CATFISH,Perca,Perch
+SPECIES_POND_CATFISH_DESC,Cazadora rayada de aletas espinosas. Vigila el estanque desde las sombras.,A striped hunter with spiny fins. It watches the pond from the shadows.
 SPECIES_POND_TROUT,Trucha,Trout
 SPECIES_POND_TROUT_DESC,Rápida y moteada; solo le gusta el agua fresca y limpia.,"Fast and spotted; it only likes fresh, clean water."
 SPECIES_POND_SALMON,Salmón,Salmon
 SPECIES_POND_SALMON_DESC,Cabeza verde y cuerpo rojo; siempre nada contra la corriente.,Green head and red body; it always swims against the current.
-SPECIES_POND_WELS,Siluro,Wels catfish
-SPECIES_POND_WELS_DESC,El gigante del estanque. Nadie sabe cuántos años tiene.,The giant of the pond. Nobody knows how old it is.
+SPECIES_POND_WELS,Esturión,Sturgeon
+SPECIES_POND_WELS_DESC,Un fósil viviente blindado de placas. Nadie sabe cuántos años tiene.,A living fossil armoured in plates. Nobody knows how old it is.
 SPECIES_POND_KOI,Carpa koi,Koi carp
 SPECIES_POND_KOI_DESC,La joya del estanque. Dicen que trae buena suerte.,The jewel of the pond. They say it brings good luck.
+SPECIES_POND_PIKE,Lucio,Pike
+SPECIES_POND_PIKE_DESC,"Cazador paciente: espera inmóvil entre las plantas y ataca de golpe.",Patient hunter: it waits motionless among the plants and strikes suddenly.
 RARITY_COMMON,Común,Common
 RARITY_UNCOMMON,Poco común,Uncommon
 RARITY_RARE,Rara,Rare
@@ -199,6 +203,8 @@ SPECIES_REEF_ANCHOVY,Anchoa,Anchovy
 SPECIES_REEF_ANCHOVY_DESC,Delgada y nerviosa; da vueltas en bancos enormes.,Slim and jumpy; it circles in huge schools.
 SPECIES_REEF_CLOWNFISH,Pez payaso,Clownfish
 SPECIES_REEF_CLOWNFISH_DESC,Naranja con franjas blancas. Se esconde entre los tentáculos.,Orange with white bands. It hides among the tentacles.
+SPECIES_REEF_SEASTAR,Estrella de mar,Starfish
+SPECIES_REEF_SEASTAR_DESC,"Se arrastra despacio por el fondo. La hay rosa, amarilla y turquesa.","Crawls slowly along the floor. Found in pink, yellow and turquoise."
 SPECIES_REEF_EEL,Anguila,Eel
 SPECIES_REEF_EEL_DESC,Larga y serpenteante; vive escondida entre el coral.,Long and winding; it lives hidden among the coral.
 SPECIES_REEF_TUNA,Atún,Tuna
@@ -412,8 +418,6 @@ PHASE_DAWN,Amanece en la pecera,Dawn breaks over the tank
 PHASE_DAY,Es de día,It is daytime
 PHASE_DUSK,Atardece,Dusk falls
 PHASE_NIGHT,Cae la noche,Night falls
-ACTIVITY_DIURNAL,Diurno,Diurnal
-ACTIVITY_NOCTURNAL,Nocturno,Nocturnal
 SHOP_TAB_PRESTIGE,Marea,Tide
 PRESTIGE_ROW_RESET,Gran marea,Great Tide
 PRESTIGE_ROW_FINAL,El final,The ending
@@ -461,7 +465,7 @@ FINAL_CLOSE,Seguirás nadando en el modo infinito.,You will keep swimming in end
 FINAL_HINT,Esc o clic para seguir,Esc or click to continue
 SETTINGS_TRANSPARENT,Fondo transparente,Transparent background
 SETTINGS_REDUCE_MOTION,Reducir movimiento,Reduce motion
-SETTINGS_TEXT_SIZE,Tamaño del texto,Text size
+SETTINGS_TEXT_SIZE,Tamaño de texto (Ctrl+0),Text size (Ctrl+0)
 SETTINGS_TEXT_SIZE_0,Pequeño,Small
 SETTINGS_TEXT_SIZE_1,Normal,Normal
 SETTINGS_TEXT_SIZE_2,Grande,Large
@@ -478,7 +482,7 @@ SETTINGS_DELETED,Partida nueva empezada,New game started
 TUTORIAL_TITLE,Tutorial %d/%d,Tutorial %d/%d
 TUTORIAL_SKIP,Esc: saltar el tutorial,Esc: skip the tutorial
 TUTORIAL_0,Haz clic en el agua para echar comida. Los peces bien alimentados producen más conchas.,Click the water to drop food. Well-fed fish make more shells.
-TUTORIAL_1,"Cuando un pez suelte una perla (◦), haz clic en ella para cobrarla.","When a fish drops a pearl (◦), click it to collect it."
+TUTORIAL_1,"Cuando un pez suelte una perla (○), haz clic en ella para cobrarla.","When a fish drops a pearl (○), click it to collect it."
 TUTORIAL_2,Abre la Tienda y compra un pez nuevo con tus conchas.,Open the Shop and buy a new fish with your shells.
 TUTORIAL_3,"Haz clic en un pez para ver su ficha: producción, felicidad y venta.","Click a fish to see its card: output, happiness and selling."
 TUTORIAL_4,"Atajos: D decora, L logros, 1-8 cambia de pecera, M silencia. ¡A coleccionar!","Shortcuts: D decorate, L achievements, 1-8 switch tank, M mute. Happy collecting!"
@@ -500,3 +504,10 @@ SETTINGS_TO_TITLE,Volver al título,Back to title
 DEX_VARIANTS,Variantes,Variants
 UI_STATS,Estad[í]sticas,Stat[i]stics
 UI_STATS_KEY,I,I
+SHOP_LEGENDARY_OWNED,Ya tienes el único ejemplar,You already have the only one
+TOAST_LEGENDARY_OWNED,Solo puede haber un ejemplar de cada legendario,Only one of each legendary can live in a tank
+SETTINGS_CURRENCY,Símbolo de moneda,Currency symbol
+TOAST_TEXT_RESET,Texto en tamaño normal,Text size back to normal
+FISH_WRITE,Escribir apodo,Type a nickname
+FISH_NAME_EDITING,Intro: guardar · Esc: cancelar,Enter: save · Esc: cancel
+FISH_NAME_PROMPT,Apodo:,Name:
