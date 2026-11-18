@@ -81,12 +81,13 @@ func test_buying_too_expensive_equipment_does_nothing() -> void:
 
 
 func test_magnet_collects_pearls_that_rest_on_the_floor() -> void:
-	Game.state.tanks[0].set_level("pearl_magnet", 5, Game.content)
 	var before: float = Game.state.wallet.shells
 	var fish: Fish = Game.state.tanks[0].fish[0]
 	Game.state.pending_pearls.append(PearlSpawn.new(0, fish, 50.0))
 	await wait_frames(3)
 	assert_eq(_tank.pearl_count(), 1)
+	# El imán se pone después: con el pez ya en el fondo la perla se cobraría antes de verla.
+	Game.state.tanks[0].set_level("pearl_magnet", 5, Game.content)
 	_tank._pearls.floor_row = 0.0
 	await wait_seconds(6.0)
 	assert_eq(_tank.pearl_count(), 0)

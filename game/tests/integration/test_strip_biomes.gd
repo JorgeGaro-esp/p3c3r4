@@ -129,7 +129,7 @@ func test_the_shop_lists_only_the_species_of_the_active_biome() -> void:
 	await wait_frames(2)
 	assert_true(shop.species_ids().has("reef_krill"))
 	assert_false(shop.species_ids().has("pond_guppy"))
-	assert_eq(shop.species_ids().size(), 9)
+	assert_eq(shop.species_ids().size(), 10)
 
 
 func test_the_shop_decor_tab_hides_other_biomes_objects() -> void:

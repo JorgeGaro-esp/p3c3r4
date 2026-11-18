@@ -1,5 +1,5 @@
 extends GutTest
-## Las plantas del fondo: varias formas por bioma.
+## Las plantas del fondo: cada bioma usa una sola forma (fondo sencillo).
 
 
 func _view(id: String) -> SeaweedView:
@@ -9,10 +9,10 @@ func _view(id: String) -> SeaweedView:
 	return view
 
 
-func test_every_biome_grows_plants_of_several_shapes() -> void:
+func test_every_biome_grows_plants_of_a_single_shape() -> void:
 	for id: String in ["pond", "reef", "mangrove", "abyss"]:
 		var counts: Dictionary[WeedForm.Kind, int] = _view(id).kind_counts()
-		assert_gte(counts.size(), 3, "%s: formas distintas" % id)
+		assert_eq(counts.size(), 1, "%s: una forma" % id)
 
 
 func test_without_forms_the_plants_are_the_classic_stalks() -> void:

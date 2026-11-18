@@ -133,8 +133,11 @@ func test_the_bloom_pays_when_the_player_cleans_it() -> void:
 
 
 func test_random_events_appear_over_time_with_a_fixed_seed() -> void:
+	# Los eventos solos están apagados por defecto (EventDirector.enabled).
+	Game.events.enabled = true
 	for _second: int in range(int(EventPlanner.MAX_WAIT) + 1):
 		Game.events.advance(1.0)
+	Game.events.enabled = false
 	assert_gte(_started.size(), 1)
 
 

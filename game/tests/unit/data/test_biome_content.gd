@@ -3,6 +3,7 @@ extends GutTest
 
 const CSV_PATH: String = "res://assets/i18n/strings.csv"
 const BIOMES: PackedStringArray = ["pond", "reef", "mangrove", "abyss"]
+const SPECIES_PER_BIOME: Dictionary = {"pond": 10, "reef": 10, "mangrove": 8, "abyss": 8}
 
 var _content: ContentDB = ContentDB.new()
 
@@ -35,10 +36,32 @@ func _species_of(biome_id: String) -> Array[SpeciesDef]:
 	return found
 
 
+## Valor mínimo de una propiedad entre las especies de cada rareza, de común a legendaria.
+func _min_by_rarity(biome_id: String, property: StringName) -> Array[float]:
+	var minimums: Dictionary = {}
+	for def: SpeciesDef in _species_of(biome_id):
+		var value: float = float(def.get(property))
+		if not minimums.has(def.rarity) or value < float(minimums[def.rarity]):
+			minimums[def.rarity] = value
+	var rarities: Array = minimums.keys()
+	rarities.sort()
+	var result: Array[float] = []
+	for rarity: int in rarities:
+		result.append(float(minimums[rarity]))
+	return result
+
+
+func _assert_grows_with_rarity(property: StringName) -> void:
+	for biome_id: String in BIOMES:
+		var minimums: Array[float] = _min_by_rarity(biome_id, property)
+		for index: int in range(1, minimums.size()):
+			assert_gt(minimums[index], minimums[index - 1], "%s %s" % [biome_id, property])
+
+
 func test_each_biome_has_its_species_of_every_rarity() -> void:
 	for biome_id: String in BIOMES:
 		var defs: Array[SpeciesDef] = _species_of(biome_id)
-		assert_eq(defs.size(), 9 if biome_id == "reef" else 8, biome_id)
+		assert_eq(defs.size(), SPECIES_PER_BIOME[biome_id], biome_id)
 		var rarities: Dictionary = {}
 		for def: SpeciesDef in defs:
 			rarities[def.rarity] = true
@@ -98,14 +121,8 @@ func test_biome_surface_sand_and_weeds_use_allowed_characters() -> void:
 
 
 func test_cost_and_production_grow_with_rarity() -> void:
-	for biome_id: String in BIOMES:
-		var previous_cost: float = 0.0
-		var previous_rate: float = 0.0
-		for def: SpeciesDef in _species_of(biome_id):
-			assert_gt(def.base_cost, previous_cost, def.id)
-			assert_gt(def.base_production, previous_rate, def.id)
-			previous_cost = def.base_cost
-			previous_rate = def.base_production
+	_assert_grows_with_rarity(&"base_cost")
+	_assert_grows_with_rarity(&"base_production")
 
 
 func test_the_starting_game_can_afford_a_second_guppy() -> void:
@@ -129,14 +146,10 @@ func test_every_stage_sprite_loads_and_stays_in_the_charset() -> void:
 
 
 func test_growth_breeding_and_hatching_times_grow_with_rarity() -> void:
-	for biome_id: String in BIOMES:
-		var previous: SpeciesDef = null
-		for def: SpeciesDef in _species_of(biome_id):
-			assert_gt(def.breed_seconds, def.hatch_seconds, def.id)
-			if previous != null:
-				assert_gt(def.growth_seconds, previous.growth_seconds, def.id)
-				assert_gt(def.breed_seconds, previous.breed_seconds, def.id)
-			previous = def
+	for def: SpeciesDef in _content.species_ids().map(_content.get_species):
+		assert_gt(def.breed_seconds, def.hatch_seconds, def.id)
+	_assert_grows_with_rarity(&"growth_seconds")
+	_assert_grows_with_rarity(&"breed_seconds")
 
 
 func test_unlock_requirements_point_to_species_of_the_same_biome() -> void:

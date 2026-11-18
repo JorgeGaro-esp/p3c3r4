@@ -223,7 +223,9 @@ func test_the_depth_band_keeps_the_fish_in_its_slice_of_the_water() -> void:
 	motion.depth_min = 0.5
 	motion.depth_max = 1.0
 	var band: Rect2 = motion.band_of(BOUNDS)
-	assert_almost_eq(band.position.y, BOUNDS.position.y + BOUNDS.size.y * 0.5, 0.001)
+	# La franja es holgada por arriba (BAND_FREEDOM) y siempre llega hasta el fondo.
+	var top: float = 0.5 * (1.0 - SwimMotion.BAND_FREEDOM)
+	assert_almost_eq(band.position.y, BOUNDS.position.y + BOUNDS.size.y * top, 0.001)
 	assert_almost_eq(band.end.y, BOUNDS.end.y, 0.001)
 	motion.set_bounds(band)
 	for _i: int in range(STEPS):

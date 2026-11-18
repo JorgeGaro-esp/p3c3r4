@@ -2,7 +2,7 @@ extends GutTest
 ## Cría, crecimiento y venta sobre la escena principal completa.
 
 const MAIN_SCENE: String = "res://src/presentation/main.tscn"
-const WINDOW_SIZE: Vector2i = Vector2i(1200, 240)
+const WINDOW_SIZE: Vector2i = Vector2i(1200, 400)
 
 var _main: Node = null
 var _canvas: AsciiCanvas = null

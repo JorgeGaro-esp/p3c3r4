@@ -4,7 +4,7 @@ extends GutTest
 
 const MAIN_SCENE: String = "res://src/presentation/main.tscn"
 ## Tamaño de ventana de la franja por defecto (la de pruebas sin pantalla mide 64×64).
-const WINDOW_SIZE: Vector2i = Vector2i(1200, 240)
+const WINDOW_SIZE: Vector2i = Vector2i(1200, 400)
 
 var _main: Node = null
 var _canvas: AsciiCanvas = null
@@ -238,9 +238,9 @@ func test_shop_lists_the_real_species_and_hides_locked_names() -> void:
 		var list: AsciiList = widget as AsciiList
 		if list != null and list.is_shown:
 			found = true
-			assert_eq(list.names.size(), 8)
+			assert_eq(list.names.size(), 10)
 			assert_true(list.names[0].contains("Guppy"), list.names[0])
-			assert_true(list.names[7].contains("???"), "la koi empieza bloqueada")
+			assert_true(list.names[8].contains("???"), "la koi empieza bloqueada")
 	assert_true(found)
 
 
