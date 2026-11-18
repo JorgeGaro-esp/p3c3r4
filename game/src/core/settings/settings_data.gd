@@ -61,6 +61,8 @@ var language: Language = Language.AUTO
 var tutorial_enabled: bool = true
 ## Unos y ceros flotando en el fondo y en la estela del puntero.
 var binary_effect: bool = true
+## Símbolo de la moneda (posición en [constant Currency.SYMBOLS]; 0 = «¢»).
+var currency: int = 0
 ## Paso del tutorial de la ranura abierta (es un reflejo de [member slot_steps]).
 var tutorial_step: int = 0
 ## Paso del tutorial de cada ranura de guardado.
@@ -114,6 +116,7 @@ static func from_dict(raw: Variant) -> SettingsData:
 	result.language = lang as Language
 	result.tutorial_enabled = _read_bool(source, "tutorial_enabled", true)
 	result.binary_effect = _read_bool(source, "binary_effect", true)
+	result.currency = _read_int(source, "currency", 0, 0, Currency.SYMBOLS.size() - 1)
 	result.tutorial_step = _read_int(source, "tutorial_step", 0, 0, Tutorial.DONE)
 	result.slot_steps = _read_slot_steps(source, result.tutorial_step)
 	result.last_slot = _read_int(source, "last_slot", 0, 0, SLOT_COUNT)
@@ -149,6 +152,7 @@ func to_dict() -> Dictionary:
 		"language": int(language),
 		"tutorial_enabled": tutorial_enabled,
 		"binary_effect": binary_effect,
+		"currency": currency,
 		"tutorial_step": tutorial_step,
 		"slot_steps": Array(slot_steps),
 		"last_slot": last_slot,

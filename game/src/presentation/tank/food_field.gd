@@ -1,7 +1,8 @@
 class_name FoodField
 extends AsciiDrawable
 ## Copos de comida que caen desde donde el jugador hace clic. Los peces
-## hambrientos los buscan y se los comen; los que llegan al fondo se disuelven.
+## hambrientos los buscan y se los comen; los que llegan al fondo se quedan unos
+## segundos en el suelo (se pueden comer todavía) y luego se disuelven.
 
 const MAX_FLAKES: int = 40
 const FLAKES_PER_DROP: int = 3
@@ -10,6 +11,10 @@ const FALL_MAX: float = 3.5
 const SPREAD: float = 1.5
 const SWAY_AMPLITUDE: float = 0.25
 const SWAY_SPEED: float = 3.0
+## Segundos que un copo se queda en el suelo antes de disolverse.
+const REST_SECONDS: float = 6.0
+## Con cuánto tiempo de reposo restante empieza a apagarse.
+const FADE_SECONDS: float = 2.0
 const COLOR: Color = Color(0.93, 0.78, 0.42)
 const GLYPH: String = "•"
 ## Colores de los copos: cada uno sale de uno al azar.
@@ -81,15 +86,31 @@ func update(delta: float, _canvas: AsciiCanvas) -> void:
 	_clock += delta
 	for index: int in range(_flakes.size() - 1, -1, -1):
 		var flake: Flake = _flakes[index]
-		flake.y += flake.speed * delta
-		if flake.y >= floor_row:
+		if not flake.landed:
+			var fall: float = flake.speed * delta
+			if flake.y + fall < floor_row:
+				flake.y += fall
+				continue
+			# Llega al suelo: lo que sobra del paso cuenta ya como reposo.
+			var spare: float = delta - maxf(floor_row - flake.y, 0.0) / maxf(flake.speed, 0.001)
+			flake.y = floor_row
+			flake.landed = true
+			flake.rest = maxf(spare, 0.0)
+		else:
+			flake.rest += delta
+		if flake.rest >= REST_SECONDS:
 			_flakes.remove_at(index)
 
 
 func draw(canvas: AsciiCanvas) -> void:
 	for flake: Flake in _flakes:
 		var sway: float = sin(_clock * SWAY_SPEED + flake.phase) * SWAY_AMPLITUDE
-		canvas.put_glyph(GLYPH, Vector2(flake.x + sway, flake.y), flake.color, FLAKE_SCALE)
+		var color: Color = flake.color
+		if flake.landed:
+			# En el suelo no se mece, y se apaga poco a poco antes de desaparecer.
+			sway = 0.0
+			color.a = clampf((REST_SECONDS - flake.rest) / FADE_SECONDS, 0.0, 1.0)
+		canvas.put_glyph(GLYPH, Vector2(flake.x + sway, flake.y), color, FLAKE_SCALE)
 
 
 class Flake:
@@ -98,3 +119,6 @@ class Flake:
 	var speed: float = 3.0
 	var phase: float = 0.0
 	var color: Color = COLOR
+	## Si ya ha llegado al suelo, y segundos que lleva ahí.
+	var landed: bool = false
+	var rest: float = 0.0

@@ -174,6 +174,14 @@ func set_binary_effect(enabled: bool) -> void:
 		_commit()
 
 
+## Símbolo de la moneda (posición en [constant Currency.SYMBOLS]); se limita al rango.
+func set_currency(index: int) -> void:
+	var value: int = clampi(index, 0, Currency.SYMBOLS.size() - 1)
+	if value != data.currency:
+		data.currency = value
+		_commit()
+
+
 ## Activa o apaga el tutorial; al activarlo vuelve a empezar desde el primer paso.
 func set_tutorial_enabled(enabled: bool) -> void:
 	if enabled == data.tutorial_enabled:
@@ -243,6 +251,7 @@ func _commit() -> void:
 
 func _apply_engine_settings() -> void:
 	Engine.max_fps = data.fps_limit
+	Currency.use_index(data.currency)
 	var language: String = effective_language()
 	if TranslationServer.get_locale().substr(0, 2) != language:
 		TranslationServer.set_locale(language)

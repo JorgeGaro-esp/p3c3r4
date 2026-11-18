@@ -25,10 +25,26 @@ const LAYER_FRONT: int = 20
 ## Capa de la estela del puntero: en pantalla, no en el mundo.
 const CURSOR_LAYER: int = 55
 ## A qué distancia, en celdas, un pez hambriento ve la comida.
-const SEEK_RADIUS: float = 30.0
+const SEEK_RADIUS: float = 80.0
 ## A qué distancia de la boca se come un copo.
-const EAT_DISTANCE: float = 1.8
+const EAT_DISTANCE: float = 2.5
 ## Sprites de alevín y juvenil de las especies que no traen los suyos.
+## Margen horizontal extra entre peces (celdas) para distinguirlos y poder pulsarlos.
+const SEPARATION_PADDING: float = 1.0
+## Velocidad de separación por cada celda que se solapan (celdas por segundo).
+const SEPARATION_GAIN: float = 6.0
+## Cada cuántos segundos se revisan los solapes.
+const SEPARATION_INTERVAL: float = 0.05
+## Desde esta superficie (celdas²) un pez asusta a los pequeños.
+const BIG_FISH_AREA: float = 40.0
+## Un pez asusta a otro si su superficie es al menos esta veces mayor.
+const BIG_FISH_RATIO: float = 3.0
+## Distancia, en celdas, a la que los pequeños empiezan a apartarse de un grande.
+const FEAR_MARGIN: Vector2 = Vector2(6.0, 2.0)
+## Velocidad con la que huyen los pequeños (celdas por segundo).
+const FEAR_SPEED: float = 5.0
+## Hasta dónde se aleja el pez asustado, en celdas.
+const FEAR_FLEE_DISTANCE: float = 8.0
 const GENERIC_FRY: String = "res://content/sprites/stage_fry.txt"
 const AERATOR_BUBBLE_SECONDS: float = 0.7
 const GENERIC_JUVENILE: String = "res://content/sprites/stage_juvenile.txt"
@@ -42,6 +58,7 @@ class Look:
 	var fry_sprite: AsciiSprite
 	var juvenile_sprite: AsciiSprite
 	var palette: AsciiPalette
+	var _coat_palettes: Dictionary[int, AsciiPalette] = {}
 
 	func _init(
 		new_def: SpeciesDef,
@@ -54,6 +71,14 @@ class Look:
 		fry_sprite = new_fry
 		juvenile_sprite = new_juvenile
 		palette = new_def.build_palette()
+
+	## Paleta del pelaje [param coat] (la base si la especie no tiene pelajes).
+	func palette_for(coat: int) -> AsciiPalette:
+		if def.coat_count() == 0:
+			return palette
+		if not _coat_palettes.has(coat):
+			_coat_palettes[coat] = def.build_palette(coat)
+		return _coat_palettes[coat]
 
 	## Sprite de la etapa [param stage].
 	func sprite_for(stage: LifeStage.Stage) -> AsciiSprite:
@@ -107,10 +132,12 @@ var _events: EventLayer = EventLayer.new(self, _make_visitor_view, _bounds_for)
 var _decor_back: DecorationField = DecorationField.new(false)
 var _decor_front: DecorationField = DecorationField.new(true)
 var _decorating: bool = false
+var _decor_banner: DecorBanner = DecorBanner.new()
 var _held_id: String = ""
 var _biome: BiomeDef = null
 var _aerator_clock: float = 0.0
 var _next_bubble_in: float = 1.0
+var _separation_clock: float = 0.0
 
 
 func _ready() -> void:
@@ -124,6 +151,7 @@ func _ready() -> void:
 	_cursor.layer = CURSOR_LAYER
 	_surface.layer = LAYER_FRONT
 	_sand.layer = LAYER_BACK
+	# Capas, de atrás adelante: vegetación, decoración trasera, peces, decoración delantera.
 	_weeds.layer = LAYER_BACK + 1
 	_bubbles.layer = LAYER_FISH + 1
 	_food.layer = LAYER_FISH + 2
@@ -152,6 +180,7 @@ func _ready() -> void:
 	]:
 		canvas.add_drawable(drawable)
 	canvas.add_drawable(_camera_hint)
+	canvas.add_drawable(_decor_banner)
 	canvas.add_drawable(_cursor)
 	_load_looks()
 	_biome = Game.content.biomes.get_biome(Game.state.active().biome_id)
@@ -171,6 +200,7 @@ func _process(delta: float) -> void:
 	_update_care()
 	_update_reactions()
 	_update_schools()
+	_separate_fish(delta)
 	_update_equipment(delta)
 	_update_decoration()
 	_events.update()
@@ -183,12 +213,10 @@ func _process(delta: float) -> void:
 	_next_bubble_in = _rng.randf_range(BUBBLE_GAP_MIN, BUBBLE_GAP_MAX)
 
 
-## Sueño según la hora del día y reacción de cada pez al puntero.
+## Reacción de cada pez al puntero (la hora del día no cambia su comportamiento).
 func _update_reactions() -> void:
-	var darkness: float = Game.state.darkness
 	for view: FishView in _fish:
 		var motion: SwimMotion = view.motion
-		motion.set_sleepiness(SwimMotion.sleepiness_for(motion.activity, darkness))
 		if _pointer_inside:
 			motion.react_to_cursor(_pointer_cell, view.anchor_cell("eye"))
 
@@ -201,6 +229,84 @@ func _startle_near(cell: Vector2i) -> void:
 
 
 ## Cada banco (los peces de una especie que tiende a agruparse) sabe dónde está su centro.
+## Evita que los peces se pisen: los que se solapan se apartan y los pequeños
+## huyen de los grandes (como el tiburón). Barre los peces ordenados por posición
+## horizontal para no comparar todos con todos.
+func _separate_fish(delta: float) -> void:
+	_separation_clock += delta
+	if _separation_clock < SEPARATION_INTERVAL or _fish.size() < 2:
+		return
+	var interval: float = _separation_clock
+	_separation_clock = 0.0
+	var ordered: Array[FishView] = []
+	ordered.append_array(_fish)
+	ordered.sort_custom(_is_left_of)
+	var widest: float = 0.0
+	for view: FishView in ordered:
+		widest = maxf(widest, float(view.width))
+	var reach: float = widest + SEPARATION_PADDING + FEAR_MARGIN.x
+	for first_index: int in range(ordered.size()):
+		var first: FishView = ordered[first_index]
+		for second_index: int in range(first_index + 1, ordered.size()):
+			var second: FishView = ordered[second_index]
+			if second.motion.position.x - first.motion.position.x > reach:
+				break
+			_separate_pair(first, second, interval)
+
+
+func _is_left_of(first: FishView, second: FishView) -> bool:
+	return first.motion.position.x < second.motion.position.x
+
+
+func _body_of(view: FishView) -> Rect2:
+	return Rect2(view.motion.position, Vector2(float(view.width), float(view.height)))
+
+
+func _separate_pair(first: FishView, second: FishView, interval: float) -> void:
+	var area_first: float = float(first.width * first.height)
+	var area_second: float = float(second.width * second.height)
+	if area_first >= BIG_FISH_AREA and area_first >= area_second * BIG_FISH_RATIO:
+		_scare(first, second, interval)
+	elif area_second >= BIG_FISH_AREA and area_second >= area_first * BIG_FISH_RATIO:
+		_scare(second, first, interval)
+	var padding: float = SEPARATION_PADDING * 0.5
+	var body_first: Rect2 = _body_of(first).grow_individual(padding, 0.0, padding, 0.0)
+	var body_second: Rect2 = _body_of(second).grow_individual(padding, 0.0, padding, 0.0)
+	if not body_first.intersects(body_second):
+		return
+	var overlap: Rect2 = body_first.intersection(body_second)
+	var centers: Vector2 = body_second.get_center() - body_first.get_center()
+	# Una fila pesa el doble que una columna (la celda es más alta que ancha).
+	var axis: Vector2 = Vector2.ZERO
+	var depth: float = 0.0
+	if overlap.size.x * 0.5 <= overlap.size.y:
+		axis = Vector2(1.0 if centers.x >= 0.0 else -1.0, 0.0)
+		depth = overlap.size.x
+	else:
+		axis = Vector2(0.0, 1.0 if centers.y >= 0.0 else -1.0)
+		depth = overlap.size.y
+	var speed: float = minf(depth * SEPARATION_GAIN, SwimMotion.PUSH_MAX)
+	# El más grande se aparta menos.
+	var share_first: float = area_second / maxf(area_first + area_second, 0.001)
+	first.motion.push(-axis * speed * share_first, interval)
+	second.motion.push(axis * speed * (1.0 - share_first), interval)
+
+
+## El pez pequeño [param small] huye del grande [param big] si se le acerca.
+func _scare(big: FishView, small: FishView, interval: float) -> void:
+	var margin: Vector2 = FEAR_MARGIN
+	var zone: Rect2 = _body_of(big).grow_individual(margin.x, margin.y, margin.x, margin.y)
+	var body: Rect2 = _body_of(small)
+	if not zone.intersects(body):
+		return
+	var away: Vector2 = body.get_center() - zone.get_center()
+	if away.length() < 0.01:
+		away = Vector2(float(small.motion.facing), 0.0)
+	away = away.normalized()
+	small.motion.push(away * FEAR_SPEED, interval)
+	small.motion.seek(small.motion.position + away * FEAR_FLEE_DISTANCE)
+
+
 func _update_schools() -> void:
 	var sums: Dictionary[String, Vector2] = {}
 	var counts: Dictionary[String, int] = {}
@@ -293,6 +399,7 @@ func _set_input_enabled(value: bool) -> void:
 		if camera.is_panning:
 			camera.end_pan()
 	_camera_hint.is_shown = value
+	_decor_banner.is_shown = value
 
 
 ## Clic del jugador sobre la celda [param cell]. Por orden: limpiar una mancha,
@@ -382,6 +489,7 @@ func set_area(area: Rect2i, world_columns: int = 0) -> void:
 	var world: Rect2i = Rect2i(area.position, Vector2i(width, area.size.y))
 	camera.configure(area.size.x, width)
 	_camera_hint.set_view(area)
+	_decor_banner.set_view(area)
 	if canvas != null:
 		canvas.camera_x = camera.x
 	if world == _area:
@@ -489,18 +597,36 @@ func _make_view(fish: Fish) -> FishView:
 	motion.rest_chance = def.rest_chance
 	motion.rest_seconds = def.rest_seconds
 	motion.temperament = def.temperament
-	motion.activity = def.activity
 	var variant_look: VariantDef.Look = VariantDef.Look.NONE
 	var variant: VariantDef = Game.content.get_variant(fish.variant_id)
 	if variant != null:
 		variant_look = variant.look
-	var view: FishView = FishView.new(
-		look.sprite_for(fish.stage()), look.palette, motion, def.frame_duration, variant_look
-	)
+	var view: FishView = null
+	if ImageFishView.has_masks(def.id):
+		# Con máscaras, todas las etapas usan la misma imagen y solo cambia el tamaño.
+		var image_view: ImageFishView = ImageFishView.new(
+			def.id,
+			look.sprite,
+			look.palette_for(fish.coat),
+			motion,
+			def.frame_duration,
+			variant_look,
+			ImageFishView.stage_scale(fish.stage())
+		)
+		if image_view.is_ready():
+			view = image_view
+	if view == null:
+		view = FishView.new(
+			look.sprite_for(fish.stage()),
+			look.palette_for(fish.coat),
+			motion,
+			def.frame_duration,
+			variant_look
+		)
 	view.layer = LAYER_FISH
 	view.stage = fish.stage()
 	view.variant_id = fish.variant_id
-	motion.set_bounds(_bounds_for(view))
+	_place_bounds(view)
 	view.set_mood(fish.happiness)
 	return view
 
@@ -521,7 +647,7 @@ func _restage(old_view: FishView, fish: Fish) -> void:
 	view.motion.velocity = old.velocity
 	view.motion.facing = old.facing
 	view.motion.phase = old.phase
-	view.motion.set_bounds(_bounds_for(view))
+	_place_bounds(view)
 	_views.erase(fish)
 	_owners.erase(old_view)
 	_fish.erase(old_view)
@@ -711,7 +837,7 @@ func _on_grid_changed() -> void:
 		)
 	)
 	for fish: FishView in _fish:
-		fish.motion.set_bounds(_bounds_for(fish))
+		_place_bounds(fish)
 
 
 ## Zona de la pecera: la que se fijó o, si no hay, toda la ventana.
@@ -721,22 +847,33 @@ func _current_area() -> Rect2i:
 	return Rect2i(0, 0, canvas.columns, canvas.row_count)
 
 
-## Zona donde puede estar la esquina superior izquierda de un pez: bajo la
-## superficie, sobre la arena y sin salirse por los lados.
-func _bounds_for(fish: FishView) -> Rect2:
+## Da al pez su zona de nado: su franja de profundidad y, aparte, toda el agua
+## (a la que puede salir cuando va tras comida).
+func _place_bounds(fish: FishView) -> void:
+	fish.motion.set_bounds(_bounds_for(fish), _water_zone_for(fish))
+
+
+## Toda el agua donde puede estar la esquina superior izquierda de un pez: bajo
+## la superficie, sobre la arena y sin salirse por los lados.
+func _water_zone_for(fish: FishView) -> Rect2:
 	var area: Rect2i = _current_area()
 	var top: float = float(area.position.y + SURFACE_ROWS + 1)
 	var bottom: float = float(area.end.y - SAND_ROWS - fish.height)
 	var right: float = float(area.size.x - fish.width)
-	var zone: Rect2 = Rect2(0.0, top, maxf(right, 0.0), maxf(bottom - top, 0.0))
-	return fish.motion.band_of(zone)
+	return Rect2(0.0, top, maxf(right, 0.0), maxf(bottom - top, 0.0))
+
+
+## Zona del pez recortada a su franja de profundidad.
+func _bounds_for(fish: FishView) -> Rect2:
+	return fish.motion.band_of(_water_zone_for(fish))
 
 
 ## Entra o sale del modo decorar.
 func set_decorating(value: bool) -> void:
 	_decorating = value
 	_decor_front.clear_ghost()
-	_decor_front.hint = tr("DECOR_HINT") if value else ""
+	_decor_front.hint = ""
+	_decor_banner.text = tr("DECOR_HINT") if value else ""
 	if value:
 		_held_id = _first_stock_id()
 		decor_message.emit(tr("TOAST_DECOR_MODE_ON"))
@@ -908,6 +1045,7 @@ func _update_decoration() -> void:
 	var items: Array[PlacedDecoration] = Game.state.active().decorations
 	_decor_back.set_items(items)
 	_decor_front.set_items(items)
+	_weeds.covers = _decor_back.covered_cells()
 	if not _decorating:
 		return
 	if _held_id.is_empty() or not Game.state.decoration_stock.has(_held_id):

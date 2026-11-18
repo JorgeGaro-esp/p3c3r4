@@ -41,14 +41,8 @@ static func total_production(state: GameState, content: ContentDB) -> float:
 				continue
 			var species: SpeciesDef = content.get_species(fish.species_id)
 			if species != null:
-				var rate: float = Economy.fish_rate(
+				total += Economy.fish_rate(
 					species.base_production, fish.happiness, tank.bonuses.production_multiplier
-				)
-				total += (
-					rate
-					* DayCycle.activity_factor(
-						species.activity, state.darkness, tank.bonuses.night_shield
-					)
 				)
 	var factor: float = Achievements.multiplier(state, content)
 	factor *= Prestige.production_multiplier(state, content)

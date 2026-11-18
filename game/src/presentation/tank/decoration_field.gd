@@ -81,6 +81,17 @@ func draw(canvas: AsciiCanvas) -> void:
 		canvas.put_string(hint, hint_cell, AsciiColors.AMBER)
 
 
+## Celdas que ocupan todos los objetos colocados (de las dos capas), en la rejilla
+## del agua. Sirve para que la vegetación del fondo quede tapada por la decoración.
+func covered_cells() -> Array[Rect2i]:
+	var cells: Array[Rect2i] = []
+	for placed: PlacedDecoration in _items:
+		var rect: Rect2i = placed.rect(_width)
+		var top: int = _floor_row - rect.position.y - rect.size.y
+		cells.append(Rect2i(_origin_x + rect.position.x, top, rect.size.x, rect.size.y))
+	return cells
+
+
 func _is_mine(def: DecorationDef) -> bool:
 	return (def.layer == DecorationDef.Layer.FRONT) == _front
 

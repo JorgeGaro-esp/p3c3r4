@@ -16,6 +16,8 @@ const POLL_SECONDS: float = 1.0
 ## Intentos seguidos de recolocar la ventana si el sistema no la deja donde se pide.
 const MAX_REPLACE_STREAK: int = 3
 const _REG_RELATIVE_PATH: String = "\\System32\\reg.exe"
+## Icono de la ventana (barra de tareas y Alt+Tab).
+const WINDOW_ICON_PATH: String = "res://logo.png"
 
 var _preferred_screen: int = SettingsData.PRIMARY_SCREEN
 var _expected_rect: Rect2i = Rect2i()
@@ -29,10 +31,22 @@ var _poll_timer: Timer = Timer.new()
 func _ready() -> void:
 	if not is_desktop():
 		return
+	_apply_window_icon()
 	_poll_timer.wait_time = POLL_SECONDS
 	_poll_timer.timeout.connect(_poll)
 	add_child(_poll_timer)
 	_poll_timer.start()
+
+
+## Pone el logo del juego como icono de la ventana. Sin esto Windows enseña en la
+## barra de tareas el icono por defecto del proyecto (un cuadrado liso).
+func _apply_window_icon() -> void:
+	var icon: Texture2D = load(WINDOW_ICON_PATH) as Texture2D
+	if icon == null:
+		return
+	var image: Image = icon.get_image()
+	if image != null:
+		DisplayServer.set_icon(image)
 
 
 ## Indica si hay una ventana de escritorio de verdad (falso en las pruebas sin pantalla).

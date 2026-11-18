@@ -18,6 +18,16 @@ const SWIM_SPEED_SCALE: float = 0.22
 ## La onda se exagera algo: en un recuadro pequeño la de la pecera apenas se ve.
 const WAVE_GAIN: float = 3.0
 const MAX_WAVE: float = 0.9
+## Con imágenes (ver [ImageFishView]) la onda es por píxel y se ve sin exagerarla tanto.
+const IMAGE_WAVE_GAIN: float = 1.5
+const IMAGE_MAX_WAVE: float = 0.35
+## Tamaños (respecto al adulto) que prueba el retrato con imágenes hasta que cabe.
+const IMAGE_FACTORS: Array[float] = [1.0, 0.7, 0.4]
+## Pestañeo del retrato: cada cuántos segundos y cuánto dura.
+const BLINK_EVERY: float = 4.0
+const BLINK_SECONDS: float = 0.15
+## Cada cuántos segundos se recalcula el color de una variante animada.
+const TINT_STEP: float = 0.1
 ## Marco de la «foto»: esquinas y lados.
 const FRAME_CORNERS: String = "┌┐└┘"
 const FRAME_HORIZONTAL: String = "─"
@@ -40,6 +50,9 @@ var _motion: SwimMotion = null
 var _mirrored: AsciiSprite = null
 var _bounds: Rect2 = Rect2()
 var _sprites: Dictionary[String, AsciiSprite] = {}
+## Peces de imagen ya creados, por variante y tamaño.
+var _images: Dictionary[String, ImageFishView] = {}
+var _last_tint: float = 0.0
 
 
 ## Enseña a [param def]. Con [param looks] vacío dibuja la silueta; si no, cada
@@ -53,13 +66,19 @@ func show_species(def: SpeciesDef, looks: Array[VariantDef.Look], names: PackedS
 	_palette = def.build_palette()
 	_sprite = _fitting_sprite(def)
 	_mirrored = _sprite.mirrored() if _sprite != null else null
+	if changed:
+		_images.clear()
 	if changed or _motion == null:
 		_clock = 0.0
 		_motion = SwimMotion.new(
 			RandomNumberGenerator.new(),
 			def.style as SwimMotion.Style,
 			def.speed,
-			minf(def.amplitude * WAVE_GAIN, MAX_WAVE),
+			(
+				minf(def.amplitude * IMAGE_WAVE_GAIN, IMAGE_MAX_WAVE)
+				if ImageFishView.has_masks(def.id)
+				else minf(def.amplitude * WAVE_GAIN, MAX_WAVE)
+			),
 			def.frequency
 		)
 		_motion.speed_scale = SWIM_SPEED_SCALE
@@ -71,6 +90,7 @@ func show_species(def: SpeciesDef, looks: Array[VariantDef.Look], names: PackedS
 func clear() -> void:
 	_species_id = ""
 	_sprite = null
+	_images.clear()
 	_looks = []
 	_names = PackedStringArray()
 
@@ -120,7 +140,8 @@ func draw(canvas: AsciiCanvas) -> void:
 		return
 	_draw_frame(canvas)
 	var area: Rect2i = _inner()
-	if area.size.x < _sprite.width or area.size.y < _sprite.height:
+	var fish_size: Vector2i = _fish_size()
+	if area.size.x < fish_size.x or area.size.y < fish_size.y:
 		return
 	var caption_rows: int = _caption_rows()
 	if _looks.is_empty():
@@ -133,7 +154,9 @@ func draw(canvas: AsciiCanvas) -> void:
 		_draw_silhouette(canvas, origin)
 		return
 	_fit_bounds()
-	_draw_sprite(canvas, Vector2(area.position) + _motion.position)
+	var origin_cell: Vector2 = Vector2(area.position) + _motion.position
+	if not _draw_image(canvas, origin_cell):
+		_draw_sprite(canvas, origin_cell)
 	_draw_caption(canvas)
 
 
@@ -167,7 +190,7 @@ func _draw_frame(canvas: AsciiCanvas) -> void:
 
 ## Filas que ocupa el nombre de la variante bajo el pez.
 func _caption_rows() -> int:
-	if not _looks.is_empty() and _inner().size.y > _sprite.height:
+	if not _looks.is_empty() and _inner().size.y > _fish_size().y:
 		return 1
 	return 0
 
@@ -178,8 +201,8 @@ func _fit_bounds() -> void:
 	var area: Rect2 = Rect2(
 		0.0,
 		0.0,
-		float(maxi(inner.size.x - _sprite.width, 0)),
-		float(maxi(inner.size.y - _caption_rows() - _sprite.height, 0))
+		float(maxi(inner.size.x - _fish_size().x, 0)),
+		float(maxi(inner.size.y - _caption_rows() - _fish_size().y, 0))
 	)
 	if area == _bounds:
 		return
@@ -225,6 +248,8 @@ func _draw_sprite(canvas: AsciiCanvas, origin: Vector2) -> void:
 				color = VariantPalette.tint(color, look, _clock, phase)
 			if character == AsciiSprite.OPAQUE_MARKER:
 				continue
+			if role == "e":
+				character = FishView.EYE_CLOSED if _is_blinking() else FishView.EYE_OPEN
 			var wave: float = (
 				_motion.body_offset(column, shown.width) + _motion.tilt_offset(column, shown.width)
 			)
@@ -235,10 +260,75 @@ func _draw_sprite(canvas: AsciiCanvas, origin: Vector2) -> void:
 			canvas.put_char(character, Vector2(origin.x + across, y), color)
 
 
+## Si el pez tiene los ojos cerrados en este instante del retrato.
+func _is_blinking() -> bool:
+	return fmod(_clock, BLINK_EVERY) < BLINK_SECONDS
+
+
+## Si el pez se dibuja con imágenes en lugar de caracteres.
+func _uses_images() -> bool:
+	return _sprite != null and ImageFishView.has_masks(_species_id)
+
+
+## Tamaño en celdas con el que se ve el pez ahora (el de su sprite, o el de la
+## imagen ya escalada para que quepa).
+func _fish_size() -> Vector2i:
+	if not _uses_images():
+		return Vector2i(_sprite.width, _sprite.height)
+	return _image_size(_image_factor())
+
+
+func _image_size(factor: float) -> Vector2i:
+	var body: float = (
+		ImageFishView.BODY_SCALE * factor * ImageFishView.species_scale(_species_id)
+	)
+	return Vector2i(
+		maxi(roundi(float(_sprite.width) * body), 1), maxi(roundi(float(_sprite.height) * body), 1)
+	)
+
+
+## El mayor tamaño (respecto al adulto) con el que el pez cabe en el recuadro,
+## dejando una fila para el nombre de la variante.
+func _image_factor() -> float:
+	var inner: Rect2i = _inner()
+	for factor: float in IMAGE_FACTORS:
+		var size: Vector2i = _image_size(factor)
+		if inner.size.x >= size.x and inner.size.y - 1 >= size.y:
+			return factor
+	return IMAGE_FACTORS[IMAGE_FACTORS.size() - 1]
+
+
+## Dibuja el pez con sus imágenes en [param origin]. Devuelve `false` si no hay
+## (entonces se dibuja con caracteres).
+func _draw_image(canvas: AsciiCanvas, origin: Vector2) -> bool:
+	if not _uses_images():
+		return false
+	var index: int = current_index()
+	var factor: float = _image_factor()
+	var key: String = "%d_%s" % [index, str(factor)]
+	if not _images.has(key):
+		var view: ImageFishView = ImageFishView.new(
+			_species_id, _sprite, _palette, _motion, _frame_duration, _looks[index], factor
+		)
+		_images[key] = view
+	var fish: ImageFishView = _images[key]
+	if not fish.is_ready():
+		return false
+	if VariantPalette.is_animated(_looks[index]) and _clock - _last_tint >= TINT_STEP:
+		_last_tint = _clock
+		fish.retint_at(_clock)
+	var saved: Vector2 = _motion.position
+	_motion.position = origin
+	fish.blinking = _is_blinking()
+	fish.draw(canvas)
+	_motion.position = saved
+	return true
+
+
 func _draw_caption(canvas: AsciiCanvas) -> void:
 	var index: int = current_index()
 	var inner: Rect2i = _inner()
-	if index < 0 or index >= _names.size() or inner.size.y <= _sprite.height:
+	if index < 0 or index >= _names.size() or inner.size.y <= _fish_size().y:
 		return
 	var text: String = UiText.fit(_names[index], inner.size.x)
 	var x: int = inner.position.x + maxi((inner.size.x - text.length()) / 2, 0)
@@ -249,7 +339,8 @@ func _draw_caption(canvas: AsciiCanvas) -> void:
 ## recurso el adulto (se dibuja recortado). Así nunca queda el recuadro vacío.
 func _fitting_sprite(def: SpeciesDef) -> AsciiSprite:
 	var adult: AsciiSprite = _sprite_for(def.sprite_path)
-	if adult == null or _fits(adult):
+	# Con imágenes siempre se usa el adulto (el tamaño se ajusta aparte).
+	if adult == null or _fits(adult) or ImageFishView.has_masks(def.id):
 		return adult
 	for path: String in [def.juvenile_sprite_path, def.fry_sprite_path]:
 		var smaller: AsciiSprite = _sprite_for(path)

@@ -146,13 +146,27 @@ func put_glyph(
 
 
 ## Dibuja una cadena que empieza en la celda [param cell].
-func put_string(text: String, cell: Vector2, color: Color) -> void:
+func put_string(raw_text: String, cell: Vector2, color: Color) -> void:
+	var text: String = Currency.apply(raw_text)
 	var origin: Vector2 = Vector2(cell.x * cell_size.x, cell.y * cell_size.y + _ascent)
 	var text_width: float = float(text.length()) * cell_size.x
 	if _culling and (origin.x + text_width < _visible_left or origin.x > _visible_right):
 		return
-	draw_string(font, origin, text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size, color)
-	glyph_count += text.length()
+	# Carácter a carácter y cada uno en su celda: dibujar la cadena entera acumula el
+	# redondeo del avance de la fuente y los textos largos (marcos, barras) se
+	# desplazan respecto a la rejilla.
+	for index: int in range(text.length()):
+		var character: String = text[index]
+		if character == " ":
+			continue
+		draw_char(
+			font,
+			Vector2(origin.x + float(index) * cell_size.x, origin.y),
+			character,
+			font_size,
+			color
+		)
+		glyph_count += 1
 
 
 ## Fondo negro de toda la ventana salvo el cielo (que se ve transparente).

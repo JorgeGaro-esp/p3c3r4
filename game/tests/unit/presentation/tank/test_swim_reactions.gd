@@ -14,14 +14,6 @@ func _make(style: SwimMotion.Style, seed_value: int = 1) -> SwimMotion:
 	return motion
 
 
-func test_sleepiness_follows_activity_and_darkness() -> void:
-	assert_eq(SwimMotion.sleepiness_for(1, 0.0), 0.0, "diurnal awake by day")
-	assert_eq(SwimMotion.sleepiness_for(1, 1.0), 1.0, "diurnal asleep at night")
-	assert_eq(SwimMotion.sleepiness_for(2, 0.0), 1.0, "nocturnal asleep by day")
-	assert_eq(SwimMotion.sleepiness_for(2, 1.0), 0.0, "nocturnal awake at night")
-	assert_almost_eq(SwimMotion.sleepiness_for(0, 1.0), 0.4, 0.001)
-
-
 func test_sleeping_fish_is_slower_and_rests_more() -> void:
 	var awake: SwimMotion = _make(SwimMotion.Style.GLIDE, 3)
 	var asleep: SwimMotion = _make(SwimMotion.Style.GLIDE, 3)

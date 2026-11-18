@@ -8,6 +8,10 @@ extends RefCounted
 
 const SEED_SALT: int = 7919
 
+## Si salen eventos solos. Apagado de momento para simplificar el juego: el código
+## y el contenido siguen ahí y se reactivan poniéndolo en `true`.
+var enabled: bool = false
+
 var _game: GameService = null
 var _planner: EventPlanner = EventPlanner.new()
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -37,6 +41,8 @@ func advance(dt: float) -> void:
 			state.mark_production_dirty()
 		EventBus.event_finished.emit(ended.id)
 	_finish_bloom(EventEffects.bloom_progress(state, false), state.events.bloom_def)
+	if not enabled:
+		return
 	var def: EventDef = _planner.step(dt, state, _game.content, _rng)
 	if def != null:
 		start(def)
@@ -62,6 +68,8 @@ func start_by_id(event_id: String) -> bool:
 
 ## Lanza el siguiente evento posible (herramienta de desarrollo, F7).
 func debug_trigger() -> void:
+	if not enabled:
+		return
 	var candidates: Array[EventDef] = []
 	for event_id: String in _game.content.events.ids():
 		var def: EventDef = _game.content.events.get_event(event_id)

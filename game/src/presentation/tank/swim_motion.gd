@@ -13,6 +13,10 @@ enum Style { DART, GLIDE, DRIFT, CRAWL, HOP }
 
 ## Aceleración máxima, como múltiplo de la velocidad de la especie por segundo.
 const ACCEL_FACTOR: float = 3.0
+## Con qué rapidez se apaga el empujón de otros peces (por segundo).
+const PUSH_DECAY: float = 5.0
+## Velocidad máxima del empujón, en celdas por segundo.
+const PUSH_MAX: float = 7.0
 ## Pulsos de impulso por segundo.
 const BEAT_RATE: float = 1.4
 const DART_MIN_THRUST: float = 0.2
@@ -60,6 +64,11 @@ const HOP_WAIT_MAX: float = 1.4
 const REST_MIN_FACTOR: float = 0.5
 const REST_MAX_FACTOR: float = 1.5
 ## Hasta dónde nota el cursor un pez huidizo (celdas) y cuánto más nada al asustarse.
+## Cuánto se ensancha por arriba la franja de profundidad de cada especie (0 = la
+## suya exacta, 1 = hasta la superficie). Por abajo todos llegan hasta el fondo.
+const BAND_FREEDOM: float = 0.5
+## Proporción de velocidad vertical al ir tras comida (si no, [constant VERTICAL_RATIO]).
+const SEEK_VERTICAL_RATIO: float = 0.9
 const SHY_RADIUS: float = 6.0
 const CURIOUS_RADIUS: float = 14.0
 ## Un curioso se queda a esta distancia del cursor, sin llegar a tocarlo.
@@ -95,6 +104,9 @@ var facing: int = 1
 var phase: float = 0.0
 ## Zona permitida para la esquina superior izquierda del sprite.
 var bounds: Rect2 = Rect2()
+## Toda el agua nadable (sin recortar por profundidad). Un pez que va tras comida
+## puede salir de su franja y bajar o subir hasta ella.
+var full_bounds: Rect2 = Rect2()
 var style: Style = Style.GLIDE
 var speed: float = 6.0
 ## Amplitud máxima de la onda, en celdas.
@@ -116,8 +128,6 @@ var rest_chance: float = 0.0
 var rest_seconds: float = 3.0
 ## Carácter ante el cursor, de -1 (huidizo) a 1 (curioso).
 var temperament: float = 0.0
-## 0 neutral, 1 diurno, 2 nocturno (como en la definición de la especie).
-var activity: int = 0
 ## Sueño actual, de 0 (despierto) a 1 (dormido del todo).
 var sleepiness: float = 0.0
 
@@ -138,6 +148,8 @@ var _rest_left: float = 0.0
 var _hop_time: float = -1.0
 var _hop_wait: float = 0.0
 var _startle_left: float = 0.0
+## Velocidad extra que le dan otros peces al apartarlo (celdas por segundo).
+var _push: Vector2 = Vector2.ZERO
 
 
 func _init(
@@ -155,8 +167,9 @@ func _init(
 
 
 ## Fija la zona permitida y mete dentro al pez si se había salido.
-func set_bounds(new_bounds: Rect2) -> void:
+func set_bounds(new_bounds: Rect2, full: Rect2 = Rect2()) -> void:
 	bounds = new_bounds
+	full_bounds = full if full.size != Vector2.ZERO else new_bounds
 	_confine()
 	_retarget_in = 0.0
 
@@ -221,7 +234,8 @@ func step(delta: float) -> void:
 	# Un pez solo nada hacia delante: si el destino queda detrás, frena, se da la
 	# vuelta y entonces arranca en el otro sentido.
 	var forward: float = direction.x if (ahead >= 0.0 and not turning) else 0.0
-	var vertical: float = direction.y * VERTICAL_RATIO if style != Style.CRAWL else 0.0
+	var vertical_ratio: float = SEEK_VERTICAL_RATIO if _seek_left > 0.0 else VERTICAL_RATIO
+	var vertical: float = direction.y * vertical_ratio if style != Style.CRAWL else 0.0
 	var desired: Vector2 = Vector2(forward, vertical) * cruise
 	if resting:
 		desired = Vector2.ZERO
@@ -229,6 +243,7 @@ func step(delta: float) -> void:
 	if velocity.x * float(facing) < 0.0:
 		velocity.x = 0.0
 	position += velocity * delta
+	position += _push_step(delta)
 	if style == Style.CRAWL:
 		velocity.y = 0.0
 		position.y = bounds.end.y
@@ -239,21 +254,27 @@ func step(delta: float) -> void:
 	_update_tilt(delta)
 
 
+## Aparta al pez de otro: [param away_speed] es la velocidad (celdas por segundo)
+## a la que debería alejarse y [param interval] los segundos desde la última vez
+## que se llamó. Hay que repetirlo mientras sigan solapados.
+func push(away_speed: Vector2, interval: float) -> void:
+	_push += away_speed * PUSH_DECAY * interval
+	if _push.length() > PUSH_MAX:
+		_push = _push.normalized() * PUSH_MAX
+
+
+## Cuánto se desplaza el pez por el empujón en [param delta] segundos.
+func _push_step(delta: float) -> Vector2:
+	var moved: Vector2 = _push * delta
+	_push *= maxf(1.0 - PUSH_DECAY * delta, 0.0)
+	return moved
+
+
 ## Indica dónde está el centro del banco (el de los peces de su especie). Con
 ## [member school_pull] a 0 no tiene efecto.
 func set_school_center(center: Vector2) -> void:
 	_school_center = center
 	_has_school = true
-
-
-## Sueño de una especie según su costumbre ([param activity_kind]: 0 neutral,
-## 1 diurno, 2 nocturno) y lo oscuro que está el día ([param darkness], de 0 a 1).
-static func sleepiness_for(activity_kind: int, darkness: float) -> float:
-	if activity_kind == 1:
-		return clampf(darkness, 0.0, 1.0)
-	if activity_kind == 2:
-		return clampf(1.0 - darkness, 0.0, 1.0)
-	return clampf(darkness * 0.4, 0.0, 1.0)
 
 
 ## Fija el sueño actual (0 despierto, 1 dormido del todo).
@@ -330,9 +351,10 @@ func is_turning() -> bool:
 ## Dirige al pez hacia [param point] (esquina superior izquierda deseada) durante
 ## un momento; hay que repetirlo cada fotograma mientras siga habiendo interés.
 func seek(point: Vector2) -> void:
+	var area: Rect2 = full_bounds if not _is_grounded() else bounds
 	_target = Vector2(
-		clampf(point.x, bounds.position.x, bounds.end.x),
-		clampf(point.y, bounds.position.y, bounds.end.y)
+		clampf(point.x, area.position.x, area.end.x),
+		clampf(point.y, area.position.y, area.end.y)
 	)
 	_retarget_in = SEEK_HOLD
 	_seek_left = SEEK_HOLD
@@ -436,6 +458,8 @@ func _follow_school() -> void:
 func band_of(zone: Rect2) -> Rect2:
 	var low: float = clampf(depth_min, 0.0, 1.0)
 	var high: float = clampf(maxf(depth_max, low), 0.0, 1.0)
+	low *= 1.0 - BAND_FREEDOM
+	high = 1.0
 	var top: float = zone.position.y + zone.size.y * low
 	return Rect2(zone.position.x, top, zone.size.x, zone.size.y * (high - low))
 
@@ -474,9 +498,11 @@ func _step_hop(delta: float, ahead: float, turning: bool) -> void:
 
 
 func _confine() -> void:
+	# Persiguiendo algo (comida), el pez puede salirse de su franja de profundidad.
+	var area: Rect2 = full_bounds if (_seek_left > 0.0 and not _is_grounded()) else bounds
 	var clamped: Vector2 = Vector2(
-		clampf(position.x, bounds.position.x, bounds.end.x),
-		clampf(position.y, bounds.position.y, bounds.end.y)
+		clampf(position.x, area.position.x, area.end.x),
+		clampf(position.y, area.position.y, area.end.y)
 	)
 	if clamped.x != position.x:
 		velocity.x = 0.0

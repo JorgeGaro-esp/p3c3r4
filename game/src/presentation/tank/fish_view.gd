@@ -16,6 +16,13 @@ const PRISM_SPREAD: float = 0.08
 ## línea vertical, el instante plano del giro.
 const EDGE_ON_SCALE: float = 0.2
 const EDGE_CHARACTER: String = "|"
+## Los ojos (rol de color `e`) son siempre el mismo carácter; al pestañear, un guion.
+const EYE_OPEN: String = "•"
+const EYE_CLOSED: String = "-"
+## Segundos entre pestañeos (al azar entre los dos valores) y lo que dura cada uno.
+const BLINK_GAP_MIN: float = 2.5
+const BLINK_GAP_MAX: float = 7.0
+const BLINK_SECONDS: float = 0.15
 ## El aleteo (cambio de fotograma) va más rápido cuanto más rápido nada el pez.
 const BEAT_MIN: float = 0.35
 const BEAT_MAX: float = 2.0
@@ -31,6 +38,10 @@ var height: int = 0
 var stage: LifeStage.Stage = LifeStage.Stage.ADULT
 var variant_id: String = VariantDef.NORMAL_ID
 
+## Si el pez tiene los ojos cerrados ahora mismo.
+var blinking: bool = false
+
+var _blink_in: float = randf_range(BLINK_GAP_MIN, BLINK_GAP_MAX)
 var _cells: Array[FishCells] = []
 var _frame_count: int = 1
 var _frame_duration: float = 0.4
@@ -69,6 +80,7 @@ func _init(
 
 func update(delta: float, _canvas: AsciiCanvas) -> void:
 	motion.step(delta)
+	_update_blink(delta)
 	var swim_ratio: float = motion.velocity.length() / maxf(motion.speed, 0.001)
 	_clock += delta * clampf(BEAT_MIN + swim_ratio, BEAT_MIN, BEAT_MAX)
 	_frame_index = int(_clock / _frame_duration) % _frame_count
@@ -93,10 +105,26 @@ func draw(canvas: AsciiCanvas) -> void:
 		var across: float = half + (float(column) - half) * squash
 		var cell: Vector2 = Vector2(origin.x + across, origin.y + float(cells.rows[index]) + wave)
 		var character: String = EDGE_CHARACTER if edge_on else cells.chars[index]
+		if blinking and cells.eyes[index] != 0 and not edge_on:
+			character = EYE_CLOSED
 		if character == AsciiSprite.OPAQUE_MARKER:
 			canvas.fill_cell(cell, Color.BLACK)
 		else:
 			canvas.put_char(character, cell, cells.colors[index])
+
+
+## Cierra los ojos un instante cada cierto tiempo (al azar).
+func _update_blink(delta: float) -> void:
+	if blinking:
+		_blink_in -= delta
+		if _blink_in <= 0.0:
+			blinking = false
+			_blink_in = randf_range(BLINK_GAP_MIN, BLINK_GAP_MAX)
+		return
+	_blink_in -= delta
+	if _blink_in <= 0.0:
+		blinking = true
+		_blink_in = BLINK_SECONDS
 
 
 ## Ajusta el aspecto a la felicidad [param happiness] (0 a 100): un pez triste nada
@@ -129,6 +157,12 @@ func anchor_cell(anchor_name: String) -> Vector2:
 	return motion.position + point
 
 
+## Recalcula los colores de una variante animada para el instante [param time]
+## (para quien dibuja el pez sin llamar a [method update]).
+func retint_at(time: float) -> void:
+	_retint(time)
+
+
 ## Recalcula los colores de la variante en el instante [param time] y vuelve a
 ## aplicar la desaturación del ánimo actual.
 func _retint(time: float) -> void:
@@ -156,9 +190,11 @@ func _build_cells(sprite: AsciiSprite, palette: AsciiPalette) -> Array[FishCells
 				var role: String = color_lines[row][column]
 				if role == " ":
 					role = AsciiSprite.DEFAULT_COLOR_ROLE
+				var is_eye: bool = role == "e" and character != AsciiSprite.OPAQUE_MARKER
 				cells.columns.append(column)
 				cells.rows.append(row)
-				cells.chars.append(character)
+				cells.chars.append(EYE_OPEN if is_eye else character)
+				cells.eyes.append(1 if is_eye else 0)
 				var color: Color = palette.color_for(role)
 				cells.source_colors.append(color)
 				cells.base_colors.append(color)
@@ -172,6 +208,8 @@ class FishCells:
 	var columns: PackedInt32Array = PackedInt32Array()
 	var rows: PackedInt32Array = PackedInt32Array()
 	var chars: PackedStringArray = PackedStringArray()
+	## 1 en las celdas que son un ojo.
+	var eyes: PackedByteArray = PackedByteArray()
 	var source_colors: PackedColorArray = PackedColorArray()
 	var base_colors: PackedColorArray = PackedColorArray()
 	var colors: PackedColorArray = PackedColorArray()

@@ -24,6 +24,8 @@ var canvas: AsciiCanvas
 var _widgets: Array[AsciiWidget] = []
 var _focused: AsciiWidget = null
 var _hovered: AsciiWidget = null
+## Componente que se está arrastrando con el ratón (una barra de desplazamiento).
+var _dragged: AsciiWidget = null
 var _ring: FocusRing = FocusRing.new()
 
 
@@ -63,7 +65,14 @@ func focused_widget() -> AsciiWidget:
 func _input(event: InputEvent) -> void:
 	var motion: InputEventMouseMotion = event as InputEventMouseMotion
 	if motion != null:
-		_update_hover(canvas.cell_at(motion.position))
+		var motion_cell: Vector2i = canvas.cell_at(motion.position)
+		if _dragged != null:
+			if (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+				_dragged.handle_drag(motion_cell)
+				get_viewport().set_input_as_handled()
+				return
+			_dragged = null
+		_update_hover(motion_cell)
 		return
 	var button: InputEventMouseButton = event as InputEventMouseButton
 	if button != null:
@@ -76,6 +85,8 @@ func _input(event: InputEvent) -> void:
 
 func _on_mouse_button(button: InputEventMouseButton) -> void:
 	if not button.pressed:
+		if button.button_index == MOUSE_BUTTON_LEFT:
+			_dragged = null
 		return
 	pointer_pressed.emit()
 	var cell: Vector2i = canvas.cell_at(button.position)
@@ -97,6 +108,8 @@ func _on_mouse_button(button: InputEventMouseButton) -> void:
 		handled = target.handle_click(cell, button.double_click)
 		if handled:
 			EventBus.ui_clicked.emit()
+			if target.begins_drag(cell):
+				_dragged = target
 	if handled:
 		get_viewport().set_input_as_handled()
 
@@ -130,6 +143,12 @@ func dispatch_wheel(cell: Vector2i, direction: int) -> bool:
 func _on_key(key: InputEventKey) -> void:
 	if key.ctrl_pressed or key.alt_pressed or key.meta_pressed:
 		return
+	# Un campo de texto en edición se lleva todo el teclado (atajos incluidos).
+	for widget: AsciiWidget in _widgets:
+		if widget.captures_keys():
+			widget.handle_key(key)
+			get_viewport().set_input_as_handled()
+			return
 	if key.keycode == KEY_ESCAPE and not key.echo:
 		escape_pressed.emit()
 		get_viewport().set_input_as_handled()

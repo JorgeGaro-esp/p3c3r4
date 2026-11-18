@@ -94,6 +94,8 @@ func _process(delta: float) -> void:
 	_tick_tutorial(delta)
 	_sidebar.set_cleanliness(roundi(Game.state.active().cleanliness))
 	_sidebar.set_clock(Game.daylight.hour(), Game.daylight.phase())
+	var tank: Tank = Game.state.active()
+	_sidebar.set_capacity(tank.occupied(), tank.total_capacity())
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -102,6 +104,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if key.ctrl_pressed and key.keycode == KEY_Q:
 		Platform.request_quit()
+	elif key.ctrl_pressed and key.keycode == KEY_0:
+		# Salida de emergencia: con el texto muy grande los ajustes pueden no caber.
+		Settings.set_text_size(SettingsData.DEFAULT_TEXT_SIZE)
+		_sidebar.show_toast(tr("TOAST_TEXT_RESET"))
 	elif _title_active and key.keycode != KEY_M:
 		return
 	elif key.keycode == KEY_D and not key.ctrl_pressed:
@@ -326,6 +332,8 @@ func _build_panels() -> void:
 	_title.quit_requested.connect(Platform.request_quit)
 	_settings_panel.title_requested.connect(_leave_to_title)
 	_card.close_requested.connect(close_card)
+	_card.size_changed.connect(_apply_layout)
+	_hint.close_requested.connect(Settings.set_tutorial_step.bind(Tutorial.DONE))
 	_sidebar.set_active(true)
 	_sidebar.shop_pressed.connect(open_shop)
 	_sidebar.settings_pressed.connect(toggle_panel.bind(Kind.SETTINGS))
@@ -482,7 +490,7 @@ func _place_panel(panel: UiPanel, kind: Kind, area: Rect2i) -> void:
 
 
 func _place_card(tank_area: Rect2i) -> void:
-	var area: Rect2i = FishCard.fit_in(tank_area)
+	var area: Rect2i = _card.fit_in(tank_area)
 	_card.set_active(_card.fish() != null and area.has_area())
 	if _card.is_active:
 		_card.layout(area)
@@ -490,7 +498,8 @@ func _place_card(tank_area: Rect2i) -> void:
 
 func _place_hint(tank_area: Rect2i) -> void:
 	var area: Rect2i = TutorialHint.fit_in(tank_area)
-	_hint.set_active(_hint.step() >= 0 and area.has_area())
+	# Con un panel abierto (tienda, ajustes…) el aviso se esconde: tapaba la lista.
+	_hint.set_active(_hint.step() >= 0 and area.has_area() and _open == Kind.NONE)
 	if _hint.is_active:
 		_hint.layout(area)
 
@@ -528,4 +537,5 @@ func _on_minimized_changed(is_minimized: bool) -> void:
 		mode = Node.PROCESS_MODE_DISABLED
 	_canvas.process_mode = mode
 	_tank.process_mode = mode
-	Game.set_paused(is_minimized)
+	# Minimizado solo se deja de dibujar: la simulación sigue (es un idle).
+	Game.set_background(is_minimized)

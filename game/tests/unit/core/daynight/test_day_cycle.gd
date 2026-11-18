@@ -1,5 +1,5 @@
 extends GutTest
-## El ciclo del día: franjas, oscuridad suave y efecto sobre la producción.
+## El ciclo del día: franjas y oscuridad suave.
 
 
 func test_the_hours_fall_into_four_phases() -> void:
@@ -46,51 +46,3 @@ func test_darkness_has_no_jump_at_the_phase_edges() -> void:
 	assert_almost_eq(DayCycle.darkness(7.999), DayCycle.darkness(8.0), 0.01)
 	assert_almost_eq(DayCycle.darkness(17.999), DayCycle.darkness(18.0), 0.01)
 	assert_almost_eq(DayCycle.darkness(20.999), DayCycle.darkness(21.0), 0.01)
-
-
-func test_nocturnal_species_gain_at_night_and_lose_by_day() -> void:
-	var night: float = DayCycle.activity_factor(SpeciesDef.Activity.NOCTURNAL, 1.0, 0.0)
-	var day: float = DayCycle.activity_factor(SpeciesDef.Activity.NOCTURNAL, 0.0, 0.0)
-	assert_almost_eq(night, 1.0 + DayCycle.NIGHT_EFFECT, 0.0001)
-	assert_almost_eq(day, 1.0 - DayCycle.NIGHT_EFFECT, 0.0001)
-
-
-func test_diurnal_species_are_the_mirror_image() -> void:
-	var night: float = DayCycle.activity_factor(SpeciesDef.Activity.DIURNAL, 1.0, 0.0)
-	var day: float = DayCycle.activity_factor(SpeciesDef.Activity.DIURNAL, 0.0, 0.0)
-	assert_almost_eq(night, 1.0 - DayCycle.NIGHT_EFFECT, 0.0001)
-	assert_almost_eq(day, 1.0 + DayCycle.NIGHT_EFFECT, 0.0001)
-
-
-func test_neutral_species_ignore_the_time() -> void:
-	for dark: float in [0.0, 0.3, 0.7, 1.0]:
-		assert_eq(DayCycle.activity_factor(SpeciesDef.Activity.NEUTRAL, dark, 0.0), 1.0)
-
-
-func test_twilight_is_halfway() -> void:
-	assert_almost_eq(DayCycle.activity_factor(SpeciesDef.Activity.NOCTURNAL, 0.5, 0.0), 1.0, 0.0001)
-
-
-func test_the_lamp_only_removes_the_penalty() -> void:
-	var diurnal_night: float = DayCycle.activity_factor(SpeciesDef.Activity.DIURNAL, 1.0, 1.0)
-	var nocturnal_day: float = DayCycle.activity_factor(SpeciesDef.Activity.NOCTURNAL, 0.0, 1.0)
-	var nocturnal_night: float = DayCycle.activity_factor(SpeciesDef.Activity.NOCTURNAL, 1.0, 1.0)
-	assert_eq(diurnal_night, 1.0)
-	assert_eq(nocturnal_day, 1.0)
-	assert_almost_eq(nocturnal_night, 1.0 + DayCycle.NIGHT_EFFECT, 0.0001)
-
-
-func test_a_half_lamp_halves_the_penalty() -> void:
-	var factor: float = DayCycle.activity_factor(SpeciesDef.Activity.DIURNAL, 1.0, 0.5)
-	assert_almost_eq(factor, 1.0 - DayCycle.NIGHT_EFFECT * 0.5, 0.0001)
-
-
-func test_the_effect_never_goes_beyond_its_limit() -> void:
-	for activity: SpeciesDef.Activity in [
-		SpeciesDef.Activity.NEUTRAL, SpeciesDef.Activity.DIURNAL, SpeciesDef.Activity.NOCTURNAL
-	]:
-		for hour: int in range(0, 24):
-			var factor: float = DayCycle.activity_factor(
-				activity, DayCycle.darkness(float(hour)), 0.0
-			)
-			assert_between(factor, 1.0 - DayCycle.NIGHT_EFFECT, 1.0 + DayCycle.NIGHT_EFFECT)

@@ -67,6 +67,7 @@ static func _hatch(state: GameState, tank_index: int, dt: float, content: Conten
 		var baby: Fish = Fish.new(egg.species_id)
 		baby.maturity = 0.0
 		baby.variant_id = egg.variant_id
+		baby.coat = egg.coat
 		tank.fish.append(baby)
 		state.pending_hatched.append(HatchEvent.new(tank_index, baby))
 	tank.eggs = waiting
@@ -104,4 +105,5 @@ static func _lay_egg(
 ) -> void:
 	var variant_id: String = VariantRoll.pick(content, rng, tank.bonuses.rare_multiplier * luck)
 	var egg: Egg = Egg.new(species.id, variant_id, species.hatch_seconds, rng.randf())
+	egg.coat = species.random_coat(rng)
 	tank.eggs.append(egg)

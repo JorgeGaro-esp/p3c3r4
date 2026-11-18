@@ -8,6 +8,9 @@ extends RefCounted
 var species_id: String = ""
 ## Variante de color (identificador de [VariantDef]).
 var variant_id: String = VariantDef.NORMAL_ID
+## Pelaje de color (índice en los pelajes de la especie). Es solo estético: no cuenta
+## como variante rara ni cambia el valor de venta.
+var coat: int = 0
 ## Avanza con el tiempo hasta [constant LifeStage.ADULT_FROM].
 var maturity: float = LifeStage.ADULT_FROM
 ## 0 (muy triste) a 100 (radiante). Los cuidados la modificarán en la Fase 6.
@@ -39,7 +42,7 @@ func feed(amount: float) -> void:
 
 
 func to_dict() -> Dictionary:
-	return {
+	var data: Dictionary = {
 		"species_id": species_id,
 		"variant_id": variant_id,
 		"maturity": maturity,
@@ -48,6 +51,9 @@ func to_dict() -> Dictionary:
 		"nickname": nickname,
 		"favorite": favorite,
 	}
+	if coat != 0:
+		data["coat"] = coat
+	return data
 
 
 ## Lee la variante de [param data]; si no existe en [param content], la normal.
@@ -82,6 +88,9 @@ static func from_dict(source: Variant, content: ContentDB, warnings: PackedStrin
 		data, "hunger", Care.MAX_HUNGER, 0.0, Care.MAX_HUNGER, warnings
 	)
 	fish.nickname = SaveFields.read_string(data, "nickname", "", warnings)
+	fish.coat = SaveFields.read_int(
+		data, "coat", 0, 0, maxi(content.get_species(id).coat_count() - 1, 0), warnings
+	)
 	if data.get("favorite", false) is bool:
 		fish.favorite = data.get("favorite", false)
 	return fish

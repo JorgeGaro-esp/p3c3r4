@@ -7,6 +7,9 @@ const DEFAULT_CAPACITY: int = 40
 const MAX_CAPACITY: int = 200
 ## Objetos decorativos que caben en una pecera (rendimiento y legibilidad).
 const MAX_DECORATIONS: int = 12
+## Ejemplares que puede haber a la vez de cada especie legendaria en una pecera
+## (son enormes: con más se taparía la vista).
+const MAX_LEGENDARY_PER_SPECIES: int = 1
 
 var biome_id: String = "pond"
 var capacity: int = DEFAULT_CAPACITY
@@ -63,6 +66,14 @@ func add_fish(new_fish: Fish) -> bool:
 		return false
 	fish.append(new_fish)
 	return true
+
+
+## ¿Cabe otro ejemplar de [param species]? Las legendarias solo admiten
+## [constant MAX_LEGENDARY_PER_SPECIES] a la vez.
+func accepts_species(species: SpeciesDef) -> bool:
+	if species.rarity != SpeciesDef.Rarity.LEGENDARY:
+		return true
+	return count_of(species.id) < MAX_LEGENDARY_PER_SPECIES
 
 
 ## Quita [param target]. Devuelve falso si no estaba.

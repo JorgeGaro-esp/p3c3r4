@@ -131,10 +131,14 @@ func layout(area: Rect2i) -> void:
 	_description.rect = Rect2i(detail_x, top + 5, detail_width, maxi(owned_row - top - 5, 0))
 	_owned.rect = Rect2i(detail_x, owned_row, detail_width, 1)
 	_progress.rect = Rect2i(detail_x, owned_row + 1, mini(detail_width, 24), 1)
-	_buy.rect = Rect2i(detail_x, top + height - 2, BUY_BUTTON_WIDTH, 1)
-	_close.rect = Rect2i(detail_x + BUY_BUTTON_WIDTH + 1, top + height - 2, CLOSE_BUTTON_WIDTH, 1)
-	var decorate_x: int = detail_x + BUY_BUTTON_WIDTH + CLOSE_BUTTON_WIDTH + 2
-	_decorate.rect = Rect2i(decorate_x, top + height - 2, DECORATE_BUTTON_WIDTH, 1)
+	# Los botones se ajustan a su texto (con un mínimo) y se reparten por la fila.
+	var buttons_y: int = top + height - 2
+	var buy_width: int = maxi(BUY_BUTTON_WIDTH, _buy.label.length() + 2)
+	var close_width: int = maxi(CLOSE_BUTTON_WIDTH, _close.label.length() + 2)
+	var decorate_width: int = maxi(DECORATE_BUTTON_WIDTH, _decorate.label.length() + 2)
+	_buy.rect = Rect2i(detail_x, buttons_y, buy_width, 1)
+	_close.rect = Rect2i(detail_x + buy_width + 1, buttons_y, close_width, 1)
+	_decorate.rect = Rect2i(detail_x + buy_width + close_width + 2, buttons_y, decorate_width, 1)
 	_book.spine = Rect2i()
 	_book.page = Rect2i()
 	_book.checklist = Rect2i()
@@ -437,12 +441,19 @@ func _fill_tab_list() -> void:
 			_fill_fish_list()
 
 
+## Si las conchas actuales llegan para pagar [param cost].
+func _can_afford(cost: float) -> bool:
+	return cost < INF and Game.state.wallet.shells >= cost
+
+
 func _fill_fish_list() -> void:
 	_ids = Encyclopedia.species_of(Game.content, Game.state.active().biome_id)
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
 	var prices: PackedStringArray = PackedStringArray()
+	var lit: Array[bool] = []
 	var locale: String = TranslationServer.get_locale()
+	var tank: Tank = Game.state.active()
 	for species_id: String in _ids:
 		var def: SpeciesDef = Game.content.get_species(species_id)
 		var unlocked: bool = Game.state.is_unlocked(species_id)
@@ -452,7 +463,16 @@ func _fill_fish_list() -> void:
 			prices.append("%s ¢" % NumberFormat.compact(Game.fish_cost(species_id), locale))
 		else:
 			prices.append(_text("SHOP_LOCKED_PRICE"))
+		lit.append(
+			(
+				unlocked
+				and tank.accepts_species(def)
+				and not tank.is_full()
+				and _can_afford(Game.fish_cost(species_id))
+			)
+		)
 	_list.set_items(names, prices)
+	_list.highlights = lit
 	if previous >= 0:
 		_list.model.select(previous)
 	_show_detail(_list.selected_index())
@@ -463,6 +483,7 @@ func _fill_equipment_list() -> void:
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
 	var extras: PackedStringArray = PackedStringArray()
+	var lit: Array[bool] = []
 	var tank: Tank = Game.state.active()
 	var locale: String = TranslationServer.get_locale()
 	for equipment_id: String in _equipment_ids:
@@ -472,7 +493,9 @@ func _fill_equipment_list() -> void:
 		extras.append(
 			"%s ¢" % NumberFormat.compact(cost, locale) if cost < INF else _text("SHOP_EQ_MAXED")
 		)
+		lit.append(cost < INF and _can_afford(cost))
 	_list.set_items(names, extras)
+	_list.highlights = lit
 	if previous >= 0:
 		_list.model.select(previous)
 	_show_detail(_list.selected_index())
@@ -483,6 +506,7 @@ func _fill_decoration_list() -> void:
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
 	var prices: PackedStringArray = PackedStringArray()
+	var lit: Array[bool] = []
 	var locale: String = TranslationServer.get_locale()
 	for decoration_id: String in _decor_ids:
 		var def: DecorationDef = Game.content.get_decoration(decoration_id)
@@ -490,7 +514,9 @@ func _fill_decoration_list() -> void:
 		var suffix: String = " ×%d" % stock if stock > 0 else ""
 		names.append("%s%s" % [_text(def.name_key), suffix])
 		prices.append("%s ¢" % NumberFormat.compact(Game.decoration_cost(def.id), locale))
+		lit.append(_can_afford(Game.decoration_cost(def.id)))
 	_list.set_items(names, prices)
+	_list.highlights = lit
 	if previous >= 0:
 		_list.model.select(previous)
 	_show_detail(_list.selected_index())
@@ -643,6 +669,7 @@ func _fill_biome_list() -> void:
 	var previous: int = _list.selected_index()
 	var names: PackedStringArray = PackedStringArray()
 	var extras: PackedStringArray = PackedStringArray()
+	var lit: Array[bool] = []
 	var locale: String = TranslationServer.get_locale()
 	for biome_id: String in _biome_ids:
 		var biome: BiomeDef = Game.content.biomes.get_biome(biome_id)
@@ -651,7 +678,9 @@ func _fill_biome_list() -> void:
 			extras.append(_text("SHOP_BIOME_OPEN"))
 		else:
 			extras.append("%s ¢" % NumberFormat.compact(biome.unlock_cost, locale))
+		lit.append(Game.state.tank_index_of(biome_id) < 0 and _can_afford(biome.unlock_cost))
 	_list.set_items(names, extras)
+	_list.highlights = lit
 	if previous >= 0:
 		_list.model.select(previous)
 	_show_detail(_list.selected_index())
@@ -807,6 +836,9 @@ func _show_fish_detail(index: int) -> void:
 		var tank: Tank = Game.state.active()
 		_name.text = _text(def.name_key)
 		_price.text = _text("SHOP_PRICE") % NumberFormat.compact(Game.fish_cost(def.id), locale)
+		if not tank.accepts_species(def):
+			_price.text = _text("SHOP_LEGENDARY_OWNED")
+			_buy.is_enabled = false
 		_description.text = _text(def.description_key)
 		_owned.text = (
 			_text("SHOP_OWNED") % [tank.count_of(def.id), tank.fish.size(), tank.total_capacity()]
@@ -881,6 +913,8 @@ func _buy_selected() -> void:
 			message.emit(_text("TOAST_LOCKED"))
 		GameService.BuyResult.WRONG_BIOME:
 			message.emit(_text("TOAST_WRONG_BIOME"))
+		GameService.BuyResult.LEGENDARY_OWNED:
+			message.emit(_text("TOAST_LEGENDARY_OWNED"))
 		_:
 			pass
 	_fill_list()

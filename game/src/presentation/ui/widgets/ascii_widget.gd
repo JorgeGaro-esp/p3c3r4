@@ -60,6 +60,23 @@ func handle_wheel(_cell: Vector2i, _direction: int) -> bool:
 	return false
 
 
+## Si el componente se queda con todas las teclas (un campo de texto en edición).
+## UiRoot le da el teclado antes que a los atajos y a Esc.
+func captures_keys() -> bool:
+	return false
+
+
+## Si un clic en [param _cell] empieza un arrastre (la barra de desplazamiento).
+func begins_drag(_cell: Vector2i) -> bool:
+	return false
+
+
+## El ratón se mueve a [param _cell] con el botón izquierdo pulsado tras un clic
+## que empezó un arrastre.
+func handle_drag(_cell: Vector2i) -> void:
+	pass
+
+
 ## Activación desde su tecla rápida. Devuelve si hizo algo.
 func activate() -> bool:
 	return false

@@ -6,7 +6,7 @@ extends RefCounted
 ## se añade primero allí y aquí, y se comprueba que la fuente lo tiene.
 
 const LATIN: String = "áéíóúüñÁÉÍÓÚÜÑ¿¡"
-const SYMBOLS: String = "°º·•¢¥§¤«»×÷±"
+const SYMBOLS: String = "°º·•¢¥€£§¤«»×÷±"
 const BOX: String = "─│┌┐└┘├┤┬┴┼═║╔╗╚╝"
 const BLOCKS: String = "░▒▓█▀▄▌▐"
 const SHAPES: String = "◎○●◦◆◇▲▼◄►≡≈∞"

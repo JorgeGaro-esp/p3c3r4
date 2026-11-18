@@ -1,19 +1,25 @@
 class_name AsciiList
 extends AsciiWidget
 ## Lista de filas seleccionables con una segunda columna a la derecha (precios) y
-## barra de desplazamiento cuando hay más elementos que filas.
+## barra de desplazamiento cuando hay más elementos que filas. La barra se puede
+## usar: clic en la columna de la barra o arrastrar el tirador (y la rueda).
 
 signal selection_changed(index: int)
 ## Se emite con doble clic o con Intro sobre un elemento.
 signal chosen(index: int)
 
 const MARKER: String = "►"
+## Marca de una fila resaltada (algo que se puede comprar ahora).
+const LIT_MARKER: String = "•"
 const _SCROLL_TRACK: String = "░"
 const _SCROLL_THUMB: String = "█"
 
 var names: PackedStringArray = PackedStringArray()
 var extras: PackedStringArray = PackedStringArray()
 var model: ListModel = ListModel.new()
+## Filas resaltadas (por ejemplo, lo que el jugador ya puede comprar): se dibujan en
+## verde y con una marca. Puede ser más corta que la lista.
+var highlights: Array[bool] = []
 
 
 func _init() -> void:
@@ -32,6 +38,7 @@ func set_rect(new_rect: Rect2i) -> void:
 func set_items(new_names: PackedStringArray, new_extras: PackedStringArray) -> void:
 	names = new_names
 	extras = new_extras
+	highlights = []
 	model.selected = 0
 	model.scroll = 0
 	model.configure(names.size(), rect.size.y)
@@ -57,6 +64,9 @@ func draw(canvas: AsciiCanvas) -> void:
 		var origin: Vector2 = Vector2(rect.position + Vector2i(0, row))
 		var is_selected: bool = index == model.selected
 		var color: Color = AsciiColors.TEXT
+		var is_lit: bool = index < highlights.size() and highlights[index]
+		if is_lit and not is_selected:
+			color = AsciiColors.SEAWEED_LIGHT
 		if is_selected and is_focused:
 			canvas.fill_rect_cells(
 				Rect2i(rect.position + Vector2i(0, row), Vector2i(width, 1)), AsciiColors.AMBER
@@ -64,7 +74,8 @@ func draw(canvas: AsciiCanvas) -> void:
 			color = Color.BLACK
 		elif is_selected:
 			color = AsciiColors.AMBER
-		canvas.put_string((MARKER if is_selected else " ") + line, origin, color)
+		var marker: String = MARKER if is_selected else (LIT_MARKER if is_lit else " ")
+		canvas.put_string(marker + line, origin, color)
 	if has_bar:
 		_draw_scroll_bar(canvas)
 
@@ -95,6 +106,9 @@ func handle_key(event: InputEventKey) -> bool:
 
 
 func handle_click(cell: Vector2i, is_double: bool) -> bool:
+	if _on_scroll_bar(cell):
+		_scroll_to_row(cell.y - rect.position.y)
+		return true
 	var index: int = model.index_at_row(cell.y - rect.position.y)
 	if index < 0:
 		return true
@@ -110,6 +124,26 @@ func handle_click(cell: Vector2i, is_double: bool) -> bool:
 func handle_wheel(_cell: Vector2i, direction: int) -> bool:
 	model.scroll_by(direction)
 	return true
+
+
+func begins_drag(cell: Vector2i) -> bool:
+	return _on_scroll_bar(cell)
+
+
+func handle_drag(cell: Vector2i) -> void:
+	_scroll_to_row(cell.y - rect.position.y)
+
+
+## Verdadero si [param cell] cae en la columna de la barra (y la barra se ve).
+func _on_scroll_bar(cell: Vector2i) -> bool:
+	return model.max_scroll() > 0 and cell.x == rect.end.x - 1 and rect.has_point(cell)
+
+
+## Lleva el desplazamiento a la posición que marca la fila [param row] de la barra.
+func _scroll_to_row(row: int) -> void:
+	var span: int = maxi(rect.size.y - 1, 1)
+	var fraction: float = clampf(float(row) / float(span), 0.0, 1.0)
+	model.scroll = clampi(roundi(fraction * float(model.max_scroll())), 0, model.max_scroll())
 
 
 func _draw_scroll_bar(canvas: AsciiCanvas) -> void:

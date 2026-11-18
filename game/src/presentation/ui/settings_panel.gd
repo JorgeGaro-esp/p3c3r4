@@ -18,16 +18,18 @@ enum SellStep { IDLE, ASKED, SURE }
 const LABEL_X: int = 3
 const LABEL_WIDTH: int = 28
 const VALUE_WIDTH: int = 22
-## Ancho de una columna de ajustes; con sitio para dos se reparten en dos columnas.
-const COLUMN_WIDTH: int = LABEL_WIDTH + ARROW_WIDTH + 1 + VALUE_WIDTH + 2 + ARROW_WIDTH + 2
 const ARROW_WIDTH: int = 3
 const FIRST_ROW: int = 2
-const CLOSE_BUTTON_WIDTH: int = 16
-const SELL_ALL_WIDTH: int = 30
+const CLOSE_BUTTON_WIDTH: int = 14
+const SELL_ALL_WIDTH: int = 28
 const DELETE_WIDTH: int = 30
-const TITLE_BUTTON_WIDTH: int = 22
-const STATS_BUTTON_WIDTH: int = 18
+const TITLE_BUTTON_WIDTH: int = 20
+const STATS_BUTTON_WIDTH: int = 16
+const FOOTER_GAP: int = 2
 
+## Anchos que piden los textos: las columnas crecen para que nada se recorte.
+var _label_width: int = LABEL_WIDTH
+var _value_width: int = VALUE_WIDTH
 var _frame: AsciiFrame = AsciiFrame.new()
 var _close: AsciiButton = null
 var _stats: AsciiButton = null
@@ -52,6 +54,13 @@ var _text_size: Row = null
 var _language: Row = null
 var _tutorial: Row = null
 var _binary: Row = null
+var _currency: Row = null
+var _scroll_bar: AsciiScrollBar = AsciiScrollBar.new()
+## Zona del panel (para recolocarlo al desplazar) y reparto de las filas.
+var _area: Rect2i = Rect2i()
+var _per_column: int = 1
+var _visible_rows: int = 1
+var _scroll: int = 0
 
 
 func _init(root: UiRoot) -> void:
@@ -74,6 +83,10 @@ func _init(root: UiRoot) -> void:
 	_language = _make_stepper("SETTINGS_LANGUAGE", _on_language_less, _on_language_more)
 	_tutorial = _make_toggle("SETTINGS_TUTORIAL", _on_tutorial_toggled)
 	_binary = _make_toggle("SETTINGS_BINARY", _on_binary_toggled)
+	_currency = _make_stepper("SETTINGS_CURRENCY", _on_currency_less, _on_currency_more)
+	_add(_scroll_bar, UiRoot.LAYER_PANEL + 1)
+	_scroll_bar.scrolled.connect(_on_scrolled)
+	_scroll_bar.tick = _follow_focus
 	_close = _make_button(_text("UI_CLOSE_PANEL"))
 	_close.activated.connect(func() -> void: close_requested.emit())
 	_stats = _make_button(_text("UI_STATS"), _text("UI_STATS_KEY"))
@@ -98,40 +111,142 @@ func set_active(value: bool) -> void:
 
 
 func layout(area: Rect2i) -> void:
+	_area = area
 	_frame.rect = area
+	refresh()
+	_measure_columns()
 	# Con sitio para dos columnas se reparten las filas; si no, van en una.
-	var two_columns: bool = area.size.x >= LABEL_X + 2 * COLUMN_WIDTH
+	var two_columns: bool = area.size.x >= LABEL_X + 2 * _column_width()
 	var per_column: int = ceili(float(_rows.size()) / 2.0) if two_columns else _rows.size()
+	# Los botones de abajo pasan a otra fila si no caben en una.
+	var footer_rows: int = _flow_footer(area, false)
 	# Con la franja más baja las filas se pegan al marco para que quepan todas.
-	var first_row: int = FIRST_ROW if area.size.y >= per_column + FIRST_ROW + 3 else 1
+	var first_row: int = FIRST_ROW if area.size.y >= per_column + FIRST_ROW + 2 + footer_rows else 1
+	var bottom: int = area.position.y + area.size.y - 2
+	var footer_top: int = bottom - footer_rows + 1
+	var top_row: int = area.position.y + first_row
+	# Si no caben todas las filas, se ven unas cuantas y el resto se desplaza.
+	_per_column = per_column
+	_visible_rows = clampi(footer_top - 1 - top_row, 1, per_column)
+	_scroll = clampi(_scroll, 0, maxi(per_column - _visible_rows, 0))
 	for index: int in range(_rows.size()):
 		var column: int = index / per_column
-		var left: int = area.position.x + LABEL_X + column * COLUMN_WIDTH
-		var y: int = area.position.y + first_row + index % per_column
-		_place_row(_rows[index], left, y)
-	var bottom: int = area.position.y + area.size.y - 2
-	var x: int = area.position.x + LABEL_X
-	_close.rect = Rect2i(x, bottom, CLOSE_BUTTON_WIDTH, 1)
-	x += CLOSE_BUTTON_WIDTH + 2
-	_stats.rect = Rect2i(x, bottom, STATS_BUTTON_WIDTH, 1)
-	x += STATS_BUTTON_WIDTH + 2
-	_sell_all.rect = Rect2i(x, bottom, SELL_ALL_WIDTH, 1)
-	x += SELL_ALL_WIDTH + 2
-	_delete.rect = Rect2i(x, bottom, DELETE_WIDTH, 1)
-	x += DELETE_WIDTH + 2
-	_to_title.rect = Rect2i(x, bottom, TITLE_BUTTON_WIDTH, 1)
-	refresh()
+		var slot: int = index % per_column
+		var left: int = area.position.x + LABEL_X + column * _column_width()
+		if slot < _scroll or slot >= _scroll + _visible_rows:
+			_hide_row(_rows[index])
+			continue
+		_place_row(_rows[index], left, top_row + slot - _scroll)
+	_scroll_bar.configure(per_column - _visible_rows, _scroll)
+	var has_bar: bool = per_column > _visible_rows
+	_scroll_bar.rect = (
+		Rect2i(area.end.x - 2, top_row, 1, _visible_rows) if has_bar else Rect2i()
+	)
+	_flow_footer(area, true)
+
+
+## Ancho de una columna de ajustes; con sitio para dos se reparten en dos columnas.
+func _column_width() -> int:
+	return _label_width + ARROW_WIDTH + 1 + _value_width + 2 + ARROW_WIDTH + 2
+
+
+## Calcula el ancho de títulos y valores a partir de los textos actuales.
+func _measure_columns() -> void:
+	_label_width = LABEL_WIDTH
+	_value_width = VALUE_WIDTH
+	for row: Row in _rows:
+		_label_width = maxi(_label_width, row.title.text.length() + 2)
+		if row.value != null:
+			_value_width = maxi(_value_width, row.value.text.length())
+
+
+## Reparte los botones de abajo en una o más filas según el ancho. Con
+## [param place] los coloca; devuelve cuántas filas ocupan.
+func _flow_footer(area: Rect2i, place: bool) -> int:
+	var start_x: int = area.position.x + LABEL_X
+	var limit: int = area.end.x - 2
+	var x: int = start_x
+	var row: int = 0
+	var placed: Array[Vector3i] = []
+	for button: AsciiButton in _footer_buttons():
+		var width: int = maxi(_footer_width(button), button.label.length() + 2)
+		width = mini(width, maxi(limit - start_x, 1))
+		if x > start_x and x + width > limit:
+			x = start_x
+			row += 1
+		placed.append(Vector3i(x, row, width))
+		x += width + FOOTER_GAP
+	if place:
+		var last_y: int = area.end.y - 2
+		for index: int in range(placed.size()):
+			var spot: Vector3i = placed[index]
+			_footer_buttons()[index].rect = Rect2i(spot.x, last_y - row + spot.y, spot.z, 1)
+	return row + 1
+
+
+func _footer_buttons() -> Array[AsciiButton]:
+	return [_close, _stats, _sell_all, _delete, _to_title]
+
+
+func _footer_width(button: AsciiButton) -> int:
+	if button == _close:
+		return CLOSE_BUTTON_WIDTH
+	if button == _stats:
+		return STATS_BUTTON_WIDTH
+	if button == _sell_all:
+		return SELL_ALL_WIDTH
+	if button == _delete:
+		return DELETE_WIDTH
+	return TITLE_BUTTON_WIDTH
+
+
+## Esconde una fila que queda fuera de la parte visible (sigue existiendo para el
+## teclado: al enfocarla, el panel se desplaza hasta ella).
+func _hide_row(row: Row) -> void:
+	row.title.rect = Rect2i()
+	if row.toggle != null:
+		row.toggle.rect = Rect2i()
+		return
+	row.less.rect = Rect2i()
+	row.value.rect = Rect2i()
+	row.more.rect = Rect2i()
+
+
+func _on_scrolled(position: int) -> void:
+	_scroll = position
+	layout(_area)
+
+
+## Si el foco del teclado cae en una fila escondida, desplaza el panel hasta ella.
+func _follow_focus() -> void:
+	if not is_active or not _area.has_area():
+		return
+	var focused: AsciiWidget = _root.focused_widget()
+	if focused == null:
+		return
+	for index: int in range(_rows.size()):
+		var row: Row = _rows[index]
+		if focused != row.toggle and focused != row.less and focused != row.more:
+			continue
+		var slot: int = index % _per_column
+		if slot < _scroll:
+			_scroll = slot
+			layout(_area)
+		elif slot >= _scroll + _visible_rows:
+			_scroll = slot - _visible_rows + 1
+			layout(_area)
+		return
 
 
 func _place_row(row: Row, left: int, y: int) -> void:
-	var value_x: int = left + LABEL_WIDTH
-	row.title.rect = Rect2i(left, y, LABEL_WIDTH - 1, 1)
+	var value_x: int = left + _label_width
+	row.title.rect = Rect2i(left, y, _label_width - 1, 1)
 	if row.toggle != null:
 		row.toggle.rect = Rect2i(value_x, y, ARROW_WIDTH + 3, 1)
 		return
 	row.less.rect = Rect2i(value_x, y, ARROW_WIDTH, 1)
-	row.value.rect = Rect2i(value_x + ARROW_WIDTH + 1, y, VALUE_WIDTH, 1)
-	row.more.rect = Rect2i(value_x + ARROW_WIDTH + VALUE_WIDTH + 2, y, ARROW_WIDTH, 1)
+	row.value.rect = Rect2i(value_x + ARROW_WIDTH + 1, y, _value_width, 1)
+	row.more.rect = Rect2i(value_x + ARROW_WIDTH + _value_width + 2, y, ARROW_WIDTH, 1)
 
 
 func refresh() -> void:
@@ -169,6 +284,9 @@ func refresh() -> void:
 	_language.more.is_enabled = data.language < SettingsData.Language.size() - 1
 	_tutorial.toggle.label = _toggle_text(data.tutorial_enabled)
 	_binary.toggle.label = _toggle_text(data.binary_effect)
+	_currency.value.text = Currency.SYMBOLS[data.currency]
+	_currency.less.is_enabled = data.currency > 0
+	_currency.more.is_enabled = data.currency < Currency.SYMBOLS.size() - 1
 	_to_title.label = _text("SETTINGS_TO_TITLE")
 	_update_sell_all()
 	_update_delete()
@@ -176,6 +294,12 @@ func refresh() -> void:
 
 ## Texto del botón de borrar la partida según el paso de la confirmación.
 func _update_delete() -> void:
+	_set_delete_label()
+	if _area.has_area():
+		_flow_footer(_area, true)
+
+
+func _set_delete_label() -> void:
 	match _delete_step:
 		SellStep.ASKED:
 			_delete.label = _text("SETTINGS_DELETE_ASK")
@@ -204,6 +328,12 @@ func _update_sell_all() -> void:
 	var tank: Tank = Game.state.active()
 	var count: int = tank.fish.size()
 	_sell_all.is_enabled = count > 0 or not tank.eggs.is_empty()
+	_set_sell_all_label(tank, count)
+	if _area.has_area():
+		_flow_footer(_area, true)
+
+
+func _set_sell_all_label(tank: Tank, count: int) -> void:
 	if not _sell_all.is_enabled:
 		_sell_step = SellStep.IDLE
 	match _sell_step:
@@ -357,6 +487,14 @@ func _on_language_less() -> void:
 
 func _on_language_more() -> void:
 	Settings.set_language((Settings.data.language + 1) as SettingsData.Language)
+
+
+func _on_currency_less() -> void:
+	Settings.set_currency(Settings.data.currency - 1)
+
+
+func _on_currency_more() -> void:
+	Settings.set_currency(Settings.data.currency + 1)
 
 
 func _on_binary_toggled() -> void:

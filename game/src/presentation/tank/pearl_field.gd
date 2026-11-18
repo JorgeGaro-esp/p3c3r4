@@ -6,9 +6,13 @@ extends AsciiDrawable
 
 const MAX_PEARLS: int = 12
 const FALL_SPEED: float = 2.0
-const SPARKLE_PERIOD: float = 0.5
-const COLOR: Color = Color(0.92, 0.95, 1.0)
-const GLYPHS: String = "○◦"
+const SPARKLE_PERIOD: float = 0.9
+## Azul clarito: destaca sobre el agua oscura y sobre la arena.
+const COLOR: Color = Color(0.5, 0.82, 1.0)
+const COLOR_SHINE: Color = Color(0.82, 0.95, 1.0)
+## Siempre se dibuja el círculo grande; el brillo es un cambio de tono, no de
+## glifo (el «◦» pequeño hacía que la perla casi desapareciera a ratos).
+const GLYPH: String = "○"
 ## Margen del clic, en celdas, alrededor de la perla.
 const HIT_MARGIN: float = 0.9
 
@@ -90,9 +94,10 @@ func update(delta: float, _canvas: AsciiCanvas) -> void:
 
 
 func draw(canvas: AsciiCanvas) -> void:
-	var glyph: String = GLYPHS[int(_clock / SPARKLE_PERIOD) % GLYPHS.length()]
+	var shine: float = 0.5 + 0.5 * sin(_clock * TAU / SPARKLE_PERIOD) * MotionScale.factor()
+	var color: Color = COLOR.lerp(COLOR_SHINE, shine)
 	for pearl: Pearl in _pearls:
-		canvas.put_char(glyph, pearl.position, COLOR)
+		canvas.put_char(GLYPH, pearl.position, color)
 
 
 class Pearl:

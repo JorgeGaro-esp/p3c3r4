@@ -16,6 +16,9 @@ const WINDOW_BUTTON_WIDTH: int = 3
 const ROWS_FOR_CLEANLINESS: int = 13
 ## Filas mínimas para dejar una fila en blanco entre las conchas y el reloj.
 const ROWS_FOR_SPACING: int = 11
+## Columnas que ocupa el reloj; a su derecha va la barra de capacidad de la pecera.
+const CLOCK_WIDTH: int = 8
+const CAPACITY_NEAR_FULL: float = 0.85
 const CLEAN_GOOD: int = 60
 const CLEAN_OK: int = 30
 ## Símbolo de cada franja del día (amanecer, día, atardecer, noche).
@@ -26,6 +29,8 @@ var _toast: AsciiToast = AsciiToast.new()
 var _shells: AsciiLabel = null
 var _rate: AsciiLabel = null
 var _clock: AsciiLabel = null
+var _capacity: AsciiLabel = null
+var _capacity_text: String = ""
 var _inner_left: int = 0
 var _inner_width: int = 0
 var _top_row: int = 0
@@ -47,6 +52,8 @@ func _init(root: UiRoot) -> void:
 	_rate = _make_label("", AsciiColors.TEXT_DIM)
 	_clock = _make_label("", AsciiColors.WATER)
 	_clock.centered_icon = true
+	_capacity = _make_label("", AsciiColors.TEXT_DIM)
+	_capacity.align = AsciiLabel.Align.RIGHT
 	_cleanliness = _make_label("", AsciiColors.SEAWEED_LIGHT)
 	_add(_toast)
 	_shop = _make_button(_text("UI_SHOP"), _text("UI_SHOP_KEY"))
@@ -96,6 +103,27 @@ func set_clock(hour: float, phase: int) -> void:
 	_clock.color = ClockPalette.color_at(hour)
 
 
+## Escribe la capacidad de la pecera: una barra y «usados/total» (peces y huevos).
+## Se pone ámbar cerca del límite y roja cuando está llena (ya no caben más).
+func set_capacity(used: int, total: int) -> void:
+	var fraction: float = float(used) / float(maxi(total, 1))
+	var count: String = "%d/%d" % [used, total]
+	var width: int = clampi(_capacity.rect.size.x - count.length() - 1, 0, 10)
+	_capacity_text = UiText.bar(fraction, width) + (" " if width > 0 else "") + count
+	_capacity.text = _capacity_text
+	if used >= total:
+		_capacity.color = AsciiColors.WARNING
+	elif fraction >= CAPACITY_NEAR_FULL:
+		_capacity.color = AsciiColors.AMBER
+	else:
+		_capacity.color = AsciiColors.TEXT_DIM
+
+
+## Texto de la barra de capacidad (para los tests).
+func capacity_text() -> String:
+	return _capacity.text
+
+
 ## Escribe la limpieza de la pecera (0-100) y la colorea según lo sucia que esté.
 func set_cleanliness(percent: int) -> void:
 	_cleanliness.text = _text("UI_CLEANLINESS") % percent
@@ -122,7 +150,10 @@ func layout(area: Rect2i) -> void:
 	_shells.rect = Rect2i(left, top + 2, inner, 1)
 	_place_rate()
 	var gap: int = 1 if area.size.y >= ROWS_FOR_SPACING else 0
-	_clock.rect = Rect2i(left, top + 3 + gap, inner, 1)
+	_clock.rect = Rect2i(left, top + 3 + gap, mini(CLOCK_WIDTH, inner), 1)
+	_capacity.rect = Rect2i(
+		left + CLOCK_WIDTH, top + 3 + gap, maxi(inner - CLOCK_WIDTH, 0), 1
+	)
 	var first_button: int = top + 4 + gap
 	_shop.rect = Rect2i(left, first_button, inner, 1)
 	_dex.rect = Rect2i(left, first_button + 1, inner, 1)

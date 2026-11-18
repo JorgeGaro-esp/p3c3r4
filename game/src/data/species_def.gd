@@ -18,8 +18,8 @@ enum UnlockKind {
 	SPECIES_COUNT,  ## Peces de `unlock_species_id` >= `unlock_amount`.
 	DECORATION_TAG,  ## Objetos colocados con la etiqueta `unlock_tag` >= `unlock_amount`.
 }
-## Cuándo está más activa la especie (Fase 12): las nocturnas producen más de noche,
-## las diurnas más de día, y las neutras igual a todas horas.
+## Sin efecto: todos los peces se comportan igual a cualquier hora. Se conserva
+## solo para no romper los recursos ya guardados.
 enum Activity { NEUTRAL, DIURNAL, NOCTURNAL }
 ## Un símbolo por rareza, para no depender solo del color (GDD §4.2).
 const RARITY_SYMBOLS: String = "·+*#@"
@@ -46,6 +46,10 @@ const RARITY_SYMBOLS: String = "·+*#@"
 ## Roles de color (`b`, `t`, `e`, `f`, `d`) y su color, en listas paralelas.
 @export var palette_roles: PackedStringArray = PackedStringArray()
 @export var palette_colors: PackedColorArray = PackedColorArray()
+## Pelajes de color (opcional): cada pez de la especie lleva uno, sin relación con las
+## variantes raras. `coat_bodies[i]` sustituye el rol `b` y `coat_tails[i]` el rol `t`.
+@export var coat_bodies: PackedColorArray = PackedColorArray()
+@export var coat_tails: PackedColorArray = PackedColorArray()
 ## Segundos que tarda un alevín en ser adulto.
 @export var growth_seconds: float = 120.0
 ## Segundos que tarda una pareja en poner un huevo.
@@ -82,9 +86,30 @@ const RARITY_SYMBOLS: String = "·+*#@"
 @export var frame_duration: float = 0.4
 
 
-## Construye la paleta de esta definición.
-func build_palette() -> AsciiPalette:
-	return AsciiPalette.from_arrays(palette_roles, palette_colors)
+## Construye la paleta de esta definición con el pelaje [param coat]. Sin pelajes (o
+## con un índice fuera de rango) sale la paleta base.
+func build_palette(coat: int = 0) -> AsciiPalette:
+	var colors: PackedColorArray = palette_colors.duplicate()
+	if coat >= 0 and coat < coat_count():
+		for index: int in range(mini(palette_roles.size(), colors.size())):
+			if palette_roles[index] == "b":
+				colors[index] = coat_bodies[coat]
+			elif palette_roles[index] == "t":
+				colors[index] = coat_tails[coat]
+	return AsciiPalette.from_arrays(palette_roles, colors)
+
+
+## Cuántos pelajes de color tiene la especie (0 si todos los peces son iguales).
+func coat_count() -> int:
+	return mini(coat_bodies.size(), coat_tails.size())
+
+
+## Pelaje al azar para un pez nuevo de esta especie (0 si no tiene pelajes).
+func random_coat(rng: RandomNumberGenerator) -> int:
+	var count: int = coat_count()
+	if count <= 1:
+		return 0
+	return rng.randi_range(0, count - 1)
 
 
 ## Símbolo de la rareza de esta especie.

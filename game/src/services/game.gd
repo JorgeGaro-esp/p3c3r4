@@ -5,7 +5,15 @@ extends Node
 ## Las acciones del jugador entran por aquí y se validan aquí: la interfaz nunca
 ## modifica el estado directamente. Lo ocurrido se anuncia por [EventBus].
 
-enum BuyResult { OK, UNKNOWN_SPECIES, NOT_ENOUGH_SHELLS, TANK_FULL, LOCKED, WRONG_BIOME }
+enum BuyResult {
+	OK,
+	UNKNOWN_SPECIES,
+	NOT_ENOUGH_SHELLS,
+	TANK_FULL,
+	LOCKED,
+	WRONG_BIOME,
+	LEGENDARY_OWNED,
+}
 enum EquipResult { OK, UNKNOWN, MAXED, NOT_ENOUGH_SHELLS }
 enum DecorResult { OK, UNKNOWN, NOT_ENOUGH_SHELLS, NO_STOCK, TOO_MANY, OUT_OF_BOUNDS, OVERLAP }
 
@@ -41,6 +49,7 @@ var prestige: PrestigeDirector = PrestigeDirector.new(self)
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 var _stepper: FixedStepper = FixedStepper.new()
+var _in_background: bool = false
 var _last_shells: float = -1.0
 var _last_rate: float = -1.0
 var _achievement_timer: float = 0.0
@@ -70,7 +79,10 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	for _step: int in range(_stepper.advance(delta)):
+	var max_steps: int = FixedStepper.MAX_STEPS_PER_FRAME
+	if _in_background:
+		max_steps = FixedStepper.BACKGROUND_MAX_STEPS
+	for _step: int in range(_stepper.advance(delta, max_steps)):
 		Simulation.step(state, FixedStepper.STEP_SECONDS, content, rng)
 		events.advance(FixedStepper.STEP_SECONDS)
 	daylight.refresh()
@@ -98,9 +110,15 @@ func start_new_game(seed_value: int = DEFAULT_SEED) -> void:
 	var fresh: GameState = GameState.new()
 	fresh.rng_seed = seed_value
 	fresh.wallet.add(START_SHELLS)
-	for species_id: String in START_FISH:
+	for index: int in range(START_FISH.size()):
+		var species_id: String = START_FISH[index]
 		if content.has_species(species_id):
-			fresh.tanks[0].add_fish(Fish.new(species_id))
+			var starter: Fish = Fish.new(species_id)
+			# Los primeros peces salen de colores distintos, sin gastar números al azar.
+			var coats: int = content.get_species(species_id).coat_count()
+			if coats > 1:
+				starter.coat = index % coats
+			fresh.tanks[0].add_fish(starter)
 	rng.seed = seed_value
 	_replace_state(fresh)
 
@@ -121,7 +139,13 @@ func adopt_state(loaded: GameState) -> void:
 	_replace_state(loaded)
 
 
-## Detiene o reanuda la simulación (ventana minimizada, D11).
+## Con la ventana minimizada la partida sigue produciendo, sin dibujar. Los
+## fotogramas llegan más espaciados y así no se pierde tiempo de juego.
+func set_background(value: bool) -> void:
+	_in_background = value
+
+
+## Detiene o reanuda la simulación (pantalla de título).
 func set_paused(paused: bool) -> void:
 	process_mode = Node.PROCESS_MODE_DISABLED if paused else Node.PROCESS_MODE_INHERIT
 	_stepper.reset()
@@ -143,6 +167,8 @@ func buy_fish(species_id: String) -> BuyResult:
 		return BuyResult.LOCKED
 	if content.get_species(species_id).biome_id != state.active().biome_id:
 		return BuyResult.WRONG_BIOME
+	if not state.active().accepts_species(content.get_species(species_id)):
+		return BuyResult.LEGENDARY_OWNED
 	if state.active().is_full():
 		return BuyResult.TANK_FULL
 	if not state.wallet.spend(fish_cost(species_id)):
@@ -341,7 +367,9 @@ func debug_add_fish(count: int) -> void:
 	for _index: int in range(count):
 		if state.active().is_full():
 			return
-		_add_fish(state.active_tank, ids[state.active().fish.size() % ids.size()])
+		var species_id: String = ids[state.active().fish.size() % ids.size()]
+		if state.active().accepts_species(content.get_species(species_id)):
+			_add_fish(state.active_tank, species_id)
 
 
 ## Herramienta de desarrollo (Mayús+F4): quita los últimos peces.
@@ -417,6 +445,9 @@ func _decorations_changed(tank: Tank) -> void:
 
 func _add_fish(tank_index: int, species_id: String) -> void:
 	var fish: Fish = Fish.new(species_id)
+	var species: SpeciesDef = content.get_species(species_id)
+	if species != null:
+		fish.coat = species.random_coat(rng)
 	if state.tanks[tank_index].add_fish(fish):
 		state.mark_production_dirty()
 		_register_discovery(fish, false)

@@ -7,6 +7,8 @@ const MAX_SECONDS: float = 86400.0
 
 var species_id: String = ""
 var variant_id: String = VariantDef.NORMAL_ID
+## Pelaje de color del pez que saldrá (solo estético, como en [Fish]).
+var coat: int = 0
 ## Segundos que faltan para que eclosione.
 var remaining: float = 0.0
 ## Dónde está en el fondo, de 0 (izquierda) a 1 (derecha). Es solo estético.
@@ -26,12 +28,15 @@ func _init(
 
 
 func to_dict() -> Dictionary:
-	return {
+	var data: Dictionary = {
 		"species_id": species_id,
 		"variant_id": variant_id,
 		"remaining": remaining,
 		"position_x": position_x,
 	}
+	if coat != 0:
+		data["coat"] = coat
+	return data
 
 
 ## Lee un huevo de [param source]; null (con aviso) si no es válido.
@@ -46,6 +51,9 @@ static func from_dict(source: Variant, content: ContentDB, warnings: PackedStrin
 		return null
 	var egg: Egg = Egg.new(id)
 	egg.variant_id = Fish.read_variant(data, content, warnings)
+	egg.coat = SaveFields.read_int(
+		data, "coat", 0, 0, maxi(content.get_species(id).coat_count() - 1, 0), warnings
+	)
 	egg.remaining = SaveFields.read_float(data, "remaining", 0.0, 0.0, MAX_SECONDS, warnings)
 	egg.position_x = SaveFields.read_float(data, "position_x", 0.5, 0.0, 1.0, warnings)
 	return egg
