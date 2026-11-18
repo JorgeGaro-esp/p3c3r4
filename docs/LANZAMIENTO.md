@@ -35,6 +35,8 @@ Persistencia y economía
 3. Dejar desmarcado «Exportar con depuración» y pulsar Exportar proyecto.
 4. Sale `build/P3C3R4.exe` (con el PCK incrustado).
 
+Importante: los sprites son archivos `.txt` que Godot no exporta solos. El preset los incluye con `include_filter="content/sprites/*.txt"`; sin eso el juego exportado arranca sin peces ni tienda (error de la primera exportación).
+
 ## 3. Probar el .exe
 - [ ] Abre con doble clic fuera del editor; la franja se coloca bien.
 - [ ] Ajustes → arrancar con Windows: activar, reiniciar sesión, comprobar y desactivar.
@@ -45,3 +47,14 @@ Persistencia y economía
 - [ ] `project.godot` a 1.0.0 y entrada `[1.0.0]` en `CHANGELOG.md`.
 - [ ] Commit y etiqueta `v1.0.0`.
 - [ ] Las ideas de las fases 21 a 25 pasan a ser la 1.1.
+
+## 5. Aviso de Windows («archivo dañino», SmartScreen o Defender)
+
+Es normal en un `.exe` nuevo y sin firmar: Windows no lo conoce y lo avisa, aunque no tenga nada malo. No se puede quitar del todo sin firmarlo, pero se reduce:
+
+- Los metadatos del exe (nombre, descripción, autor, copyright) ya van rellenos en `export_presets.cfg`; los ejecutables sin datos levantan más sospechas.
+- No repartas `P3C3R4.console.exe` (es solo para depurar) ni compartas el exe suelto por chat: mejor un `.zip` con el exe y un `LEEME.txt`.
+- Publica el SHA-256 del zip (`certutil -hashfile P3C3R4.zip SHA256` en cmd) para que tus amigos comprueben que no se ha tocado.
+- Para quien lo reciba: «Más información → Ejecutar de todas formas» en SmartScreen. Si Defender lo pone en cuarentena, se envía como falso positivo en <https://www.microsoft.com/wdsi/filesubmission> (suele resolverse en 1-2 días).
+- La solución de verdad es firmar el exe con un certificado de firma de código (Azure Trusted Signing o similar, de pago). Si se publica en itch.io, su app de escritorio reparte el juego sin este aviso.
+- El icono de la barra de tareas sale del logo (`logo.png`, ajustado en `project.godot` y puesto al arrancar). El icono del propio `.exe` en el Explorador viene de `icon.ico`; para que Godot lo incruste hay que tener configurado rcedit (Editor → Configuración del editor → Exportar → Windows → rcedit).
