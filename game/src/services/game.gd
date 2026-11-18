@@ -1,3 +1,4 @@
+# gdlint: disable=max-public-methods,max-returns
 class_name GameService
 extends Node
 ## Dueño del estado de la partida y del bucle de simulación a paso fijo.

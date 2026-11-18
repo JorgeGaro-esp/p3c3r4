@@ -1,4 +1,4 @@
-# gdlint: disable=max-public-methods
+# gdlint: disable=max-public-methods,max-file-lines
 # (fachada de la tienda: un método de consulta o de prueba por pestaña)
 class_name ShopPanel
 extends UiPanel

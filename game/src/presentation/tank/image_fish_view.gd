@@ -154,9 +154,7 @@ func draw(canvas: AsciiCanvas) -> void:
 			strip_cells * squash * along * _scale * cell.x,
 			dest_height
 		)
-		var source: Rect2 = Rect2(
-			float(strip * STRIP_PX), 0.0, float(STRIP_PX), _strip_height_px
-		)
+		var source: Rect2 = Rect2(float(strip * STRIP_PX), 0.0, float(STRIP_PX), _strip_height_px)
 		for role_index: int in range(_role_names.size()):
 			if _role_strips[role_index][strip] == 0:
 				continue
@@ -172,9 +170,7 @@ func draw(canvas: AsciiCanvas) -> void:
 			)
 			if alt_texture != null and use_alt:
 				texture = alt_texture
-			canvas.draw_texture_rect_region(
-				texture, dest, source, _role_colors[role_index][strip]
-			)
+			canvas.draw_texture_rect_region(texture, dest, source, _role_colors[role_index][strip])
 
 
 func set_mood(happiness: float) -> void:
@@ -255,7 +251,9 @@ func _add_role(role: String, texture: Texture2D, color: Color, alt: Texture2D = 
 			var w: int = mini(STRIP_PX, alt_image.get_width() - x)
 			if (
 				not alt_image.get_region(Rect2i(x, 0, w, alt_image.get_height())).is_invisible()
-				or not alt_mirror.get_region(Rect2i(x, 0, w, alt_mirror.get_height())).is_invisible()
+				or not (
+					alt_mirror.get_region(Rect2i(x, 0, w, alt_mirror.get_height())).is_invisible()
+				)
 			):
 				used[strip] = 1
 	else:

@@ -279,9 +279,7 @@ func _fish_size() -> Vector2i:
 
 
 func _image_size(factor: float) -> Vector2i:
-	var body: float = (
-		ImageFishView.BODY_SCALE * factor * ImageFishView.species_scale(_species_id)
-	)
+	var body: float = ImageFishView.BODY_SCALE * factor * ImageFishView.species_scale(_species_id)
 	return Vector2i(
 		maxi(roundi(float(_sprite.width) * body), 1), maxi(roundi(float(_sprite.height) * body), 1)
 	)

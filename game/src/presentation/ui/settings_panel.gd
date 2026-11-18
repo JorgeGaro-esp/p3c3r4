@@ -139,9 +139,7 @@ func layout(area: Rect2i) -> void:
 		_place_row(_rows[index], left, top_row + slot - _scroll)
 	_scroll_bar.configure(per_column - _visible_rows, _scroll)
 	var has_bar: bool = per_column > _visible_rows
-	_scroll_bar.rect = (
-		Rect2i(area.end.x - 2, top_row, 1, _visible_rows) if has_bar else Rect2i()
-	)
+	_scroll_bar.rect = (Rect2i(area.end.x - 2, top_row, 1, _visible_rows) if has_bar else Rect2i())
 	_flow_footer(area, true)
 
 

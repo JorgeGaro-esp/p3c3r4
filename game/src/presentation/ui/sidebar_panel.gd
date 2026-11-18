@@ -151,9 +151,7 @@ func layout(area: Rect2i) -> void:
 	_place_rate()
 	var gap: int = 1 if area.size.y >= ROWS_FOR_SPACING else 0
 	_clock.rect = Rect2i(left, top + 3 + gap, mini(CLOCK_WIDTH, inner), 1)
-	_capacity.rect = Rect2i(
-		left + CLOCK_WIDTH, top + 3 + gap, maxi(inner - CLOCK_WIDTH, 0), 1
-	)
+	_capacity.rect = Rect2i(left + CLOCK_WIDTH, top + 3 + gap, maxi(inner - CLOCK_WIDTH, 0), 1)
 	var first_button: int = top + 4 + gap
 	_shop.rect = Rect2i(left, first_button, inner, 1)
 	_dex.rect = Rect2i(left, first_button + 1, inner, 1)

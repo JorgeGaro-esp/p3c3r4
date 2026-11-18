@@ -1,4 +1,4 @@
-# gdlint: disable=max-public-methods
+# gdlint: disable=max-public-methods,max-file-lines
 # (fachada de la pecera: consultas para los tests y acciones de los paneles)
 class_name TankView
 extends Node

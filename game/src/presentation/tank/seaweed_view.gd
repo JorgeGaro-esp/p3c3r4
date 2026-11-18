@@ -131,10 +131,7 @@ func _draw_stalk(canvas: AsciiCanvas, weed: Weed) -> void:
 	for segment: int in range(weed.height):
 		var reach: float = float(segment + 1) / float(weed.height)
 		var x: float = float(weed.column) + _sway(weed, reach, segment)
-		_put(
-			canvas,
-			glyphs[segment % 2], Vector2(x, _row(segment)), _segment_color(weed, segment)
-		)
+		_put(canvas, glyphs[segment % 2], Vector2(x, _row(segment)), _segment_color(weed, segment))
 
 
 ## Tallo con una hoja a cada lado, alternando.

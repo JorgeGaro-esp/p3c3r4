@@ -353,8 +353,7 @@ func is_turning() -> bool:
 func seek(point: Vector2) -> void:
 	var area: Rect2 = full_bounds if not _is_grounded() else bounds
 	_target = Vector2(
-		clampf(point.x, area.position.x, area.end.x),
-		clampf(point.y, area.position.y, area.end.y)
+		clampf(point.x, area.position.x, area.end.x), clampf(point.y, area.position.y, area.end.y)
 	)
 	_retarget_in = SEEK_HOLD
 	_seek_left = SEEK_HOLD

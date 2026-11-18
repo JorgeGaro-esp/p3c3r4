@@ -9,7 +9,9 @@ func _sprite() -> AsciiSprite:
 
 func _view() -> ImageFishView:
 	var palette: AsciiPalette = Game.content.get_species("reef_shark").build_palette()
-	var motion: SwimMotion = SwimMotion.new(RandomNumberGenerator.new(), SwimMotion.Style.GLIDE, 4.5, 0.15, 0.7)
+	var motion: SwimMotion = SwimMotion.new(
+		RandomNumberGenerator.new(), SwimMotion.Style.GLIDE, 4.5, 0.15, 0.7
+	)
 	return ImageFishView.new("reef_shark", _sprite(), palette, motion, 0.6)
 
 
